@@ -1,0 +1,1 @@
+<span class="type-badge type-{{ report.report_type }}">{{ report.get_report_type_display|upper }}</span><span class="status-badge status-{{ report.status }}">{{ report.get_status_display }}</span>{% if report.is_hidden %}<span class="status-badge status-hidden">Hidden</span>{% endif %}

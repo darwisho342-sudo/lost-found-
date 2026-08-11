@@ -1,0 +1,6 @@
+<div class="bulk-actions" data-bulk-actions>
+  <label for="bulk-action">Action</label>
+  <select id="bulk-action" name="action" class="form-select form-select-sm" required><option value="">Choose action</option>{% for value, label in bulk_actions.items %}<option value="{{ value }}">{{ label }}</option>{% endfor %}</select>
+  <button class="btn btn-primary btn-sm" type="submit">Apply</button>
+  <span class="bulk-selection-count" aria-live="polite"><strong data-selected-count>0</strong> selected</span>
+</div>

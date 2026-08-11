@@ -1,0 +1,14 @@
+.type-badge, .status-badge, .contact-status { border-radius: 999px; font-size: .75rem; font-weight: 700; padding: .35rem .65rem; }
+.type-lost { background: #FEE2E2; color: #991B1B; }
+.type-found { background: #DCFCE7; color: #166534; }
+.status-active { background: #DBEAFE; color: #1E40AF; }
+.status-possible_match { background: #FEF3C7; color: #92400E; }
+.status-resolved, .status-completed, .status-visible { background: #DCFCE7; color: #166534; }
+.status-deactivated { background: var(--color-orange-soft); color: #92400E; }
+.status-closed { background: #FEE2E2; color: #991B1B; }
+.status-hidden { background: #FEF3C7; color: #92400E; }
+.contact-status { display: inline-flex; flex-shrink: 0; font-size: .72rem; }
+.contact-status-pending { background: #FEF3C7; color: #92400E; }
+.contact-status-approved { background: #DCFCE7; color: #166534; }
+.contact-status-denied, .contact-status-revoked { background: #FEE2E2; color: #991B1B; }
+.contact-status-cancelled { background: var(--color-border); color: #334155; }

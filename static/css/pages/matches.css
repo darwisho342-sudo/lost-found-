@@ -1,0 +1,14 @@
+.matches-page { background: linear-gradient(180deg,#F5F3FF 0,var(--color-background) 320px); min-height: 70vh; }
+.match-comparison { background: var(--color-white); border: 0; border-radius: var(--radius-medium); box-shadow: var(--shadow-raised); display: grid; grid-template-columns: minmax(0,1fr) 270px minmax(0,1fr); overflow: hidden; }
+.match-item-panel, .match-score-panel { min-width: 0; padding: clamp(1.25rem,3vw,2rem); }
+.match-item-panel:first-child { background: linear-gradient(180deg,#FFF1F2,#FFF 58%); } .match-item-panel:last-child { background: linear-gradient(180deg,#F0FDF4,#FFF 58%); }
+.match-item-panel img { border-radius: var(--radius-medium); box-shadow: 0 10px 22px rgba(15,23,42,.1); height: 220px; margin: 1rem 0; object-fit: cover; width: 100%; }
+.match-score-panel { align-items: center; background: linear-gradient(180deg,#EDE9FE,var(--color-background)); border-left: 1px solid var(--color-border); border-right: 1px solid var(--color-border); display: flex; flex-direction: column; justify-content: center; }
+.score-circle { align-items: center; background: var(--color-white); border: 8px solid #7C3AED; border-radius: 50%; box-shadow: 0 10px 25px rgba(91,33,182,.14); color: #5B21B6; display: inline-flex; font-size: 2rem; font-weight: 700; height: 8rem; justify-content: center; width: 8rem; }
+.score-circle small { font-size: 1rem; }
+.score-list { list-style: none; margin: 0; padding: 0; width: 100%; }
+.score-list li { border-bottom: 1px solid var(--color-border); display: flex; font-size: .78rem; justify-content: space-between; padding: .55rem 0; }
+.match-group-heading { align-items: end; display: flex; justify-content: space-between; margin-bottom: 1rem; }
+@media (max-width: 991.98px) { .match-comparison { grid-template-columns: 1fr 1fr; } .match-score-panel { border-bottom: 1px solid var(--color-border); border-left: 0; border-right: 0; grid-column: 1 / -1; grid-row: 2; } }
+@media (max-width: 575.98px) { .match-comparison { grid-template-columns: 1fr; } .match-score-panel { grid-column: auto; grid-row: auto; } .match-group-heading { align-items: start; flex-direction: column; gap: .75rem; } }
+

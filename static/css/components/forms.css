@@ -1,0 +1,15 @@
+.filter-panel, .form-shell, .search-panel { background: var(--color-white); border-radius: var(--radius-large); box-shadow: var(--shadow-card); padding: clamp(1.25rem,3vw,2rem); }
+.form-shell { margin: auto; max-width: 720px; }
+.form-shell input, .form-shell select, .form-shell textarea, .filter-panel input, .filter-panel select, .search-panel input, .search-panel select { background: var(--color-white); border: 1px solid #94A3B8; border-radius: var(--radius-small); display: block; min-height: 46px; padding: .65rem .75rem; width: 100%; }
+.form-shell textarea { min-height: 140px; }
+.form-shell input[type="file"] { padding: .5rem; }
+.form-shell input[type="checkbox"], .filter-panel input[type="checkbox"] { min-height: auto; width: auto; }
+.form-control:focus, .form-select:focus, .form-shell input:focus, .form-shell select:focus, .form-shell textarea:focus, .filter-panel input:focus, .filter-panel select:focus, .search-panel input:focus, .search-panel select:focus { border-color: var(--color-primary); box-shadow: 0 0 0 .22rem rgba(20,184,166,.14); }
+.filter-panel { border: 0; border-top: 4px solid #7C3AED; }
+.search-panel { border: 0; border-top: 5px solid var(--color-primary); margin-top: -2rem; position: relative; }
+.search-field { position: relative; }
+.search-field > i { color: var(--color-text-muted); left: 1rem; position: absolute; top: .9rem; }
+.search-field input { padding-left: 2.65rem !important; }
+.filter-label { color: var(--color-text-muted); font-size: .72rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+@media (max-width: 575.98px) { .search-panel { margin-top: -1rem; } }
+

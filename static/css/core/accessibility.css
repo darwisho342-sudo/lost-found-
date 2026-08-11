@@ -1,0 +1,5 @@
+.skip-link { background: var(--color-white); color: #000; left: 1rem; padding: .75rem; position: fixed; top: -100px; z-index: 2000; }
+.skip-link:focus { top: 1rem; }
+.btn:focus-visible, .nav-link:focus-visible, a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 3px solid var(--color-orange); outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; } }
+

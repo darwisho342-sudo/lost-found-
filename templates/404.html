@@ -1,0 +1,5 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/pages/errors.css' %}">{% endblock %}
+{% block title %}Page not found — FindMatch{% endblock %}
+{% block content %}<section class="container py-5"><div class="error-page"><span class="error-code">404</span><h1>Page not found</h1><p>The page may have moved, or the report may no longer be publicly available.</p><a class="btn btn-primary" href="{% url 'home' %}">Return to homepage</a></div></section>{% endblock %}

@@ -1,0 +1,15 @@
+.notification-center, .notification-button { position: relative; }
+button.notification-bell-button { align-items: center; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2); border-radius: 50%; color: var(--color-white) !important; display: inline-flex; flex: 0 0 42px; font-size: 1.1rem; height: 42px; justify-content: center; opacity: 1; padding: 0; transition: color .2s ease, background-color .2s ease, border-color .2s ease; width: 42px; -webkit-text-fill-color: var(--color-white); }
+button.notification-bell-button i, button.notification-bell-button svg { color: inherit !important; fill: currentColor; }
+button.notification-bell-button:hover, button.notification-bell-button:focus-visible { background: rgba(255,255,255,.2); border-color: rgba(255,255,255,.35); color: var(--color-primary) !important; -webkit-text-fill-color: var(--color-primary); }
+button.notification-bell-button:focus-visible { box-shadow: none; outline: 3px solid var(--color-orange); outline-offset: 2px; }
+.notification-count { background: var(--color-lost); border: 2px solid var(--color-navy); border-radius: 999px; color: var(--color-white); font-size: .7rem; font-weight: 700; height: 1.2rem; line-height: 1rem; min-width: 1.2rem; padding: 0 .25rem; position: absolute; right: -.45rem; text-align: center; top: -.35rem; z-index: 1; }
+.notification-menu { overflow: hidden; padding: 0; width: min(360px,calc(100vw - 2rem)); }
+.notification-menu-heading { border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; padding: .9rem 1rem; }
+.notification-entry { border-bottom: 1px solid var(--color-border); margin: 0; }
+.notification-entry button { background: var(--color-white); border: 0; display: grid; padding: .8rem 1rem; text-align: left; width: 100%; }
+.notification-entry.unread button { background: #F0FDFA; }
+.notification-entry span, .notification-entry small { color: var(--color-text-muted); display: block; }
+.notification-empty { color: var(--color-text-muted); margin: 0; padding: 1rem; }
+.admin-topbar .notification-bell-button { background: rgba(15,23,42,.08); border-color: rgba(15,23,42,.15); color: var(--color-navy) !important; -webkit-text-fill-color: var(--color-navy); }
+.admin-topbar .notification-bell-button:hover, .admin-topbar .notification-bell-button:focus-visible { color: var(--color-primary-dark) !important; -webkit-text-fill-color: var(--color-primary-dark); }

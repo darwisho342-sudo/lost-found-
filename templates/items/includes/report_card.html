@@ -1,0 +1,16 @@
+<div class="col-md-6 col-lg-4">
+  <article class="card report-card h-100">
+    <div class="report-image-wrap"><img src="{{ report.image.url }}" class="card-img-top report-image" alt="{{ report.get_report_type_display }} item: {{ report.title }}"><span class="type-badge type-{{ report.report_type }} image-badge">{{ report.get_report_type_display|upper }}</span></div>
+    <div class="card-body d-flex flex-column">
+      <div class="d-flex justify-content-between gap-2 align-items-start"><h3 class="h5 card-title mb-3">{{ report.title }}</h3><span class="status-badge status-{{ report.status }}">{{ report.get_status_display }}</span></div>
+      <ul class="item-meta"><li><i class="bi bi-tag"></i>{{ report.get_category_display }}</li><li><i class="bi bi-geo-alt"></i>{{ report.get_campus_location_display }}</li><li><i class="bi bi-calendar3"></i>{{ report.item_date|date:'j M Y' }}</li></ul>
+      <p class="card-text text-secondary">{{ report.description|truncatewords:14 }}</p>
+      <a class="btn btn-outline-primary mt-auto align-self-start" href="{% url 'item_detail' report.pk %}">View Details <i class="bi bi-arrow-right ms-1"></i></a>
+      {% if show_owner_actions %}<div class="owner-actions">
+        <a class="btn btn-sm btn-primary" href="{% url 'item_matches' report.pk %}"><i class="bi bi-intersect"></i> Matches</a>
+        {% if report.status != 'resolved' and report.status != 'closed' %}<a class="btn btn-sm btn-outline-secondary" href="{% url 'item_edit' report.pk %}"><i class="bi bi-pencil"></i> Edit</a><a class="btn btn-sm btn-outline-success" href="{% url 'item_resolve' report.pk %}">Resolve</a>{% endif %}
+        <a class="btn btn-sm btn-outline-danger" href="{% url 'item_delete' report.pk %}"><i class="bi bi-trash"></i> Delete</a>
+      </div>{% endif %}
+    </div>
+  </article>
+</div>

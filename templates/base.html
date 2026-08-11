@@ -1,0 +1,53 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="FindMatch university lost-and-found service">
+  <title>{% block title %}FindMatch{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'vendor/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'vendor/bootstrap-icons.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/core/variables.css' %}">
+  <link rel="stylesheet" href="{% static 'css/core/reset.css' %}">
+  <link rel="stylesheet" href="{% static 'css/core/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/core/typography.css' %}">
+  <link rel="stylesheet" href="{% static 'css/core/utilities.css' %}">
+  <link rel="stylesheet" href="{% static 'css/components/navigation.css' %}">
+  <link rel="stylesheet" href="{% static 'css/components/footer.css' %}">
+  <link rel="stylesheet" href="{% static 'css/components/buttons.css' %}">
+  <link rel="stylesheet" href="{% static 'css/components/forms.css' %}">
+  <link rel="stylesheet" href="{% static 'css/components/cards.css' %}">
+  <link rel="stylesheet" href="{% static 'css/components/badges.css' %}">
+  <link rel="stylesheet" href="{% static 'css/components/messages.css' %}">
+  <link rel="stylesheet" href="{% static 'css/components/pagination.css' %}">
+  <link rel="stylesheet" href="{% static 'css/components/notification-bell.css' %}">
+  <link rel="stylesheet" href="{% static 'css/core/accessibility.css' %}">
+  {% block extra_css %}
+    {% with page=request.resolver_match.url_name %}
+      {% if page == 'home' %}<link rel="stylesheet" href="{% static 'css/pages/home.css' %}">{% endif %}
+      {% if page == 'login' or page == 'register' %}<link rel="stylesheet" href="{% static 'css/pages/authentication.css' %}">{% endif %}
+      {% if page == 'item_list' or page == 'lost_item_list' or page == 'found_item_list' or page == 'report_list' %}<link rel="stylesheet" href="{% static 'css/pages/reports-list.css' %}">{% endif %}
+      {% if page == 'item_detail' or page == 'report_detail' %}<link rel="stylesheet" href="{% static 'css/pages/report-detail.css' %}">{% endif %}
+      {% if page == 'item_create_lost' or page == 'item_create_found' or page == 'report_create' or page == 'item_edit' or page == 'report_edit' or page == 'item_delete' or page == 'report_delete' or page == 'item_resolve' or page == 'item_close' or page == 'change_status' %}<link rel="stylesheet" href="{% static 'css/pages/report-form.css' %}">{% endif %}
+      {% if page == 'my_reports' %}<link rel="stylesheet" href="{% static 'css/pages/my-reports.css' %}">{% endif %}
+      {% if page == 'item_matches' or page == 'possible_matches' or page == 'my_possible_matches' %}<link rel="stylesheet" href="{% static 'css/pages/matches.css' %}">{% endif %}
+      {% if page == 'contact_request_create' or page == 'contact_requests_sent' or page == 'contact_requests_received' or page == 'contact_request_detail' or page == 'contact_request_cancel' %}<link rel="stylesheet" href="{% static 'css/pages/contact-requests.css' %}">{% endif %}
+      {% if page == 'conversation_list' or page == 'conversation_detail' or page == 'conversation_complete' %}<link rel="stylesheet" href="{% static 'css/pages/conversations.css' %}">{% endif %}
+      {% if page == 'notification_list' %}<link rel="stylesheet" href="{% static 'css/pages/notifications.css' %}">{% endif %}
+      {% if page == 'profile' or page == 'profile_edit' %}<link rel="stylesheet" href="{% static 'css/pages/profile.css' %}">{% endif %}
+      {% if page == 'permission_denied_page' or page == 'page_not_found_page' %}<link rel="stylesheet" href="{% static 'css/pages/errors.css' %}">{% endif %}
+    {% endwith %}
+  {% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  {% block header %}{% include 'includes/navigation.html' %}{% endblock %}
+  {% block main %}<main id="main-content">{% include 'includes/messages.html' %}{% block content %}{% endblock %}</main>{% endblock %}
+  {% block footer %}{% include 'includes/footer.html' %}{% endblock %}
+  <script src="{% static 'vendor/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'js/findmatch.js' %}"></script>
+  <script src="{% static 'js/admin_report_actions.js' %}"></script>
+  <script src="{% static 'js/conversation_notifications.js' %}"></script>
+</body>
+</html>

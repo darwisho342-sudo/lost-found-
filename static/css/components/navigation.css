@@ -1,0 +1,8 @@
+.fm-navbar { background: var(--color-navy); box-shadow: 0 5px 20px rgba(15,23,42,.16); position: relative; z-index: 1030; }
+.fm-brand, .auth-brand, .admin-brand { align-items: center; display: inline-flex; font-weight: 700; gap: .65rem; text-decoration: none; }
+.brand-mark { align-items: center; background: var(--color-primary); border-radius: .6rem; color: var(--color-white); display: inline-flex; height: 2.1rem; justify-content: center; width: 2.1rem; }
+.user-chip { align-items: center; display: flex; font-size: .82rem; gap: .25rem; }
+.fm-navbar .nav-link { border-radius: var(--radius-small); padding-left: .7rem !important; padding-right: .7rem !important; }
+.fm-navbar .nav-link:hover, .fm-navbar .nav-link:focus { background: rgba(255,255,255,.08); color: var(--color-white); }
+.dropdown-menu { border: 0; border-radius: var(--radius-medium); box-shadow: 0 15px 35px rgba(15,23,42,.15); padding: .6rem; }
+.dropdown-item { border-radius: .45rem; padding: .65rem .75rem; }

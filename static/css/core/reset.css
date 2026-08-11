@@ -1,0 +1,4 @@
+*, *::before, *::after { box-sizing: border-box; }
+img { display: block; max-width: 100%; }
+button, input, select, textarea { font: inherit; }
+

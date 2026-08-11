@@ -1,0 +1,8 @@
+.btn { border-radius: .6rem; font-weight: 600; }
+.btn-primary { --bs-btn-bg: var(--color-primary-dark); --bs-btn-border-color: var(--color-primary-dark); --bs-btn-hover-bg: #115E59; --bs-btn-hover-border-color: #115E59; }
+.btn-outline-primary { --bs-btn-color: var(--color-primary-dark); --bs-btn-border-color: var(--color-primary); --bs-btn-hover-bg: var(--color-primary-dark); --bs-btn-hover-border-color: var(--color-primary-dark); }
+.btn-lost, .btn-found { color: var(--color-white); }
+.btn-lost { background: #DC2626; border-color: #DC2626; }
+.btn-found { background: #15803D; border-color: #15803D; }
+.btn-lost:hover, .btn-found:hover { color: var(--color-white); filter: brightness(.9); }
+

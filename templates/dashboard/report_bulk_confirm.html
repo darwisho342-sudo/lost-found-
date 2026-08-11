@@ -1,0 +1,6 @@
+{% extends 'dashboard/base.html' %}{% block title %}Confirm bulk action — FindMatch{% endblock %}{% block dashboard_content %}
+<div class="admin-page-heading"><div><span class="eyebrow">Confirmation required</span><h1>{{ action_label }}</h1><p>This action will affect {{ reports|length }} selected report{{ reports|length|pluralize }}.</p></div></div>
+<section class="admin-panel confirmation-panel"><div class="report-panel-list">{% for report in reports %}{% include 'includes/report_panel.html' %}{% endfor %}</div>
+<div class="alert alert-warning">Please confirm this moderation action. Soft-deleted reports remain available to staff for audit purposes but disappear from public pages and matching.</div>
+<form method="post" action="{% url 'management_report_bulk_confirm' %}">{% csrf_token %}<input type="hidden" name="action" value="{{ action }}">{% for report_id in report_ids %}<input type="hidden" name="report_ids[]" value="{{ report_id }}">{% endfor %}<a class="btn btn-outline-secondary" href="{% url 'management_reports' %}">Cancel</a> <button class="btn {% if action == 'delete' %}btn-danger{% else %}btn-primary{% endif %}" type="submit">Confirm {{ action_label }}</button></form></section>
+{% endblock %}

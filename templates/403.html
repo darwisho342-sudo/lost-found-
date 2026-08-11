@@ -1,0 +1,5 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/pages/errors.css' %}">{% endblock %}
+{% block title %}Permission denied — FindMatch{% endblock %}
+{% block content %}<section class="container py-5"><div class="error-page"><span class="error-code">403</span><h1>Permission denied</h1><p>You do not have permission to open this page or perform this action.</p><a class="btn btn-primary" href="{% url 'home' %}">Return to homepage</a></div></section>{% endblock %}

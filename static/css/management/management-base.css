@@ -1,0 +1,35 @@
+.admin-body { background: #F1F5F9; }
+.admin-layout { display: grid; grid-template-columns: 260px minmax(0,1fr); min-height: 100vh; }
+.admin-sidebar { background: linear-gradient(180deg,var(--color-navy) 0%,#1E1B4B 72%,var(--color-purple) 100%); color: #CBD5E1; display: flex; flex-direction: column; min-height: 100vh; padding: 1.5rem 1rem; position: sticky; top: 0; }
+.admin-brand { color: var(--color-white); font-size: 1.2rem; margin: 0 .5rem 2rem; }
+.admin-brand:hover { color: var(--color-white); }
+.admin-brand small { color: #94A3B8; display: block; font-size: .65rem; font-weight: 400; letter-spacing: .07em; text-transform: uppercase; }
+.admin-menu { display: grid; gap: .3rem; }
+.admin-menu a, .admin-sidebar-footer a, .admin-sidebar-footer button { align-items: center; background: transparent; border: 0; border-radius: .6rem; color: #CBD5E1; display: flex; font-size: .9rem; gap: .8rem; padding: .75rem .9rem; text-align: left; text-decoration: none; width: 100%; }
+.admin-menu a:hover, .admin-menu a[aria-current="page"], .admin-sidebar-footer a:hover, .admin-sidebar-footer button:hover { background: rgba(20,184,166,.16); color: #5EEAD4; }
+.admin-menu i, .admin-sidebar-footer i { font-size: 1.05rem; width: 1.2rem; }
+.admin-menu-label { color: var(--color-text-muted); font-size: .65rem; font-weight: 700; letter-spacing: .12em; margin: 1.2rem .9rem .35rem; text-transform: uppercase; }
+.admin-sidebar-footer { border-top: 1px solid #334155; margin-top: auto; padding-top: 1rem; }
+.admin-main { min-width: 0; }
+.admin-topbar { align-items: center; background: var(--color-white); border-bottom: 1px solid var(--color-border); display: flex; height: 72px; justify-content: flex-end; padding: 0 2rem; }
+.admin-topbar-tools { align-items: center; display: flex; gap: 1rem; margin-left: auto; }
+.admin-user { align-items: center; display: flex; gap: .65rem; }
+.admin-user > i { color: var(--color-primary-dark); font-size: 1.8rem; }
+.admin-user span { font-size: .85rem; font-weight: 600; }
+.admin-user small { color: var(--color-text-muted); display: block; font-size: .68rem; font-weight: 400; }
+.admin-menu-toggle, .mobile-admin-menu { display: none; }
+.admin-page { min-width: 0; padding: var(--space-page); }
+.admin-page-heading { align-items: end; display: flex; gap: 1rem; justify-content: space-between; margin-bottom: 2rem; }
+.admin-page-heading h1 { margin: .25rem 0; }
+.admin-page-heading p, .admin-panel-heading p { color: var(--color-text-muted); margin: 0; }
+.admin-panel, .admin-filter { background: var(--color-white); border: 1px solid var(--color-border); border-radius: 14px; box-shadow: 0 10px 30px rgba(15,23,42,.06); min-width: 0; }
+.admin-filter { border-top: 4px solid #7C3AED; }
+.admin-panel { overflow: hidden; }
+.admin-panel-heading { align-items: end; display: flex; gap: 1rem; justify-content: space-between; padding: 1.25rem 1.5rem; }
+.admin-panel-heading h2 { font-size: 1.25rem; margin: 0; }
+.dashboard-table-wrap { max-width: 100%; overflow-x: auto; width: 100%; }
+.dashboard-table-wrap th { background: var(--color-background); color: #475569; font-size: .74rem; letter-spacing: .04em; padding: .85rem 1rem; text-transform: uppercase; white-space: nowrap; }
+.dashboard-table-wrap td { padding: .9rem 1rem; }
+@media (max-width: 991.98px) { .admin-layout { display: block; } .admin-sidebar { display: none; } .admin-topbar { justify-content: space-between; padding: 0 1rem; } .admin-menu-toggle { align-items: center; background: var(--color-navy); border: 0; border-radius: var(--radius-small); color: var(--color-white); display: flex; gap: .4rem; padding: .55rem .75rem; } .mobile-admin-menu { background: var(--color-navy); padding: .6rem 1rem; } .mobile-admin-menu.show { display: flex; flex-wrap: wrap; gap: .4rem; } .mobile-admin-menu a { border-radius: .45rem; color: #CBD5E1; padding: .55rem .75rem; text-decoration: none; } .mobile-admin-menu a:hover { background: rgba(20,184,166,.16); color: #5EEAD4; } }
+@media (max-width: 575.98px) { .admin-page-heading { align-items: start; flex-direction: column; } .admin-page-heading .btn { width: 100%; } .admin-panel-heading { align-items: start; flex-direction: column; gap: .5rem; } }
+

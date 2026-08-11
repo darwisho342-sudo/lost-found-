@@ -1,0 +1,3 @@
+.pagination .page-link { color: var(--color-primary-dark); }
+.pagination .active > .page-link { background: var(--color-primary-dark); border-color: var(--color-primary-dark); color: var(--color-white); }
+

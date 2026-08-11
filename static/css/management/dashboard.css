@@ -1,0 +1,7 @@
+.metric-card { background: #ECFEFF; border: 1px solid #A5F3FC; border-left: 5px solid var(--color-primary); border-radius: 14px; box-shadow: 0 8px 24px rgba(15,23,42,.06); display: grid; gap: .1rem .75rem; grid-template-columns: 2.7rem 1fr; height: 100%; padding: 1.25rem; }
+.metric-icon { align-items: center; background: #CCFBF1; border-radius: .65rem; color: var(--color-primary-dark); display: flex; font-size: 1.2rem; grid-row: span 2; height: 2.7rem; justify-content: center; width: 2.7rem; }
+.metric-card span { color: var(--color-text-muted); font-size: .78rem; } .metric-card strong { font-size: 1.8rem; }
+.metric-lost { background: #FFF1F2; border-color: #FECDD3; border-left-color: var(--color-lost); } .metric-lost .metric-icon { background: #FEE2E2; color: #B91C1C; }
+.metric-found { background: #F0FDF4; border-color: #BBF7D0; border-left-color: var(--color-found); } .metric-found .metric-icon { background: #DCFCE7; color: #15803D; }
+.metric-resolved { background: #FFFBEB; border-color: #FDE68A; border-left-color: var(--color-orange); } .metric-resolved .metric-icon { background: #FEF3C7; color: #B45309; }
+

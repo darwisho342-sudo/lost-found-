@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}Conversation — FindMatch{% endblock %}
+{% block content %}
+<section class="container py-5">
+  <div class="conversation-shell">
+    <header class="conversation-header">
+      <div><span class="eyebrow">Secure conversation</span><h1 class="h3 mb-1">{{ conversation.item_report.title }}</h1><a href="{% url 'item_detail' conversation.item_report.pk %}">View item report</a></div>
+      {% include 'includes/deal_status_badge.html' %}
+    </header>
+
+    {% if conversation.status == 'completed' %}<div class="alert alert-success"><strong>Deal completed.</strong> The item has been marked as returned and this conversation is now read-only.{% if conversation.completed_at %}<br><small>Completed {{ conversation.completed_at|date:'j M Y, H:i' }}.</small>{% endif %}</div>{% elif conversation.status == 'deactivated' %}<div class="alert alert-warning"><strong>Conversation deactivated.</strong> This thread is read-only and phone-number access is disabled.{% if conversation.deactivation_reason %}<br><small>Reason: {{ conversation.deactivation_reason }}</small>{% endif %}</div>{% elif conversation.status == 'closed' %}<div class="alert alert-secondary"><strong>Conversation closed.</strong> Participants can review the history but cannot send messages.</div>{% endif %}
+
+    {% if contact_people %}
+      <aside class="contact-visibility">
+        <h2 class="h6">Contact details</h2>
+        {% for person in contact_people %}
+          <div>
+            <strong>{{ person.user.username }}</strong>
+            {% if person.phone_display %}
+              {% if person.phone_href %}<a href="tel:{{ person.phone_href }}">{{ person.phone_display }}</a>{% else %}<span>{{ person.phone_display }} <span class="privacy-label">Masked</span></span>{% endif %}
+            {% else %}<span>This user has chosen not to share their phone number.</span>{% endif %}
+          </div>
+        {% endfor %}
+      </aside>
+    {% endif %}
+
+    <div class="message-thread" aria-label="Conversation messages">
+      {% for thread_message in thread_messages %}
+        <article class="message-bubble {% if thread_message.sender == user %}message-own{% endif %}">
+          <div class="message-meta"><strong>{{ thread_message.sender.username }}</strong><time datetime="{{ thread_message.sent_at|date:'c' }}">{{ thread_message.sent_at|date:'j M Y, H:i' }}</time></div>
+          {% if thread_message.is_deleted %}<p class="fst-italic text-secondary">Message deleted</p>{% else %}<p>{{ thread_message.body|linebreaksbr }}</p>
+            <div class="message-state">{% if thread_message.sender == user %}{% if thread_message.read_at %}Read{% else %}Sent · unread{% endif %}{% endif %}{% if thread_message.sender == user or user.is_staff %}<form method="post" action="{% url 'message_delete' thread_message.pk %}">{% csrf_token %}<button class="btn btn-link btn-sm text-danger p-0" type="submit">Delete</button></form>{% endif %}</div>
+          {% endif %}
+        </article>
+      {% empty %}<p class="text-center text-secondary py-4">No messages yet.</p>{% endfor %}
+    </div>
+
+    {% if participant_can_send and permission_active %}<form class="message-form" method="post">{% csrf_token %}<label class="form-label" for="{{ form.body.id_for_label }}">{{ form.body.label }}</label>{{ form.body }}{% for error in form.body.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}<button class="btn btn-primary mt-2" type="submit"><i class="bi bi-send me-1"></i>Send message</button></form>{% else %}<div class="alert alert-warning mb-0">Messaging is unavailable because this conversation is deactivated, completed, or closed.</div>{% endif %}
+    {% if can_complete %}<div class="deal-action"><a class="btn btn-success" href="{% if user.is_staff %}{% url 'management_conversation_complete' conversation.pk %}{% else %}{% url 'conversation_complete' conversation.pk %}{% endif %}"><i class="bi bi-check2-circle me-1"></i>Confirm item returned</a></div>{% endif %}
+  </div>
+</section>
+{% endblock %}

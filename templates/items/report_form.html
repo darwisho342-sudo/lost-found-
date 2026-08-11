@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}{% if editing %}Edit{% else %}Create{% endif %} report — FindMatch{% endblock %}
+{% block content %}
+<header class="page-hero"><div class="container text-center"><span class="hero-label"><i class="bi bi-clipboard-plus"></i>{{ report_type|title }} item report</span><h1 class="mt-3">{% if editing %}Update your report{% else %}Tell the campus what happened{% endif %}</h1><p class="mb-0">Clear details help FindMatch produce more useful possible matches.</p></div></header>
+<section class="container py-5"><div class="form-shell report-form-shell">
+  <div class="report-type-switch" aria-label="Report type"><a class="{% if report_type == 'lost' %}active-lost{% endif %}" href="{% url 'report_create' 'lost' %}"><i class="bi bi-question-circle me-1"></i>Lost item</a><a class="{% if report_type == 'found' %}active-found{% endif %}" href="{% url 'report_create' 'found' %}"><i class="bi bi-check-circle me-1"></i>Found item</a></div>
+  <div class="alert alert-light border"><i class="bi bi-shield-check text-success me-2"></i>For your privacy, do not include contact details, student IDs or other private information.</div>
+  <form method="post" enctype="multipart/form-data" novalidate>
+    {% csrf_token %}{% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+    <section class="form-section"><div class="form-section-heading"><i class="bi bi-box-seam"></i><div><h2>Item information</h2><small class="text-secondary">Describe what makes the item recognisable.</small></div></div><div class="row g-3">{% include 'items/includes/form_field.html' with field=form.title %}{% include 'items/includes/form_field.html' with field=form.description %}{% include 'items/includes/form_field.html' with field=form.category field_class='col-md-6' %}{% include 'items/includes/form_field.html' with field=form.colour field_class='col-md-6' %}</div></section>
+    <section class="form-section"><div class="form-section-heading"><i class="bi bi-geo-alt"></i><div><h2>Place and date</h2><small class="text-secondary">Where and when was it lost or found?</small></div></div><div class="row g-3">{% include 'items/includes/form_field.html' with field=form.campus_location field_class='col-md-6' %}{% include 'items/includes/form_field.html' with field=form.item_date field_class='col-md-6' %}</div></section>
+    <section class="form-section"><div class="form-section-heading"><i class="bi bi-image"></i><div><h2>Item photograph</h2><small class="text-secondary">Use a clear, well-lit image without private information.</small></div></div><div class="row g-3">{% include 'items/includes/form_field.html' with field=form.image %}</div></section>
+    <div class="d-flex flex-wrap gap-2"><button class="btn btn-primary px-4" type="submit">{% if editing %}Save changes{% else %}Submit {{ report_type }} report{% endif %}</button><a class="btn btn-outline-secondary" href="{% url 'report_list' %}">Cancel</a></div>
+  </form>
+</div></section>
+{% endblock %}

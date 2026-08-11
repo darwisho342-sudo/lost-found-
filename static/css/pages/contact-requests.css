@@ -1,0 +1,10 @@
+.contact-panel { border: 0; border-top: 5px solid #7C3AED; box-shadow: var(--shadow-raised); }
+.contact-item-summary { align-items: center; background: #F5F3FF; border-radius: .85rem; display: flex; gap: 1rem; margin-bottom: 1.5rem; padding: 1rem; }
+.contact-item-summary img { border-radius: .65rem; height: 84px; object-fit: cover; width: 100px; }
+.request-tabs { background: var(--color-white); border: 1px solid var(--color-border); border-radius: .8rem; display: flex; flex-wrap: wrap; gap: .35rem; padding: .4rem; }
+.request-tabs a { border-radius: .55rem; color: #475569; font-size: .82rem; font-weight: 600; padding: .6rem .85rem; text-decoration: none; }
+.request-tabs a:hover, .request-tabs a[aria-current="page"] { background: #EDE9FE; color: #5B21B6; }
+.contact-request-detail { margin: auto; max-width: 850px; }
+.private-block { background: var(--color-background); border-left: 4px solid #7C3AED; border-radius: .65rem; margin: 1.25rem 0; padding: 1.15rem; }
+.private-block h2 { align-items: center; display: flex; gap: .45rem; }
+.private-block p { margin-bottom: 0; }

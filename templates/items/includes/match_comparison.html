@@ -1,0 +1,17 @@
+<article class="match-comparison mb-4">
+  <div class="match-item-panel">
+    <span class="type-badge type-lost">LOST ITEM</span>
+    <img src="{{ match.lost_item.image.url }}" alt="Lost item: {{ match.lost_item.title }}">
+    <h3 class="h5"><a href="{% url 'report_detail' match.lost_item.pk %}">{{ match.lost_item.title }}</a></h3>
+    <ul class="item-meta"><li><i class="bi bi-tag"></i>{{ match.lost_item.get_category_display }}</li><li><i class="bi bi-geo-alt"></i>{{ match.lost_item.get_campus_location_display }}</li><li><i class="bi bi-calendar3"></i>{{ match.lost_item.item_date|date:'j M Y' }}</li></ul>
+  </div>
+  <div class="match-score-panel">
+    {% include 'items/includes/match_score.html' %}
+  </div>
+  <div class="match-item-panel">
+    <span class="type-badge type-found">FOUND ITEM</span>
+    <img src="{{ match.found_item.image.url }}" alt="Found item: {{ match.found_item.title }}">
+    <h3 class="h5"><a href="{% url 'report_detail' match.found_item.pk %}">{{ match.found_item.title }}</a></h3>
+    <ul class="item-meta"><li><i class="bi bi-tag"></i>{{ match.found_item.get_category_display }}</li><li><i class="bi bi-geo-alt"></i>{{ match.found_item.get_campus_location_display }}</li><li><i class="bi bi-calendar3"></i>{{ match.found_item.item_date|date:'j M Y' }}</li></ul>
+  </div>
+</article>

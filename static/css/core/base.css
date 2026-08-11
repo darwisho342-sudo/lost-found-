@@ -1,0 +1,5 @@
+html { min-width: 320px; }
+body { background: var(--color-background); color: var(--color-navy); font-family: var(--font-family-base); font-size: var(--font-size-body); margin: 0; }
+main { min-width: 0; }
+a { color: var(--color-primary-dark); }
+a:hover { color: #115E59; }
