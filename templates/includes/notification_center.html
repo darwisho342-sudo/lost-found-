@@ -1,13 +1,13 @@
-<li class="nav-item dropdown notification-center" data-notification-center data-count-url="{% url 'notification_unread_count' %}">
-  <button class="nav-link notification-button notification-bell-button" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notifications">
+{% load i18n %}<li class="nav-item dropdown notification-center" data-notification-center data-count-url="{% url 'notification_unread_count' %}">
+  <button class="nav-link notification-button notification-bell-button" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="{% translate 'Notifications' %}">
     <i class="bi bi-bell"></i><span class="notification-count{% if not notification_unread_count %} d-none{% endif %}" data-notification-count>{{ notification_unread_count }}</span>
   </button>
   <div class="dropdown-menu dropdown-menu-end notification-menu">
-    <div class="notification-menu-heading"><strong>Notifications</strong><a href="{% url 'notification_list' %}">View all</a></div>
+    <div class="notification-menu-heading"><strong>{% translate "Notifications" %}</strong><a href="{% url 'notification_list' %}">{% translate "View all" %}</a></div>
     <div data-notification-preview>
       {% for notification in notification_preview %}
-        <form method="post" action="{% url 'notification_mark_read' notification.pk %}" class="notification-entry{% if not notification.is_read %} unread{% endif %}">{% csrf_token %}<button type="submit"><strong>{{ notification.title }}</strong><span>{{ notification.safe_message }}</span><small>{{ notification.created_at|timesince }} ago</small></button></form>
-      {% empty %}<p class="notification-empty">No notifications yet.</p>{% endfor %}
+        <form method="post" action="{% url 'notification_mark_read' notification.pk %}" class="notification-entry{% if not notification.is_read %} unread{% endif %}">{% csrf_token %}<button type="submit"><strong dir="auto">{{ notification.title }}</strong><span dir="auto">{{ notification.safe_message }}</span><small>{% blocktranslate with elapsed=notification.created_at|timesince %}{{ elapsed }} ago{% endblocktranslate %}</small></button></form>
+      {% empty %}<p class="notification-empty">{% translate "No notifications yet." %}</p>{% endfor %}
     </div>
   </div>
 </li>

@@ -2,6 +2,7 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
 from .communications import record_contact_event
 from .models import ContactAuditLog, ContactRequest, Conversation, ItemReport, Notification
@@ -24,13 +25,13 @@ class DealService:
             receiver = cls.receiving_participant(conversation)
             authorized = acting_user == receiver or (allow_staff and acting_user.is_staff)
             if not authorized:
-                raise PermissionDenied("Only the receiving participant can complete this deal.")
+                raise PermissionDenied(_("Only the receiving participant can complete this deal."))
             if conversation.status == Conversation.DealStatus.COMPLETED:
                 return conversation, False
             if not conversation.is_active or conversation.status not in (
                 Conversation.DealStatus.ACTIVE,
             ):
-                raise ValidationError("This conversation cannot be completed.")
+                raise ValidationError(_("This conversation cannot be completed."))
             now = timezone.now()
             conversation.status = Conversation.DealStatus.COMPLETED
             conversation.completed_at = now
@@ -55,8 +56,8 @@ class DealService:
                 NotificationService.create(
                     recipient=participant,
                     notification_type=Notification.NotificationType.DEAL_COMPLETED,
-                    title="Deal completed",
-                    safe_message=f"The item ‘{report.title}’ has been marked as returned.",
+                    title=_("Deal completed"),
+                    safe_message=_("The item ‘%(title)s’ has been marked as returned.") % {"title": report.title},
                     conversation=conversation,
                     item_report=report,
                     destination_url=destination,
@@ -66,8 +67,8 @@ class DealService:
                 NotificationService.create(
                     recipient_id=requester_id,
                     notification_type=Notification.NotificationType.ADMIN_NOTICE,
-                    title="Conversation initiation closed",
-                    safe_message=f"Another return was completed for ‘{report.title}’.",
+                    title=_("Conversation initiation closed"),
+                    safe_message=_("Another return was completed for ‘%(title)s’.") % {"title": report.title},
                     item_report=report,
                     destination_url=reverse("contact_request_detail", args=[request_id]),
                     deduplication_key=f"deal-pending-closed:{conversation.pk}:{request_id}",
@@ -78,7 +79,7 @@ class DealService:
                 item_report=report,
                 contact_request=conversation.approved_contact_request,
                 conversation=conversation,
-                description="An item return was completed.",
+                description=_("An item return was completed."),
             )
             return conversation, True
 
@@ -87,7 +88,7 @@ class DealService:
         if not administrator.is_staff:
             raise PermissionDenied
         if not reason.strip():
-            raise ValidationError("Enter an administrator reason.")
+            raise ValidationError(_("Enter an administrator reason."))
         with transaction.atomic():
             conversation = Conversation.objects.select_for_update().select_related(
                 "item_report", "approved_contact_request", "first_participant", "second_participant"
@@ -96,7 +97,7 @@ class DealService:
                 Conversation.DealStatus.COMPLETED,
                 Conversation.DealStatus.DEACTIVATED,
             ):
-                raise ValidationError("Only completed or deactivated conversations can be reactivated.")
+                raise ValidationError(_("Only completed or deactivated conversations can be reactivated."))
             now = timezone.now()
             conversation.status = Conversation.DealStatus.ACTIVE
             conversation.is_active = True
@@ -121,8 +122,8 @@ class DealService:
                 NotificationService.create(
                     recipient=participant,
                     notification_type=Notification.NotificationType.CONVERSATION_REOPENED,
-                    title="Conversation reopened",
-                    safe_message=f"An administrator reopened the conversation about ‘{conversation.item_report.title}’.",
+                    title=_("Conversation reopened"),
+                    safe_message=_("An administrator reopened the conversation about ‘%(title)s’.") % {"title": conversation.item_report.title},
                     conversation=conversation,
                     item_report=conversation.item_report,
                     destination_url=destination,
@@ -134,6 +135,6 @@ class DealService:
                 item_report=conversation.item_report,
                 contact_request=conversation.approved_contact_request,
                 conversation=conversation,
-                description=f"Conversation reopened. Reason: {reason.strip()[:220]}",
+                description=_("An administrator reopened a conversation after recording a private reason."),
             )
             return conversation

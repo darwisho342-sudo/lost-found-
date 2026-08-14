@@ -1,0 +1,8 @@
+{% load i18n %}{% with page=request.resolver_match.url_name %}
+<nav class="mobile-bottom-nav" aria-label="{% translate 'Mobile navigation' %}">
+  <a href="{% url 'home' %}"{% if page == 'home' %} aria-current="page"{% endif %}><i class="bi bi-house" aria-hidden="true"></i><span>{% translate "Home" %}</span></a>
+  <a href="{% url 'item_list' %}"{% if page == 'item_list' or page == 'lost_item_list' or page == 'found_item_list' %} aria-current="page"{% endif %}><i class="bi bi-search" aria-hidden="true"></i><span>{% translate "Search" %}</span></a>
+  <a class="mobile-primary-action" href="{% if user.is_authenticated %}{% url 'item_create_lost' %}{% else %}{% url 'login' %}?next={% url 'item_create_lost' %}{% endif %}"{% if page == 'item_create_lost' or page == 'item_create_found' or page == 'report_create' %} aria-current="page"{% endif %}><i class="bi bi-plus-lg" aria-hidden="true"></i><span>{% translate "Report Item" %}</span></a>
+  <a href="{% if user.is_authenticated %}{% url 'my_possible_matches' %}{% else %}{% url 'login' %}?next={% url 'my_possible_matches' %}{% endif %}"{% if page == 'my_possible_matches' or page == 'item_matches' %} aria-current="page"{% endif %}><i class="bi bi-intersect" aria-hidden="true"></i><span>{% translate "Matches" %}</span></a>
+  <a href="{% if user.is_authenticated %}{% url 'user_dashboard' %}{% else %}{% url 'login' %}?next={% url 'user_dashboard' %}{% endif %}"{% if page == 'user_dashboard' or page == 'profile' or page == 'profile_edit' %} aria-current="page"{% endif %}><i class="bi bi-person" aria-hidden="true"></i><span>{% translate "Profile" %}</span></a>
+</nav>{% endwith %}

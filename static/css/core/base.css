@@ -1,5 +1,12 @@
-html { min-width: 320px; }
-body { background: var(--color-background); color: var(--color-navy); font-family: var(--font-family-base); font-size: var(--font-size-body); margin: 0; }
-main { min-width: 0; }
+html { max-width: 100%; overflow-x: clip; }
+body { background: var(--color-background); color: var(--color-navy); font-family: var(--font-family-base); font-size: var(--font-size-body); margin: 0; max-width: 100%; overflow-x: clip; }
+main, main > *, .container, .row, [class*="col-"] { min-width: 0; }
+a, button, input, select, textarea, p, h1, h2, h3, h4, h5, h6, dd, dt { overflow-wrap: anywhere; }
 a { color: var(--color-primary-dark); }
 a:hover { color: #115E59; }
+@media (max-width: 575.98px) {
+  .container { --bs-gutter-x: 1.5rem; }
+  .py-5 { padding-bottom: 2rem !important; padding-top: 2rem !important; }
+  .page-hero { padding-block: 2.25rem; }
+  .page-hero h1 { font-size: clamp(1.75rem,9vw,2.35rem); }
+}

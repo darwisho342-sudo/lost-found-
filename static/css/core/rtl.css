@@ -1,0 +1,22 @@
+/* Direction-specific adjustments layered over the matching local Bootstrap 5 build. */
+html[dir="rtl"] body { line-height: 1.65; }
+html[dir="rtl"] .ms-auto { margin-inline-start: auto !important; margin-inline-end: 0 !important; }
+html[dir="rtl"] .me-1, html[dir="rtl"] .me-2 { margin-right: 0 !important; }
+html[dir="rtl"] .me-1 { margin-left: .25rem !important; }
+html[dir="rtl"] .me-2 { margin-left: .5rem !important; }
+html[dir="rtl"] .ms-lg-2 { margin-left: 0 !important; margin-right: .5rem !important; }
+html[dir="rtl"] .dropdown-menu-end { left: 0; right: auto; }
+html[dir="rtl"] .dropdown-toggle::after { margin-left: 0; margin-right: .255em; }
+html[dir="rtl"] .bi-arrow-right, html[dir="rtl"] .bi-arrow-left, html[dir="rtl"] .bi-chevron-right, html[dir="rtl"] .bi-chevron-left { display: inline-block; transform: scaleX(-1); }
+html[dir="rtl"] .admin-sidebar { border-left: 1px solid rgba(255,255,255,.08); border-right: 0; }
+html[dir="rtl"] .admin-topbar-tools { margin-left: 0; margin-right: auto; }
+html[dir="rtl"] .bulk-selection-count { margin-left: 0; margin-right: auto; }
+html[dir="rtl"] .password-wrap input { padding-left: 3rem; padding-right: .75rem; }
+html[dir="rtl"] .password-toggle { left: .45rem; right: auto; }
+html[dir="rtl"] .search-field > i { left: auto; right: 1rem; }
+html[dir="rtl"] .search-field input { padding-left: .75rem !important; padding-right: 2.65rem !important; }
+html[dir="rtl"] .message-bubble, html[dir="rtl"] table, html[dir="rtl"] .form-control, html[dir="rtl"] .form-select { text-align: start; }
+html[dir="rtl"] input[type="email"], html[dir="rtl"] input[type="tel"], html[dir="rtl"] [dir="ltr"] { direction: ltr; text-align: left; }
+html[dir="rtl"] .pagination { padding-right: 0; }
+html[dir="rtl"] canvas, html[dir="rtl"] img { direction: ltr; }
+@media (max-width: 1199.98px) { html[dir="rtl"] .language-switcher { padding-block: .5rem; padding-inline: 0; } }

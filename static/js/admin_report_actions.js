@@ -13,7 +13,10 @@
   all.addEventListener('change', () => { boxes.forEach((box) => { box.checked = all.checked; }); update(); });
   boxes.forEach((box) => box.addEventListener('change', update));
   form.addEventListener('submit', (event) => {
-    if (!boxes.some((box) => box.checked)) { event.preventDefault(); window.alert('Select at least one report.'); }
+    if (!boxes.some((box) => box.checked)) {
+      event.preventDefault();
+      window.alert(form.dataset.selectionRequired);
+    }
   });
   update();
 })();

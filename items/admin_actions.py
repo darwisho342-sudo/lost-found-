@@ -4,6 +4,7 @@ from uuid import uuid4
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.utils import timezone
+from django.utils.translation import gettext as _, gettext_lazy
 
 from .communications import record_contact_event
 from .models import ContactAuditLog, ItemReport, Notification
@@ -19,12 +20,12 @@ class BulkActionResult:
 
 class AdminReportActionService:
     ACTION_LABELS = {
-        "mark_reviewed": "Mark as Reviewed",
-        "mark_active": "Mark as Active",
-        "mark_resolved": "Mark as Resolved",
-        "close": "Close Selected",
-        "hide": "Hide Selected",
-        "delete": "Delete Selected",
+        "mark_reviewed": gettext_lazy("Mark as Reviewed"),
+        "mark_active": gettext_lazy("Mark as Active"),
+        "mark_resolved": gettext_lazy("Mark as Resolved"),
+        "close": gettext_lazy("Close Selected"),
+        "hide": gettext_lazy("Hide Selected"),
+        "delete": gettext_lazy("Delete Selected"),
     }
     CONFIRMATION_ACTIONS = {"mark_resolved", "close", "hide", "delete"}
 
@@ -33,7 +34,7 @@ class AdminReportActionService:
         if not administrator.is_staff:
             raise PermissionDenied
         if action not in cls.ACTION_LABELS:
-            raise ValueError("Choose an action before continuing.")
+            raise ValueError(_("Choose an action before continuing."))
         reports = list(reports)
         result = BulkActionResult()
         operation_key = uuid4().hex
@@ -52,8 +53,8 @@ class AdminReportActionService:
                 NotificationService.create(
                     recipient=report.owner,
                     notification_type=Notification.NotificationType.REPORT_STATUS_CHANGED,
-                    title="Report updated",
-                    safe_message=f"An administrator updated your report ‘{report.title}’.",
+                    title=_("Report updated"),
+                    safe_message=_("An administrator updated your report ‘%(title)s’.") % {"title": report.title},
                     item_report=report,
                     destination_url=report.get_absolute_url(),
                     deduplication_key=f"bulk:{operation_key}:{report.pk}",
@@ -63,44 +64,44 @@ class AdminReportActionService:
                     actor=administrator,
                     event_type=ContactAuditLog.EventType.BULK_REPORT_ACTION,
                     item_report=reports[0],
-                    description="An administrator applied a bulk report action.",
+                    description=_("An administrator applied a bulk report action."),
                 )
         missing_count = len(reports) - len(locked_reports)
         if missing_count:
             result.skipped_count += missing_count
-            result.skipped_reasons.append("Some selected reports were not found.")
+            result.skipped_reasons.append(_("Some selected reports were not found."))
         return result
 
     @staticmethod
     def _apply_one(report, action, administrator):
         now = timezone.now()
         if report.is_deleted:
-            return "Already deleted reports were skipped."
+            return _("Already deleted reports were skipped.")
         if action == "mark_reviewed":
             if report.is_reviewed:
-                return "Already reviewed reports were skipped."
+                return _("Already reviewed reports were skipped.")
             report.is_reviewed = True
             report.reviewed_at = now
             report.reviewed_by = administrator
             report.save(update_fields=["is_reviewed", "reviewed_at", "reviewed_by", "updated_at"])
         elif action == "mark_active":
             if report.status == ItemReport.Status.ACTIVE:
-                return "Already active reports were skipped."
+                return _("Already active reports were skipped.")
             report.status = ItemReport.Status.ACTIVE
             report.save(update_fields=["status", "updated_at"])
         elif action == "mark_resolved":
             if report.status == ItemReport.Status.RESOLVED:
-                return "Already resolved reports were skipped."
+                return _("Already resolved reports were skipped.")
             report.status = ItemReport.Status.RESOLVED
             report.save(update_fields=["status", "updated_at"])
         elif action == "close":
             if report.status == ItemReport.Status.CLOSED:
-                return "Already closed reports were skipped."
+                return _("Already closed reports were skipped.")
             report.status = ItemReport.Status.CLOSED
             report.save(update_fields=["status", "updated_at"])
         elif action == "hide":
             if report.is_hidden:
-                return "Already hidden reports were skipped."
+                return _("Already hidden reports were skipped.")
             report.is_hidden = True
             report.save(update_fields=["is_hidden", "updated_at"])
         elif action == "delete":

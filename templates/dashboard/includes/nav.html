@@ -1,6 +1,6 @@
-<div class="dashboard-nav mb-4" aria-label="Administrator dashboard sections">
-  <a href="{% url 'dashboard_home' %}"{% if request.resolver_match.url_name == 'dashboard_home' %} aria-current="page"{% endif %}>Overview</a>
-  <a href="{% url 'dashboard_reports' %}"{% if request.resolver_match.url_name == 'dashboard_reports' %} aria-current="page"{% endif %}>Manage reports</a>
-  <a href="{% url 'dashboard_users' %}"{% if request.resolver_match.url_name == 'dashboard_users' or request.resolver_match.url_name == 'dashboard_user_detail' %} aria-current="page"{% endif %}>Manage users</a>
-  <a href="{% url 'admin:index' %}">Django admin</a>
+{% load i18n %}<div class="dashboard-nav mb-4" aria-label="{% translate 'Administrator dashboard sections' %}">
+  <a href="{% url 'dashboard_home' %}"{% if request.resolver_match.url_name == 'dashboard_home' %} aria-current="page"{% endif %}>{% translate "Overview" %}</a>
+  <a href="{% url 'dashboard_reports' %}"{% if request.resolver_match.url_name == 'dashboard_reports' %} aria-current="page"{% endif %}>{% translate "Manage reports" %}</a>
+  <a href="{% url 'dashboard_users' %}"{% if request.resolver_match.url_name == 'dashboard_users' or request.resolver_match.url_name == 'dashboard_user_detail' %} aria-current="page"{% endif %}>{% translate "Manage users" %}</a>
+  <a href="{% url 'admin:index' %}">{% translate "Django admin" %}</a>
 </div>

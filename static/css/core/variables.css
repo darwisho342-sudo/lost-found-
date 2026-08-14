@@ -21,7 +21,7 @@
   --color-found-soft: #DCFCE7;
   --color-orange-soft: #FEF3C7;
 
-  --font-family-base: "Poppins", "Segoe UI", sans-serif;
+  --font-family-base: "Poppins", Inter, "Noto Sans Arabic", "Segoe UI", Arial, sans-serif;
   --font-size-small: 0.75rem;
   --font-size-body: 1rem;
 

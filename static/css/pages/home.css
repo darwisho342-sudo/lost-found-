@@ -45,6 +45,8 @@
 .turquoise-card { background: #CCFBF1; } .turquoise-card > i { color: var(--color-primary-dark); }
 .yellow-card { background: #FEF3C7; } .yellow-card > i { color: #B45309; }
 .smart-section { background: var(--color-white); }
+.smart-section > .container > .row { margin-inline: 0; }
+.smart-section > .container > .row > * { min-width: 0; }
 .smart-points { list-style: none; margin: 1.75rem 0; padding: 0; }
 .smart-points li { align-items: flex-start; display: flex; gap: .65rem; margin-bottom: .75rem; }
 .smart-points i { color: var(--color-primary); }

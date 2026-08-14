@@ -11,5 +11,12 @@
 .search-field > i { color: var(--color-text-muted); left: 1rem; position: absolute; top: .9rem; }
 .search-field input { padding-left: 2.65rem !important; }
 .filter-label { color: var(--color-text-muted); font-size: .72rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
-@media (max-width: 575.98px) { .search-panel { margin-top: -1rem; } }
-
+.form-label { font-weight: 600; }
+.form-control:disabled, .form-select:disabled { background: #E2E8F0; color: #475569; }
+.form-control[readonly] { background: #F8FAFC; }
+.is-invalid, [aria-invalid="true"] { border-color: var(--color-lost) !important; }
+@media (max-width: 575.98px) {
+  .search-panel { margin-top: -1rem; }
+  input, select, textarea, .form-control, .form-select { font-size: 16px !important; }
+  .btn, button, input:not([type="checkbox"]):not([type="radio"]), select { min-height: 44px; }
+}

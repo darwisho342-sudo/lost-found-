@@ -1,27 +1,25 @@
-{% extends 'base.html' %}
-{% block title %}Browse reports — FindMatch{% endblock %}
+{% extends 'base.html' %}{% load i18n %}
+{% block title %}{% translate "Browse reports" %} — FindMatch{% endblock %}
 {% block content %}
-<header class="page-hero"><div class="container"><span class="hero-label"><i class="bi bi-grid"></i>Campus reports</span><h1 class="mt-3 mb-2">{{ list_title|title }}</h1><p class="mb-0">Search current reports and narrow the results using campus details.</p></div></header>
-<section class="container pb-5">
-  <form class="search-panel mb-5" method="get" role="search">
-    <div class="row g-3 align-items-end">
-      {% for field in form %}
-        {% if not locked_report_type or field.name != 'report_type' %}
-        <div class="{% if field.name == 'query' %}col-12{% else %}col-sm-6 col-lg{% endif %}">
-          <label class="form-label filter-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-          {% if field.name == 'query' %}<div class="search-field"><i class="bi bi-search" aria-hidden="true"></i>{{ field }}</div>{% else %}{{ field }}{% endif %}
-          {% if field.errors %}<div class="invalid-feedback d-block">{{ field.errors|striptags }}</div>{% endif %}
-        </div>
-        {% endif %}
-      {% endfor %}
-      <div class="col-12 d-flex flex-wrap gap-2"><button class="btn btn-primary px-4" type="submit"><i class="bi bi-funnel me-1"></i>Search and filter</button><a class="btn btn-outline-secondary" href="{{ clear_url }}">Clear all</a></div>
+<header class="page-hero"><div class="container"><span class="hero-label"><i class="bi bi-grid" aria-hidden="true"></i>{% translate "Reports" %}</span><h1 class="mt-3 mb-2">{{ list_title|title }}</h1><p class="mb-0">{% translate "Search reports and narrow results by item and location details." %}</p></div></header>
+<section class="container reports-page pb-5">
+  <form class="search-panel report-search-form mb-4" method="get" role="search" data-filter-form>
+    <div class="mobile-search-row">
+      <div class="search-control"><label class="visually-hidden" for="{{ form.query.id_for_label }}">{{ form.query.label }}</label><div class="search-field"><i class="bi bi-search" aria-hidden="true"></i>{{ form.query }}</div></div>
+      <button class="btn btn-outline-primary mobile-filter-button" type="button" data-filter-open aria-label="{% translate 'Filters' %}" aria-controls="reportFilters" aria-expanded="false"><i class="bi bi-funnel" aria-hidden="true"></i><span>{% translate "Filters" %}</span>{% if active_filter_count %}<span class="filter-count" aria-label="{% blocktranslate count count=active_filter_count %}{{ count }} active filter{% plural %}{{ count }} active filters{% endblocktranslate %}">{{ active_filter_count }}</span>{% endif %}</button>
+      <div class="sort-control"><label class="visually-hidden" for="{{ form.sort.id_for_label }}">{{ form.sort.label }}</label>{{ form.sort }}</div>
+      <button class="btn btn-primary search-submit" type="submit" aria-label="{% translate 'Search' %}"><i class="bi bi-search" aria-hidden="true"></i><span>{% translate "Search" %}</span></button>
+    </div>
+    <div class="filter-drawer" id="reportFilters" data-filter-panel aria-labelledby="filterPanelTitle">
+      <div class="filter-drawer-header"><div><span class="eyebrow">{% translate "Refine results" %}</span><h2 class="h4 mb-0" id="filterPanelTitle">{% translate "Filters" %}</h2></div><button class="btn btn-outline-secondary filter-close" type="button" data-filter-close aria-label="{% translate 'Close filters' %}"><i class="bi bi-x-lg" aria-hidden="true"></i></button></div>
+      <div class="row g-3 filter-fields">{% for field in form %}{% if field.name != 'query' and field.name != 'sort' and field.name != 'status' %}{% if not locked_report_type or field.name != 'report_type' %}<div class="col-sm-6 col-xl-3"><label class="form-label filter-label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}</div>{% endif %}{% endif %}{% endfor %}</div>
+      <div class="filter-actions"><a class="btn btn-outline-secondary" href="{{ clear_url }}">{% translate "Clear all" %}</a><button class="btn btn-primary" type="submit"><i class="bi bi-check2" aria-hidden="true"></i> {% translate "Apply filters" %}</button></div>
     </div>
   </form>
-  <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4"><div><span class="eyebrow">Search results</span><h2 class="h4 mb-0">{{ page_obj.paginator.count }} report{{ page_obj.paginator.count|pluralize }}</h2></div><div class="d-flex gap-2"><a class="btn btn-lost btn-sm" href="{% url 'report_create' 'lost' %}">Report lost</a><a class="btn btn-found btn-sm" href="{% url 'report_create' 'found' %}">Report found</a></div></div>
-  <div class="row g-4">
-    {% for report in page_obj %}{% include 'items/includes/report_card.html' %}
-    {% empty %}<div class="col-12"><div class="empty-state"><i class="bi bi-search empty-icon"></i><h2 class="h4">No reports matched</h2><p class="mb-0">Try clearing one or more filters or using a shorter keyword.</p></div></div>{% endfor %}
-  </div>
-  {% include 'includes/pagination.html' with pagination_label='Report pages' %}
+  {% if active_filters %}<div class="active-filter-list" aria-label="{% translate 'Active filters' %}">{% for filter in active_filters %}<a class="filter-chip" href="{{ filter.remove_url }}"><span>{{ filter.label }}: <strong dir="auto">{{ filter.value }}</strong></span><i class="bi bi-x" aria-hidden="true"></i><span class="visually-hidden">{% translate "Remove filter" %}</span></a>{% endfor %}<a class="clear-filter-link" href="{{ clear_url }}">{% translate "Clear all" %}</a></div>{% endif %}
+  <div class="results-heading"><div><span class="eyebrow">{% translate "Search results" %}</span><h2 class="h4 mb-0" aria-live="polite">{% blocktranslate count report_count=page_obj.paginator.count %}{{ report_count }} report{% plural %}{{ report_count }} reports{% endblocktranslate %}</h2></div><div class="report-quick-actions"><a class="btn btn-lost btn-sm" href="{% url 'report_create' 'lost' %}">{% translate "Report lost" %}</a><a class="btn btn-found btn-sm" href="{% url 'report_create' 'found' %}">{% translate "Report found" %}</a></div></div>
+  <div class="row g-4">{% for report in page_obj %}{% include 'items/includes/report_card.html' %}{% empty %}<div class="col-12"><div class="empty-state"><i class="bi bi-search empty-icon" aria-hidden="true"></i><h2 class="h4">{% translate "No reports matched" %}</h2><p class="mb-0">{% translate "Try clearing one or more filters or using a shorter keyword." %}</p></div></div>{% endfor %}</div>
+  {% include 'includes/pagination.html' %}
 </section>
+<div class="filter-backdrop" data-filter-backdrop hidden></div>
 {% endblock %}

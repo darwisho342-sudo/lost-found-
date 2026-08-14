@@ -2,7 +2,22 @@
 .fm-brand, .auth-brand, .admin-brand { align-items: center; display: inline-flex; font-weight: 700; gap: .65rem; text-decoration: none; }
 .brand-mark { align-items: center; background: var(--color-primary); border-radius: .6rem; color: var(--color-white); display: inline-flex; height: 2.1rem; justify-content: center; width: 2.1rem; }
 .user-chip { align-items: center; display: flex; font-size: .82rem; gap: .25rem; }
-.fm-navbar .nav-link { border-radius: var(--radius-small); padding-left: .7rem !important; padding-right: .7rem !important; }
+.fm-navbar .nav-link { border-radius: var(--radius-small); padding-inline: .7rem !important; }
+.language-nav-item { align-items: center; display: flex; }
+.language-switcher { display: inline-flex; flex-wrap: wrap; gap: .2rem; padding-inline: .35rem; }
+.language-switcher a { border: 1px solid rgba(255,255,255,.25); border-radius: 999px; color: #E2E8F0; font-size: .72rem; padding: .2rem .45rem; text-decoration: none; white-space: nowrap; }
+.language-switcher a:hover, .language-switcher a:focus-visible, .language-switcher a[aria-current="page"] { background: rgba(255,255,255,.16); color: var(--color-white); }
+.language-switcher a:focus-visible { outline: 3px solid var(--color-orange); outline-offset: 2px; }
 .fm-navbar .nav-link:hover, .fm-navbar .nav-link:focus { background: rgba(255,255,255,.08); color: var(--color-white); }
 .dropdown-menu { border: 0; border-radius: var(--radius-medium); box-shadow: 0 15px 35px rgba(15,23,42,.15); padding: .6rem; }
 .dropdown-item { border-radius: .45rem; padding: .65rem .75rem; }
+@media (min-width:1200px) and (max-width:1399.98px) {
+  .fm-navbar .container { max-width:100%; padding-inline:.5rem; }
+  .fm-navbar .fm-brand { font-size:1rem; margin-inline-end:.25rem; }
+  .fm-navbar .fm-brand .brand-mark { height:2rem; width:2rem; }
+  .fm-navbar .nav-link, .fm-navbar .navbar-text { font-size:.7rem; padding-inline:.22rem; }
+  .fm-navbar .navbar-nav { gap:0 !important; }
+  .fm-navbar .user-chip { padding-inline:.35rem; }
+  .fm-navbar .language-switcher { gap:.2rem; }
+  .fm-navbar .language-switcher a { font-size:.6rem; padding-inline:.15rem; }
+}

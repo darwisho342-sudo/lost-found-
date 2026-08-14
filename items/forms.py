@@ -1,19 +1,32 @@
+from io import BytesIO
+from pathlib import Path
+from uuid import uuid4
+
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+from django.core.files.uploadedfile import InMemoryUploadedFile, UploadedFile
+from PIL import Image, UnidentifiedImageError
 
+from .choices import (
+    ALL_ITEM_TYPE_CHOICES, BRAND_CHOICES, COLOUR_CHOICES, CONDITION_CHOICES,
+    ITEM_TYPE_CHOICES, MATERIAL_CHOICES, PATTERN_CHOICES, SIZE_CHOICES,
+    VERIFICATION_QUESTION_TYPES, PLACE_TYPE_CHOICES, RETURN_METHOD_CHOICES, RETURN_STATUS_CHOICES,
+)
 from .models import (
-    AIAssistantSettings,
-    AICapability,
-    AICapabilitySetting,
-    AdminCapabilityOverride,
     ContactRequest,
+    ClaimEvidence,
     Conversation,
     ItemReport,
     Message,
+    ReturnArrangement,
+    SavedSearch,
     UserProfile,
     normalize_phone_number,
+    validate_evidence_size,
+    validate_evidence_content,
     validate_phone_number,
 )
 from .moderation import SensitiveContentModerationService
@@ -24,14 +37,13 @@ class RegistrationForm(UserCreationForm):
     phone_number = forms.CharField(
         required=False,
         max_length=30,
-        help_text="Optional. You may include an international country code.",
+        help_text=_("Optional. You may include an international country code."),
     )
     consent_to_share_phone = forms.BooleanField(
         required=False,
-        label="Allow active conversation contacts to see my phone number",
+        label=_("Allow active conversation contacts to see my phone number"),
         help_text=(
-            "Your number is never public. It is shown only to an active conversation "
-            "participant, and you can revoke this permission at any time."
+            _("Your number is never public. It is shown only to an active conversation participant, and you can revoke this permission at any time.")
         ),
     )
 
@@ -49,7 +61,7 @@ class RegistrationForm(UserCreationForm):
     def clean_email(self):
         email = self.cleaned_data["email"].strip().lower()
         if User.objects.filter(email__iexact=email).exists():
-            raise forms.ValidationError("An account already uses this email address.")
+            raise forms.ValidationError(_("An account already uses this email address."))
         return email
 
     def clean_phone_number(self):
@@ -76,29 +88,28 @@ class UserProfileForm(forms.ModelForm):
     phone_number = forms.CharField(
         required=False,
         max_length=30,
-        help_text="Optional. You may include an international country code.",
+        help_text=_("Optional. You may include an international country code."),
     )
 
     class Meta:
         model = UserProfile
         fields = (
-            "phone_number",
+            "display_name", "preferred_language", "phone_number",
             "consent_to_share_phone",
             "mask_phone_number",
+            "notify_strong_matches", "notify_claim_updates", "notify_messages", "email_notifications",
         )
         labels = {
-            "consent_to_share_phone": "Allow active conversation contacts to see my phone number",
-            "mask_phone_number": "Mask my phone number",
+            "consent_to_share_phone": _("Allow active conversation contacts to see my phone number"),
+            "mask_phone_number": _("Mask my phone number"),
         }
         help_texts = {
-            "phone_number": "Optional. You may include an international country code.",
+            "phone_number": _("Optional. You may include an international country code."),
             "consent_to_share_phone": (
-                "Your number stays private unless an active private conversation exists. "
-                "Turning this off hides it immediately."
+                _("Your number stays private unless an active private conversation exists. Turning this off hides it immediately.")
             ),
             "mask_phone_number": (
-                "Conversation contacts see only the final four digits. Administrators need "
-                "a separate permission to review the full number."
+                _("Conversation contacts see only the final four digits. Administrators need a separate permission to review the full number.")
             ),
         }
 
@@ -107,16 +118,20 @@ class UserProfileForm(forms.ModelForm):
         validate_phone_number(raw_phone_number)
         return normalize_phone_number(raw_phone_number)
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["preferred_language"].required = False
+
 
 class ContactRequestForm(forms.ModelForm):
     class Meta:
         model = ContactRequest
         fields = ("initial_message",)
         labels = {
-            "initial_message": "Message to the report owner",
+            "initial_message": _("Message to the report owner"),
         }
         help_texts = {
-            "initial_message": "This message appears immediately in your private conversation.",
+            "initial_message": _("This message appears immediately in your private conversation."),
         }
         widgets = {
             "initial_message": forms.Textarea(attrs={"rows": 5, "maxlength": 2000}),
@@ -125,25 +140,33 @@ class ContactRequestForm(forms.ModelForm):
     def clean_initial_message(self):
         message = self.cleaned_data["initial_message"].strip()
         if not message:
-            raise forms.ValidationError("Enter a private message.")
+            raise forms.ValidationError(_("Enter a private message."))
         return message
 
 
 class MessageForm(forms.ModelForm):
     class Meta:
         model = Message
-        fields = ("body",)
-        labels = {"body": "Message"}
+        fields = ("body", "attachment")
+        labels = {"body": _("Message")}
         widgets = {
             "body": forms.Textarea(
-                attrs={"rows": 3, "maxlength": 2000, "placeholder": "Write a message…"}
+                attrs={"rows": 3, "maxlength": 2000, "placeholder": _("Write a message…")}
             )
         }
+
+    def clean_attachment(self):
+        upload = self.cleaned_data.get("attachment")
+        if upload:
+            validate_evidence_size(upload)
+            validate_evidence_content(upload)
+            FileExtensionValidator(("jpg", "jpeg", "png", "webp", "pdf"))(upload)
+        return upload
 
     def clean_body(self):
         body = self.cleaned_data["body"].strip()
         if not body:
-            raise forms.ValidationError("A message cannot be empty.")
+            raise forms.ValidationError(_("A message cannot be empty."))
         return body
 
 
@@ -151,13 +174,13 @@ class ConversationDeactivateForm(forms.Form):
     reason = forms.CharField(
         max_length=1000,
         widget=forms.Textarea(attrs={"rows": 4, "maxlength": 1000}),
-        help_text="Required for administrator accountability. Message content is not copied here.",
+        help_text=_("Required for administrator accountability. Message content is not copied here."),
     )
 
     def clean_reason(self):
         reason = SensitiveContentModerationService.clean(self.cleaned_data["reason"])
         if not reason:
-            raise forms.ValidationError("Enter a deactivation reason.")
+            raise forms.ValidationError(_("Enter a deactivation reason."))
         return reason
 
 
@@ -165,186 +188,373 @@ class ConversationReopenForm(forms.Form):
     reason = forms.CharField(
         max_length=1000,
         widget=forms.Textarea(attrs={"rows": 4, "maxlength": 1000}),
-        help_text="Required for administrator accountability. It is not included in notifications.",
+        help_text=_("Required for administrator accountability. It is not included in notifications."),
     )
     change_report_status = forms.BooleanField(
         required=False,
-        label="Also change the related report back to Active",
+        label=_("Also change the related report back to Active"),
     )
 
     def clean_reason(self):
         reason = SensitiveContentModerationService.clean(self.cleaned_data["reason"])
         if not reason:
-            raise forms.ValidationError("Enter an administrator reason.")
+            raise forms.ValidationError(_("Enter an administrator reason."))
         return reason
 
 
 class ItemReportForm(forms.ModelForm):
+    verification_question_1_type = forms.ChoiceField(required=False, choices=(("", _("Select a question")), *VERIFICATION_QUESTION_TYPES))
+    verification_question_1_text = forms.CharField(required=False, max_length=240)
+    verification_question_1_answer = forms.CharField(required=False, max_length=500, widget=forms.Textarea(attrs={"rows": 2, "dir": "auto"}))
+    verification_question_2_type = forms.ChoiceField(required=False, choices=(("", _("Select a question")), *VERIFICATION_QUESTION_TYPES))
+    verification_question_2_text = forms.CharField(required=False, max_length=240)
+    verification_question_2_answer = forms.CharField(required=False, max_length=500, widget=forms.Textarea(attrs={"rows": 2, "dir": "auto"}))
+    verification_question_3_type = forms.ChoiceField(required=False, choices=(("", _("Select a question")), *VERIFICATION_QUESTION_TYPES))
+    verification_question_3_text = forms.CharField(required=False, max_length=240)
+    verification_question_3_answer = forms.CharField(required=False, max_length=500, widget=forms.Textarea(attrs={"rows": 2, "dir": "auto"}))
+
     class Meta:
         model = ItemReport
         fields = (
             "title",
-            "description",
             "category",
-            "colour",
+            "item_type", "custom_item_type", "primary_colour", "secondary_colour",
+            "material", "approximate_size", "pattern", "item_condition",
+            "brand", "custom_brand", "model",
+            "country", "region", "city", "district", "place_type", "place_name",
+            "public_location", "exact_private_location", "latitude", "longitude",
+            "public_location_precision_km",
             "campus_location",
+            "custom_location",
             "item_date",
-            "image",
+            "additional_details",
+            "image", "duplicate_confirmed",
+            "require_official_handover",
         )
         widgets = {
-            "description": forms.Textarea(attrs={"rows": 5}),
             "item_date": forms.DateInput(attrs={"type": "date"}),
+            "additional_details": forms.Textarea(attrs={"rows": 5, "maxlength": 1000, "dir": "auto"}),
+            "exact_private_location": forms.Textarea(attrs={"rows": 3, "maxlength": 500, "dir": "auto"}),
+            "latitude": forms.NumberInput(attrs={"step": "0.000001"}),
+            "longitude": forms.NumberInput(attrs={"step": "0.000001"}),
         }
+
+    def __init__(self, *args, report_type=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.report_type = report_type or getattr(self.instance, "report_type", "")
+        self.fields["category"].choices = (("", _("Select a category")), *ItemReport.Category.choices)
+        self.fields["title"].required = False
+        self.fields["item_type"].choices = (("", _("Select an item type")), *ALL_ITEM_TYPE_CHOICES)
+        self.fields["primary_colour"].required = not bool(self.data.get("colour"))
+        self.fields["primary_colour"].choices = (("", _("Select a primary colour")), *COLOUR_CHOICES)
+        for field_name in ("secondary_colour", "material", "approximate_size", "pattern", "item_condition", "brand"):
+            self.fields[field_name].choices = (("", _("Not specified")), *self.fields[field_name].choices)
+        self.fields["campus_location"].choices = (("", _("Select a general location")), *ItemReport.CampusLocation.choices)
+        self.fields["campus_location"].required = False
+        legacy_post = bool(self.data.get("colour"))
+        self.fields["country"].required = not legacy_post
+        self.fields["city"].required = not legacy_post
+        self.fields["place_type"].choices = (("", _("Select a place type (optional)")), *PLACE_TYPE_CHOICES)
+        self.fields["exact_private_location"].help_text = _("Private. Visible only to you, approved return participants when necessary, and authorized administrators.")
+        self.fields["latitude"].help_text = _("Optional full-precision coordinate. It is never displayed publicly.")
+        self.fields["longitude"].help_text = _("Optional full-precision coordinate. It is never displayed publicly.")
+        self.fields["public_location_precision_km"].help_text = _("Controls how broadly an approximate map location may be displayed.")
+        self.fields["public_location_precision_km"].required = False
+        self.fields["public_location_precision_km"].initial = self.instance.public_location_precision_km or 5
+        self.fields["duplicate_confirmed"].widget = forms.HiddenInput()
+        self.fields["item_date"].label = _("Date found") if self.report_type == ItemReport.ReportType.FOUND else _("Date lost")
+        self.fields["approximate_size"].help_text = _("Choose the closest approximate size.")
+        self.fields["additional_details"].help_text = _("Do not include passwords, complete card numbers, identification numbers, security codes, phone numbers, addresses, or other private information.")
+        self.fields["image"].help_text = _("Maximum 5 MB. Do not upload images showing private numbers, PINs, addresses, messages, or unrelated people's faces.")
+        for field in self.fields.values():
+            if isinstance(field.widget, (forms.Select, forms.SelectMultiple)):
+                field.widget.attrs.setdefault("class", "form-select")
+        if self.instance.pk and self.instance.report_type == ItemReport.ReportType.FOUND:
+            for index, question in enumerate(self.instance.verification_questions.all()[:3], start=1):
+                self.fields[f"verification_question_{index}_type"].initial = question.question_type
+                self.fields[f"verification_question_{index}_text"].initial = question.question_text
+                self.fields[f"verification_question_{index}_answer"].initial = question.expected_answer
+
+    def clean(self):
+        cleaned = super().clean()
+        cleaned["public_location_precision_km"] = cleaned.get("public_location_precision_km") or 5
+        category = cleaned.get("category")
+        item_type = cleaned.get("item_type")
+        legacy_post = bool(self.data.get("colour"))
+        if not item_type and legacy_post:
+            item_type = "not_sure"
+            cleaned["item_type"] = item_type
+        allowed = {value for value, label in ITEM_TYPE_CHOICES.get(category, ())}
+        if item_type and item_type not in allowed:
+            self.add_error("item_type", _("Select an item type that belongs to the selected category."))
+        if not item_type:
+            self.add_error("item_type", _("Select an item type."))
+        if item_type == "other" and not cleaned.get("custom_item_type"):
+            self.add_error("custom_item_type", _("Specify the item type when Other is selected."))
+        if cleaned.get("brand") == "other" and not cleaned.get("custom_brand"):
+            self.add_error("custom_brand", _("Specify the brand when Other is selected."))
+        if cleaned.get("campus_location") == "other" and not cleaned.get("custom_location"):
+            self.add_error("custom_location", _("Specify a general location when Other is selected."))
+        if not cleaned.get("primary_colour") and legacy_post:
+            raw = " ".join(self.data.get("colour", "").split()).casefold().replace(" ", "_")
+            cleaned["primary_colour"] = raw if raw in dict(COLOUR_CHOICES) else "not_sure"
+        for field_name in ("additional_details", "title"):
+            try:
+                cleaned[field_name] = SensitiveContentModerationService.reject_public_sensitive_content(cleaned.get(field_name, ""))
+            except forms.ValidationError as exc:
+                self.add_error(field_name, exc)
+        for index in range(1, 4):
+            question_type = cleaned.get(f"verification_question_{index}_type")
+            answer = cleaned.get(f"verification_question_{index}_answer", "")
+            if question_type and not answer:
+                self.add_error(f"verification_question_{index}_answer", _("Enter the private expected answer."))
+            if answer:
+                try:
+                    cleaned[f"verification_question_{index}_answer"] = SensitiveContentModerationService.reject_forbidden_secret(answer)
+                except forms.ValidationError as exc:
+                    self.add_error(f"verification_question_{index}_answer", exc)
+        return cleaned
 
     def clean_item_date(self):
         item_date = self.cleaned_data["item_date"]
         if item_date > timezone.localdate():
-            raise forms.ValidationError("The date cannot be in the future.")
+            raise forms.ValidationError(_("The date cannot be in the future."))
         return item_date
 
-    def clean_colour(self):
-        return " ".join(self.cleaned_data["colour"].split())
+    def clean_image(self):
+        upload = self.cleaned_data.get("image")
+        if not upload or not isinstance(upload, UploadedFile):
+            return upload
+        try:
+            upload.seek(0)
+            with Image.open(upload) as source:
+                source.verify()
+            upload.seek(0)
+            with Image.open(upload) as source:
+                if source.width < 1 or source.height < 1 or source.width > 12000 or source.height > 12000:
+                    raise forms.ValidationError(_("Use an image no larger than 12,000×12,000 pixels."))
+                image = source.convert("RGB") if source.mode not in ("RGB", "RGBA") else source.copy()
+                image.thumbnail((2400, 2400))
+                output = BytesIO()
+                suffix = Path(upload.name).suffix.lower()
+                image_format = "PNG" if suffix == ".png" else "WEBP" if suffix == ".webp" else "JPEG"
+                if image_format == "JPEG" and image.mode != "RGB":
+                    image = image.convert("RGB")
+                image.save(output, format=image_format, quality=88, optimize=True)
+        except (UnidentifiedImageError, OSError, ValueError):
+            raise forms.ValidationError(_("Upload a genuine JPG, PNG, or WebP image."))
+        output.seek(0)
+        extension = {"JPEG": ".jpg", "PNG": ".png", "WEBP": ".webp"}[image_format]
+        return InMemoryUploadedFile(
+            output, "ImageField", f"report-{uuid4().hex}{extension}",
+            f"image/{image_format.lower()}", output.getbuffer().nbytes, None,
+        )
+
+    def save(self, commit=True):
+        report = super().save(commit=False)
+        report.colour = (" ".join(self.data.get("colour", "").split()) if self.data.get("colour") else (report.get_primary_colour_display() or report.primary_colour))
+        report.description = self.cleaned_data.get("additional_details", "")
+        if not report.title:
+            report.title = self.suggested_title()
+        if commit:
+            report.save()
+            self.save_m2m()
+        return report
+
+    def suggested_title(self):
+        report_type = dict(ItemReport.ReportType.choices).get(self.report_type, self.report_type.title())
+        colour = dict(COLOUR_CHOICES).get(self.cleaned_data.get("primary_colour"), "")
+        brand = self.cleaned_data.get("custom_brand") if self.cleaned_data.get("brand") == "other" else dict(BRAND_CHOICES).get(self.cleaned_data.get("brand"), "")
+        item_type = self.cleaned_data.get("custom_item_type") if self.cleaned_data.get("item_type") == "other" else dict(ALL_ITEM_TYPE_CHOICES).get(self.cleaned_data.get("item_type"), "")
+        city = self.cleaned_data.get("city", "")
+        title = " ".join(str(part) for part in (report_type, colour, brand, item_type) if part)
+        return (f"{title} in {city}" if city else title)[:120]
+
+
+class ReturnArrangementForm(forms.ModelForm):
+    share_delivery_address = forms.BooleanField(
+        required=False,
+        label=_("I explicitly consent to share this delivery address with the approved participant"),
+    )
+
+    class Meta:
+        model = ReturnArrangement
+        fields = (
+            "return_method", "status", "safe_public_location", "trusted_organization",
+            "custom_arrangement", "delivery_address", "delivery_cost_payer", "courier_name",
+            "tracking_reference", "failure_report",
+        )
+        widgets = {
+            "custom_arrangement": forms.Textarea(attrs={"rows": 3, "dir": "auto"}),
+            "delivery_address": forms.Textarea(attrs={"rows": 3, "dir": "auto"}),
+            "failure_report": forms.Textarea(attrs={"rows": 3, "dir": "auto"}),
+        }
+
+    def __init__(self, *args, user, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.user = user
+        self.fields["return_method"].choices = (("", _("Choose a return method")), *RETURN_METHOD_CHOICES)
+        self.fields["status"].choices = RETURN_STATUS_CHOICES
+        self.fields["trusted_organization"].queryset = self.fields["trusted_organization"].queryset.filter(is_verified=True)
+        self.fields["delivery_address"].help_text = _("Private. Never used for matching, search, analytics, or notification text.")
+        if self.instance.pk and self.instance.address_consent_at and not self.instance.address_consent_withdrawn_at:
+            self.fields["share_delivery_address"].initial = True
+
+    def clean(self):
+        cleaned = super().clean()
+        claim = self.instance.contact_request
+        if cleaned.get("delivery_address") and self.user.pk != claim.requesting_user_id:
+            self.add_error("delivery_address", _("Only the approved owner may provide and consent to share a delivery address."))
+        if cleaned.get("delivery_address") and not cleaned.get("share_delivery_address"):
+            self.add_error("share_delivery_address", _("Explicit consent is required before sharing a delivery address."))
+        elif cleaned.get("delivery_address") and cleaned.get("share_delivery_address"):
+            self.instance.address_consent_at = self.instance.address_consent_at or timezone.now()
+            self.instance.address_consent_withdrawn_at = None
+        if (
+            self.instance.pk and self.instance.address_consent_at
+            and not cleaned.get("share_delivery_address")
+            and self.instance.status in ("sent", "handed_over", "awaiting_receipt", "received")
+        ):
+            self.add_error("share_delivery_address", _("Address consent can be withdrawn only before shipment or handover."))
+        if cleaned.get("return_method") == "courier_post" and not cleaned.get("delivery_cost_payer"):
+            self.add_error("delivery_cost_payer", _("Agree who pays the delivery cost."))
+        for field in ("delivery_address", "tracking_reference", "custom_arrangement", "failure_report"):
+            try:
+                cleaned[field] = SensitiveContentModerationService.reject_forbidden_secret(cleaned.get(field, ""))
+            except forms.ValidationError as exc:
+                self.add_error(field, exc)
+        return cleaned
+
+
+class SavedSearchForm(forms.ModelForm):
+    class Meta:
+        model = SavedSearch
+        fields = ("name",)
+
+
+class OwnershipClaimForm(forms.ModelForm):
+    evidence = forms.FileField(required=False, help_text=_("Optional JPG, PNG, WebP, or PDF up to 5 MB. Mask unrelated private information."))
+
+    class Meta:
+        model = ContactRequest
+        fields = ("initial_message", "loss_location", "loss_timeframe", "truthful_confirmation")
+        labels = {"initial_message": _("Initial private claim message"), "loss_location": _("Where did you lose it?"),
+                  "loss_timeframe": _("Approximately when did you lose it?"),
+                  "truthful_confirmation": _("I confirm that this claim is truthful.")}
+        widgets = {"initial_message": forms.Textarea(attrs={"rows": 4, "dir": "auto"})}
+
+    def __init__(self, *args, item_report, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.item_report = item_report
+        for question in item_report.verification_questions.all():
+            self.fields[f"question_{question.pk}"] = forms.CharField(
+                label=question.question_text or question.get_question_type_display(), max_length=1000,
+                widget=forms.Textarea(attrs={"rows": 3, "dir": "auto"}),
+            )
+
+    def clean_evidence(self):
+        upload = self.cleaned_data.get("evidence")
+        if upload:
+            validate_evidence_size(upload)
+            validate_evidence_content(upload)
+            FileExtensionValidator(("jpg", "jpeg", "png", "webp", "pdf"))(upload)
+        return upload
+
+    def clean(self):
+        cleaned = super().clean()
+        for name, value in list(cleaned.items()):
+            if name.startswith("question_") or name in ("initial_message", "loss_location", "loss_timeframe"):
+                try:
+                    cleaned[name] = SensitiveContentModerationService.reject_forbidden_secret(value)
+                except forms.ValidationError as exc:
+                    self.add_error(name, exc)
+        if not cleaned.get("truthful_confirmation"):
+            self.add_error("truthful_confirmation", _("You must confirm that the claim is truthful."))
+        return cleaned
+
+
+class ClarificationForm(forms.Form):
+    clarification = forms.CharField(max_length=1000, widget=forms.Textarea(attrs={"rows": 4, "dir": "auto"}))
+
+    def clean_clarification(self):
+        return SensitiveContentModerationService.reject_forbidden_secret(self.cleaned_data["clarification"])
+
+
+class SuspiciousClaimForm(forms.Form):
+    reason = forms.CharField(max_length=1000, widget=forms.Textarea(attrs={"rows": 4, "dir": "auto"}))
 
 
 class ReportFilterForm(forms.Form):
-    query = forms.CharField(required=False, label="Keyword")
+    query = forms.CharField(required=False, label=_("Keyword"))
     report_type = forms.ChoiceField(
-        required=False, choices=[("", "All types"), *ItemReport.ReportType.choices]
+        required=False, choices=[("", _("All types")), *ItemReport.ReportType.choices]
     )
     category = forms.ChoiceField(
-        required=False, choices=[("", "All categories"), *ItemReport.Category.choices]
+        required=False, choices=[("", _("All categories")), *ItemReport.Category.choices]
     )
-    colour = forms.CharField(required=False)
+    item_type = forms.ChoiceField(required=False, choices=(("", _("All item types")), *ALL_ITEM_TYPE_CHOICES))
+    primary_colour = forms.ChoiceField(required=False, choices=(("", _("All colours")), *COLOUR_CHOICES))
+    brand = forms.ChoiceField(required=False, choices=(("", _("All brands")), *BRAND_CHOICES))
+    material = forms.ChoiceField(required=False, choices=(("", _("All materials")), *MATERIAL_CHOICES))
+    approximate_size = forms.ChoiceField(required=False, choices=(("", _("All sizes")), *SIZE_CHOICES), label=_("Size"))
+    country = forms.CharField(required=False, label=_("Country"))
+    region = forms.CharField(required=False, label=_("State, province, or region"))
+    city = forms.CharField(required=False, label=_("City"))
+    district = forms.CharField(required=False, label=_("District or area"))
+    place_type = forms.ChoiceField(required=False, choices=(("", _("All place types")), *PLACE_TYPE_CHOICES))
+    place_name = forms.CharField(required=False, label=_("Place name"))
     campus_location = forms.ChoiceField(
         required=False,
-        choices=[("", "All locations"), *ItemReport.CampusLocation.choices],
+        choices=[("", _("All locations")), *ItemReport.CampusLocation.choices],
     )
     status = forms.ChoiceField(
-        required=False, choices=[("", "All statuses"), *ItemReport.Status.choices]
+        required=False, choices=(("", _("All public reports")), (ItemReport.Status.ACTIVE, _("Active")))
     )
+    date_from = forms.DateField(required=False, widget=forms.DateInput(attrs={"type": "date"}))
+    date_to = forms.DateField(required=False, widget=forms.DateInput(attrs={"type": "date"}))
+    sort = forms.ChoiceField(
+        required=False,
+        choices=(("newest", _("Newest")), ("oldest", _("Oldest")), ("closest_date", _("Closest date"))),
+    )
+
+    def clean(self):
+        cleaned = super().clean()
+        if cleaned.get("date_from") and cleaned.get("date_to") and cleaned["date_from"] > cleaned["date_to"]:
+            self.add_error("date_to", _("The end date must not be before the start date."))
+        return cleaned
 
 
 class AdminReportFilterForm(ReportFilterForm):
     visibility = forms.ChoiceField(
         required=False,
-        choices=[("", "All visibility"), ("visible", "Visible"), ("hidden", "Hidden")],
+        choices=[("", _("All visibility")), ("visible", _("Visible")), ("hidden", _("Hidden"))],
     )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["status"].choices = (("", _("All statuses")), *ItemReport.Status.choices)
 
 
 class AdminUserFilterForm(forms.Form):
-    query = forms.CharField(required=False, label="Username or email")
+    query = forms.CharField(required=False, label=_("Username or email"))
     account_type = forms.ChoiceField(
         required=False,
-        choices=[("", "All account types"), ("staff", "Staff"), ("regular", "Regular users")],
+        choices=[("", _("All account types")), ("staff", _("Staff")), ("regular", _("Regular users"))],
     )
     account_status = forms.ChoiceField(
         required=False,
-        choices=[("", "All account statuses"), ("active", "Active"), ("inactive", "Inactive")],
+        choices=[("", _("All account statuses")), ("active", _("Active")), ("inactive", _("Inactive"))],
     )
 
 
-class AIAssistantRequestForm(forms.Form):
-    capability = forms.ChoiceField(choices=(), label="Assistant capability")
-    input_text = forms.CharField(
-        required=False,
-        label="Instructions or content",
-        widget=forms.Textarea(
-            attrs={
-                "rows": 6,
-                "placeholder": "Enter only the information needed for this advisory request.",
-            }
-        ),
-    )
-    reports = forms.ModelMultipleChoiceField(
-        required=False,
-        queryset=ItemReport.objects.none(),
-        widget=forms.SelectMultiple(attrs={"size": 8}),
-        help_text="Hold Ctrl (Windows) or Command (Mac) to select multiple reports.",
-    )
-    conversation = forms.ModelChoiceField(
-        required=False,
-        queryset=Conversation.objects.none(),
-        help_text="Conversation content is available only for the conversation-summary and risk-check tools.",
+class AdminUserStatusForm(forms.Form):
+    reason = forms.CharField(
+        max_length=500, widget=forms.Textarea(attrs={"rows": 3, "dir": "auto"}),
+        help_text=_("Required. Stored privately; audit descriptions do not copy the reason."),
     )
 
-    def __init__(self, *args, user=None, **kwargs):
-        super().__init__(*args, **kwargs)
-        from .ai_assistant import AICapabilityService
-
-        assistant_settings = AIAssistantSettings.get_solo()
-        self.fields["input_text"].widget.attrs["maxlength"] = assistant_settings.maximum_input_length
-        self.fields["capability"].choices = [
-            (capability.code, capability.name)
-            for capability in AICapabilityService.enabled_capabilities(user)
-        ]
-        self.fields["reports"].queryset = ItemReport.objects.filter(is_deleted=False).select_related("owner")
-        self.fields["conversation"].queryset = Conversation.objects.select_related("item_report")
-
-    def clean(self):
-        cleaned_data = super().clean()
-        capability = cleaned_data.get("capability")
-        reports = list(cleaned_data.get("reports") or [])
-        conversation = cleaned_data.get("conversation")
-        input_text = cleaned_data.get("input_text", "").strip()
-        if capability == "report_summarization" and not reports:
-            self.add_error("reports", "Select at least one report.")
-        elif capability == "conversation_summarization" and conversation is None:
-            self.add_error("conversation", "Select a conversation.")
-        elif capability == "matching_insights" and len(reports) != 2:
-            self.add_error("reports", "Select exactly two reports.")
-        elif capability in ("data_extraction", "content_generation") and not input_text:
-            self.add_error("input_text", "Enter content for this capability.")
-        elif capability == "risk_violation_checks" and not (input_text or reports or conversation):
-            self.add_error(None, "Enter text or select content to check.")
-        return cleaned_data
-
-
-class AIAssistantSettingsForm(forms.ModelForm):
-    enabled_capabilities = forms.ModelMultipleChoiceField(
-        queryset=AICapability.objects.none(),
-        required=False,
-        widget=forms.CheckboxSelectMultiple,
-    )
-
-    class Meta:
-        model = AIAssistantSettings
-        fields = (
-            "is_enabled",
-            "provider_name",
-            "model_name",
-            "request_timeout_seconds",
-            "maximum_input_length",
-        )
-        labels = {"is_enabled": "Enable AI Assistant"}
-        help_texts = {
-            "provider_name": "Safe display name only. API keys must come from environment variables.",
-            "model_name": "Configuration label only; the initial provider is local and deterministic.",
-        }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["enabled_capabilities"].queryset = AICapability.objects.filter(is_available=True)
-        self.fields["enabled_capabilities"].initial = AICapability.objects.filter(
-            global_setting__is_enabled=True
-        )
-
-    def clean(self):
-        cleaned_data = super().clean()
-        if cleaned_data.get("is_enabled") and not cleaned_data.get("enabled_capabilities"):
-            self.add_error("enabled_capabilities", "Enable at least one capability while the assistant is enabled.")
-        timeout = cleaned_data.get("request_timeout_seconds")
-        if timeout is not None and not 1 <= timeout <= 120:
-            self.add_error("request_timeout_seconds", "Use a timeout between 1 and 120 seconds.")
-        maximum = cleaned_data.get("maximum_input_length")
-        if maximum is not None and not 100 <= maximum <= 20000:
-            self.add_error("maximum_input_length", "Use an input limit between 100 and 20,000 characters.")
-        return cleaned_data
-
-
-class AdminCapabilityOverrideForm(forms.Form):
-    capability = forms.ModelChoiceField(queryset=AICapability.objects.none())
-    setting = forms.ChoiceField(choices=AdminCapabilityOverride.OverrideSetting.choices)
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["capability"].queryset = AICapability.objects.filter(is_available=True)
+    def clean_reason(self):
+        reason = SensitiveContentModerationService.clean(self.cleaned_data["reason"])
+        if not reason:
+            raise forms.ValidationError(_("Enter a reason for this account action."))
+        return reason

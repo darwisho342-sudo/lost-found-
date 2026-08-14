@@ -2,6 +2,7 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import IntegrityError, transaction
 from django.db.models import Q
 from django.urls import reverse
+from django.utils.translation import gettext as _
 
 from .communications import record_contact_event
 from .models import (
@@ -42,13 +43,13 @@ class ConversationInitiationService:
                 pk=item_report.pk
             )
             if report.is_deleted or report.is_hidden or report.status == ItemReport.Status.CLOSED:
-                raise ValidationError("This report is not available for a new conversation.")
+                raise ValidationError(_("This report is not available for a new conversation."))
             if initiating_user.pk == report.owner_id:
-                raise PermissionDenied("You cannot start a conversation with yourself.")
+                raise PermissionDenied(_("You cannot start a conversation with yourself."))
             if UserBlock.objects.filter(
                 blocker=report.owner, blocked_user=initiating_user
             ).exists():
-                raise PermissionDenied("The report owner is not accepting messages from this account.")
+                raise PermissionDenied(_("The report owner is not accepting messages from this account."))
 
             existing = cls.existing_conversation(
                 item_report=report,
@@ -114,8 +115,8 @@ class ConversationInitiationService:
             NotificationService.create(
                 recipient=recipient,
                 notification_type=Notification.NotificationType.NEW_MESSAGE,
-                title="New private conversation",
-                safe_message=f"A private conversation was started about '{report.title}'.",
+                title=_("New private conversation"),
+                safe_message=_("A private conversation was started about ‘%(title)s’.") % {"title": report.title},
                 conversation=conversation,
                 item_report=report,
                 destination_url=reverse("conversation_detail", args=[conversation.pk]),
@@ -127,6 +128,6 @@ class ConversationInitiationService:
                 item_report=report,
                 contact_request=contact_request,
                 conversation=conversation,
-                description="A private conversation was started directly from an item report.",
+                description=_("A private conversation was started directly from an item report."),
             )
             return conversation, True

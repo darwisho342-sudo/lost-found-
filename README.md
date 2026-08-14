@@ -1,6 +1,6 @@
 # FindMatch
 
-FindMatch is a beginner-friendly university lost-and-found demonstration built with Django, Bootstrap 5, SQLite and Pillow. Visitors can browse and filter reports. Registered users can submit and manage their own reports and review transparent possible-match scores. Staff members have a custom administrator dashboard as well as Django's built-in administration site.
+FindMatch is an international lost-and-found platform built with Django, Bootstrap 5, SQLite or PostgreSQL, and Pillow. Visitors browse privacy-safe public reports; verified registered users manage reports, claims, conversations, saved alerts, and return arrangements. Staff members have a custom operational dashboard as well as Django's technical administration site.
 
 The interface uses a responsive Campus Portal design: a navy navigation bar, turquoise accents, three-column item cards, homepage statistics, side-by-side match comparisons and a dark staff-dashboard sidebar. All visual assets are stored locally.
 
@@ -34,9 +34,9 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 .venv\Scripts\Activate.ps1
 ```
 
-Open [http://127.0.0.1:8000/](http://127.0.0.1:8000/) in a browser. The administrator panel is at [http://127.0.0.1:8000/admin/](http://127.0.0.1:8000/admin/).
+Open [http://127.0.0.1:8000/en/](http://127.0.0.1:8000/en/) in a browser. Turkish uses `/tr/` and Arabic uses `/ar/`. The administrator panel remains at [http://127.0.0.1:8000/admin/](http://127.0.0.1:8000/admin/).
 
-Staff members can open the custom dashboard at [http://127.0.0.1:8000/management/](http://127.0.0.1:8000/management/). It contains report totals, recent activity, report moderation and user management. Regular users receive a permission-denied page if they try to access it.
+Staff members can open the custom dashboard at [http://127.0.0.1:8000/en/management/](http://127.0.0.1:8000/en/management/). It contains report totals, recent activity, report moderation and user management. Regular users receive a permission-denied page if they try to access it.
 
 After logging in, staff accounts are sent directly to the custom dashboard. Regular accounts are sent to the normal homepage.
 
@@ -47,6 +47,8 @@ The interface uses a responsive premium campus-portal design: a navy-to-purple h
 Stop the server with `Ctrl+C`.
 
 ## Application URLs
+
+All user-facing routes begin with `/en/`, `/tr/`, or `/ar/`; the table below shows the part after the language prefix. Django admin, static/media files, and `/i18n/` are intentionally unprefixed.
 
 | Page | URL |
 |---|---|
@@ -72,10 +74,24 @@ Stop the server with `Ctrl+C`.
 | Custom staff administration | `/management/` |
 | Staff reports and users | `/management/reports/`, `/management/users/` |
 | Staff conversations and audit | `/management/conversations/`, `/management/audit/` |
-| Staff AI Assistant | `/management/ai-assistant/` |
-| Restricted AI Assistant settings | `/management/ai-assistant/settings/` |
 | Django administration | `/admin/` |
 | Demonstration error pages | `/403/`, `/404/` |
+
+## Internationalization
+
+FindMatch supports English (source and fallback), Turkish, and Arabic through Django's built-in translation system. The URL prefix has first priority; Django then considers its saved language preference, the browser's `Accept-Language` header, and finally English. The shared language switcher retains the current path, report identifier, filters, pagination, and query string. Arabic pages use `dir="rtl"`; user-written content uses `dir="auto"`, while phone numbers and email addresses remain left-to-right.
+
+Wrap Python UI text with `gettext()` or `gettext_lazy()` and template text with `{% translate %}` or `{% blocktranslate %}`. To update catalogs on Windows, install **GNU gettext 0.19 or newer** and make sure `msguniq.exe`, `xgettext.exe`, and `msgfmt.exe` are on `PATH`, then run:
+
+```powershell
+.venv\Scripts\python.exe manage.py makemessages -l tr -l ar
+.venv\Scripts\python.exe manage.py compilemessages
+.venv\Scripts\python.exe manage.py test
+```
+
+This checkout includes `tools/compile_locales.py` only as a dependency-free development fallback for the existing simple PO catalogs. GNU gettext plus Django's `compilemessages` remains the supported catalog workflow. To add another language, append it to `LANGUAGES`, generate its catalog, translate every `msgstr`, compile it, and add RTL checks when applicable. RTL CSS belongs in `static/css/core/rtl.css`; prefer logical properties such as `margin-inline-start` and never mirror photographs, phone numbers, or fixed-direction charts.
+
+Deployment order is: install dependencies, update and compile catalogs, run migrations when needed, run `collectstatic`, and restart Django. `collectstatic` does not compile translations. Commit both PO and MO files and keep caches separated by language-prefixed URL.
 
 Earlier `/reports/`, `/login/` and `/dashboard/` links redirect to or remain compatible with the canonical routes where appropriate.
 
@@ -112,17 +128,20 @@ docs/work_log.md            Implementation record
 media/                      Local user uploads (created when needed)
 ```
 
-## Smart matching algorithm
+## Deterministic Smart Matching
 
 `MatchingService` compares a lost report only with found reports, or a found report only with lost reports. It calculates suggestions when requested and does not permanently store them.
 
-- Same category: 25 points
-- Description similarity with Python `SequenceMatcher`: up to 25 points
-- Same normalized colour: 20 points
-- Same location: 15 points
-- Date proximity: up to 15 points
+- Same category: 15 points
+- Same item type: 15 points
+- Similar title: up to 10 points
+- Similar public additional details: up to 15 points
+- Same primary and secondary colours: 10 and 5 points
+- Same normalized brand and similar model: 10 and 5 points
+- International public/approximate location: 20 points
+- Date proximity: up to 10 points
 
-The possible-matches page displays the five strongest results scoring at least 50%. It shows every component so users can understand the suggestion. A score is not proof that two reports describe the same item.
+The current balanced 100-point formula is: category 12, item type 12, title 8, public details 8, primary colour 8, secondary colour 4, brand 6, model 4, material 4, approximate size 4, international public/approximate location 20, and date 10. Only opposite-type Active reports scoring at least 70 are shown. Scores from 70–84 are Possible matches; scores from 85–100 are Strong possible matches and may create a deduplicated notification. At most five results are displayed. Exact locations, claims, evidence, addresses, tracking, contacts, usernames, and messages are never compared. A score is not proof of ownership and never approves a claim.
 
 ## Secure contact and messaging
 
@@ -147,16 +166,15 @@ The possible-matches page displays the five strongest results scoring at least 5
 - The notification bell polls a small authenticated JSON endpoint every 15 seconds while the page is visible. Notifications never include private messages, phone numbers or verification details.
 - The implementation uses Django templates, forms, messages and database transactions only—there is no REST framework, React, Celery or WebSocket dependency.
 
-## Configurable administrator AI Assistant
+## Structured reports and secure ownership verification
 
-- The custom dashboard includes a staff-only advisory assistant for report summaries, authorized conversation summaries, structured-data suggestions, reviewed content drafts, user-support hints, moderation-risk checks, deterministic matching explanations and aggregate analytics.
-- The master switch defaults to disabled. When enabled, at least one globally available capability must be selected.
-- Superusers and staff granted `items.manage_ai_assistant` may change global settings. Other staff may use enabled capabilities and disable individual capabilities for their own account.
-- The initial provider is local and deterministic. It does not call a paid or external AI API and cannot mutate reports, users, claims, conversations or permissions.
-- Any future provider secret must use an environment variable named like `FINDMATCH_AI_<PROVIDER>_API_KEY`; API keys are never database fields.
-- Assistant outputs redact email addresses, phone numbers and common ownership evidence. Outputs are drafts or explanations only and are never sent or saved automatically.
-- The dedicated AI audit log stores safe event metadata only. It deliberately excludes prompts, results, messages, phone numbers and ownership evidence.
-- The assistant relies on the existing `MatchingService` and `ContentModerationService`; it cannot override normal matching, moderation or confirmation workflows.
+Reports use stable choice values from `items/choices.py` for category, category-dependent item type, colours, appearance, brand, international place type, and return method. Country and city are required for new reports; region, district, place name, approximate map location, and private exact location are supported. Existing campus records remain valid through legacy fields. JavaScript improves conditional fields, title suggestions, explicit geolocation, and manual image preparation, while Django forms and models enforce important rules on the server.
+
+Found-report owners can save up to three private verification questions. Expected answers are stored separately and never rendered on public report, browse, search, notification, or match pages. A signed-in claimant submits private answers, approximate loss details, a truthfulness confirmation, and optional private evidence. The finder may request one clarification, approve, reject, or report the claim as suspicious. Approval creates the private conversation and never reveals contact details automatically.
+
+After claim approval, participants can record a safe public meeting, official return point, security/police handover, pickup, courier/postal delivery, or custom private arrangement. Delivery addresses require explicit owner consent and are excluded from search, matching, analytics, notifications, and audit descriptions. Both participants must confirm handover/receipt before completion resolves the report, closes the conversation, and closes competing pending claims.
+
+FindMatch has no AI assistant, image-recognition provider, generated form content, OpenAI integration, or Ollama integration. Smart Matching is a local rule-based comparison implemented with explicit field weights and Python's `SequenceMatcher`. Sensitive-information checks are deterministic Django validation rules. The application requires no AI provider, API key, background worker, or network request.
 
 ## Useful commands
 
@@ -180,3 +198,33 @@ The seed command is repeatable and does not create duplicate demonstration repor
 - Images must be readable image files no larger than 5 MB.
 - Uploaded media and SQLite are suitable for this local demonstration, not a production deployment.
 - Users should not put contact details, student IDs or other private information in report descriptions.
+
+## Worldwide configuration
+
+Copy `.env.example` values into environment variables appropriate to the host. FindMatch does not load `.env` files itself in production, avoiding a hidden configuration dependency. SQLite remains the default. Set `DB_ENGINE=postgresql` plus `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`, and `DB_SSLMODE` only after PostgreSQL is ready. The `psycopg` driver is included; no Directus or REST layer is used.
+
+Email defaults to Django's console backend, so registration, reporting, browsing, and matching remain functional without an email provider. Claims and private messaging require a verified email; configure SMTP variables for real delivery. Maps are disabled by default. Manual country/city/place fields are complete, and browser geolocation is requested only after the user presses **Use my current location**. A future restricted public browser key may be provided through `MAP_PUBLIC_BROWSER_KEY`; never put a secret provider key in templates or JavaScript.
+
+The unlocalized `/health/` endpoint checks database connectivity and returns only `{"status":"ok"}` or a generic unavailable response. Production mode reads hosts and security controls from environment variables, enables secure cookies, HTTPS redirect, HSTS, MIME sniffing protection, and clickjacking protection. Set `SECURE_HSTS_PRELOAD=1` only after every current and future subdomain is permanently HTTPS-ready; browser preload can be difficult to reverse.
+
+## Location and privacy boundaries
+
+Public report data may include country, region, city, district, place type, place name, a safe general description, and coordinates rounded according to the user's selected precision. Exact location and full-precision coordinates are private. They are never included in public templates, search filters, match explanations, notifications, normal analytics, or audit descriptions.
+
+Private claim evidence and message attachments use private storage and permission-checked download views. Delivery addresses, courier details, and tracking references are participant-only. Delivery consent may be withdrawn before shipment; private delivery details have a configurable operational retention deadline and can be purged with `python manage.py process_retention` unless an authorized dispute/safety hold applies.
+
+## PostgreSQL transfer, backup, and restore
+
+See `docs/database_operations.md` for the tested provider-neutral procedure. In summary: back up SQLite and media, export Django data with natural dependencies, create an empty PostgreSQL database/user, configure environment variables, run migrations, load data transactionally, verify row counts and relationships, then switch traffic. Preserve `media/` and `private_media/` separately; database dumps do not contain uploaded file bytes.
+
+## Return, organization, and alert workflows
+
+Approved claims gain a private return record with safe meeting, verified organization, security/police, pickup, courier/post, or custom methods. Return status changes generate privacy-safe deduplicated notifications. The finder confirms handover/shipment and the claimant confirms receipt; only both confirmations complete the claim, resolve the report, close competing claims, and make the conversation read-only.
+
+Staff approve trusted organizations before they can be selected. Organization membership and privacy-safe custody events are represented separately. Saved searches store only allow-listed public filters and notify once per new matching Found report. FindMatch never transports an item, purchases shipping, guarantees delivery, or makes a legal determination of ownership.
+
+## Retention and legal review
+
+Active reports receive an expiration window and owners receive a privacy-safe warning before expiry. Expired reports leave public search and matching but are not automatically erased. Owners can renew eligible reports. Delivery data defaults to a limited retention window; evidence, conversations, audit records, public photographs, and legal/safety holds require an operator-approved retention policy before public deployment.
+
+The included Privacy Policy and Terms are project notices, not professional legal advice. Obtain qualified privacy, security, consumer, courier, accessibility, and jurisdiction-specific legal review before a worldwide public launch. The project does not claim automatic GDPR, Turkish-law, or worldwide compliance.

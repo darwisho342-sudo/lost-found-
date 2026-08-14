@@ -1,6 +1,7 @@
 import re
 
 from django.core.exceptions import ValidationError
+from django.utils.translation import gettext as _
 
 
 class SensitiveContentModerationService:
@@ -12,6 +13,24 @@ class SensitiveContentModerationService:
         if "\x00" in value:
             raise ValidationError("The text contains unsupported characters.")
         return value
+
+    CARD_NUMBER = re.compile(r"(?<!\d)(?:\d[ -]?){13,19}(?!\d)")
+    SECURITY_CODE = re.compile(r"(?i)\b(?:cvv|cvc|security\s*code|pin|password|passcode|otp|authentication\s*code)\b\s*[:=#-]?\s*\S+")
+    NATIONAL_ID = re.compile(r"(?i)\b(?:national\s*id|identity\s*number|kimlik\s*no|tc\s*no)\b\s*[:=#-]?\s*[A-Z0-9-]{5,}")
+
+    @classmethod
+    def reject_public_sensitive_content(cls, value):
+        text = cls.clean(value)
+        if cls.CARD_NUMBER.search(text) or cls.SECURITY_CODE.search(text) or cls.NATIONAL_ID.search(text):
+            raise ValidationError(_("Please remove private or sensitive information before submitting this report."))
+        return text
+
+    @classmethod
+    def reject_forbidden_secret(cls, value):
+        text = cls.clean(value)
+        if cls.CARD_NUMBER.search(text) or cls.SECURITY_CODE.search(text) or cls.NATIONAL_ID.search(text):
+            raise ValidationError(_("Do not include complete passwords, PINs, card numbers, security codes, or identification numbers."))
+        return text
 
 
 class ContentModerationService:

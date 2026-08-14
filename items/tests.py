@@ -1,36 +1,38 @@
 from datetime import date, timedelta
 from io import BytesIO
+import importlib.util
 from tempfile import TemporaryDirectory
 
 from django.contrib.auth.models import AnonymousUser, User
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 from django.template.loader import render_to_string
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
+from django.utils import translation
+from django.utils.translation import gettext, ngettext
 from PIL import Image
 
 from .forms import ItemReportForm, UserProfileForm
+from .choices import ITEM_TYPE_CHOICES
 from .models import (
-    AIAssistantSettings,
-    AICapability,
-    AICapabilityAuditLog,
-    AICapabilitySetting,
-    AdminCapabilityOverride,
     MAX_IMAGE_SIZE,
     ContactAuditLog,
     ContactRequest,
+    ClaimAnswer,
+    HandoverConfirmation,
     Conversation,
     ItemReport,
     Message,
     Notification,
+    PrivateVerificationQuestion,
     UserBlock,
     UserProfile,
     validate_image_size,
 )
 from .services import MatchingService
-from .ai_assistant import AIAssistantService, AICapabilityService
 
 
 def test_image(name="item.jpg", colour="blue"):
@@ -227,7 +229,13 @@ class SearchAndFilterTests(MediaTestCase):
 class MatchingServiceTests(MediaTestCase):
     def setUp(self):
         super().setUp()
-        self.lost = self.create_report(item_date=date(2026, 8, 1))
+        self.lost = self.create_report(
+            item_date=date(2026, 8, 1), item_type="headphones", primary_colour="black",
+            material="plastic", approximate_size="medium", brand="sony", model="WH1000",
+            country="Türkiye", region="Marmara", city="Istanbul", district="Fatih",
+            place_type="university_school", place_name="Central Library",
+            latitude=41.008, longitude=28.978,
+        )
 
     def found_report(self, **overrides):
         data = {
@@ -236,6 +244,11 @@ class MatchingServiceTests(MediaTestCase):
             "title": "Headphones found",
             "item_date": date(2026, 8, 2),
             "image": test_image("found.jpg"),
+            "item_type": "headphones", "primary_colour": "black",
+            "material": "plastic", "approximate_size": "medium", "brand": "sony", "model": "WH1000",
+            "country": "Türkiye", "region": "Marmara", "city": "Istanbul", "district": "Fatih",
+            "place_type": "university_school", "place_name": "Central Library",
+            "latitude": 41.008, "longitude": 28.978,
         }
         data.update(overrides)
         return self.create_report(**data)
@@ -243,12 +256,12 @@ class MatchingServiceTests(MediaTestCase):
     def test_identical_details_score_correctly(self):
         found = self.found_report()
         result = MatchingService.compare(self.lost, found)
-        self.assertEqual(result.category_points, 25)
-        self.assertEqual(result.description_points, 25)
-        self.assertEqual(result.colour_points, 20)
-        self.assertEqual(result.location_points, 15)
-        self.assertEqual(result.date_points, 13)
-        self.assertEqual(result.total_score, 98)
+        self.assertEqual(result.category_points, 12)
+        self.assertGreater(result.title_points, 0)
+        self.assertEqual(result.description_points, 8)
+        self.assertEqual(result.primary_colour_points, 8)
+        self.assertEqual(result.location_points, 20)
+        self.assertEqual(result.date_points, 8)
 
     def test_same_report_types_are_rejected(self):
         another_lost = self.create_report(title="Other", image=test_image("other.jpg"))
@@ -257,7 +270,7 @@ class MatchingServiceTests(MediaTestCase):
 
     def test_date_point_boundaries(self):
         base = date(2026, 8, 1)
-        expected = {0: 15, 1: 13, 3: 10, 7: 7, 14: 3, 15: 0}
+        expected = {0: 10, 1: 8, 3: 5, 7: 5, 14: 2, 15: 0}
         for days, points in expected.items():
             self.assertEqual(MatchingService.date_points(base, base + timedelta(days=days)), points)
 
@@ -274,12 +287,152 @@ class MatchingServiceTests(MediaTestCase):
         )
         results = MatchingService.find_matches(self.lost)
         self.assertEqual(results[0].found_item, close)
-        self.assertTrue(all(result.total_score >= 50 for result in results))
+        self.assertTrue(all(result.total_score >= 70 for result in results))
         self.assertLessEqual(len(results), 5)
 
     def test_possible_matches_page_requires_owner(self):
         self.client.force_login(User.objects.create_user("other", password="StrongPass123!"))
         self.assertEqual(self.client.get(reverse("possible_matches", args=[self.lost.pk])).status_code, 403)
+
+
+class StructuredReportAndOwnershipTests(MediaTestCase):
+    def structured_data(self, **overrides):
+        data = {
+            "title": "Lost Black Mobile Phone", "category": "electronics",
+            "item_type": "mobile_phone", "primary_colour": "black",
+            "secondary_colour": "", "material": "", "approximate_size": "",
+            "pattern": "", "item_condition": "", "brand": "samsung",
+            "custom_brand": "", "model": "Galaxy S", "campus_location": "library",
+            "custom_location": "", "item_date": date.today().isoformat(),
+            "country": "Türkiye", "region": "Marmara", "city": "Istanbul",
+            "district": "Fatih", "place_type": "university_school", "place_name": "Central Library",
+            "public_location": "Central district", "public_location_precision_km": "5",
+            "additional_details": "Black case", "require_official_handover": "",
+        }
+        data.update(overrides)
+        return data
+
+    def found_report(self):
+        report = self.create_report(
+            report_type="found", title="Found phone", item_type="mobile_phone",
+            primary_colour="black", brand="samsung", model="Galaxy S",
+        )
+        question = PrivateVerificationQuestion.objects.create(
+            item_report=report, question_type="hidden_mark",
+            question_text="Describe the hidden mark", expected_answer="Tiny star under case",
+        )
+        return report, question
+
+    def test_every_category_item_type_pair_is_valid(self):
+        for category, choices in ITEM_TYPE_CHOICES.items():
+            for item_type, label in choices:
+                form = ItemReportForm(
+                    data=self.structured_data(
+                        category=category, item_type=item_type,
+                        custom_item_type="Custom item" if item_type == "other" else "",
+                    ), files={"image": test_image(f"{category}-{item_type}.jpg")}, report_type="lost",
+                )
+                self.assertTrue(form.is_valid(), (category, item_type, form.errors))
+
+    def test_invalid_category_item_type_is_rejected(self):
+        form = ItemReportForm(data=self.structured_data(category="bags", item_type="mobile_phone"), files={"image": test_image()}, report_type="lost")
+        self.assertFalse(form.is_valid())
+        self.assertIn("item_type", form.errors)
+
+    def test_other_requires_custom_value_and_optional_fields_stay_optional(self):
+        invalid = ItemReportForm(data=self.structured_data(item_type="other", custom_item_type=""), files={"image": test_image()}, report_type="lost")
+        self.assertIn("custom_item_type", invalid.errors)
+        valid = ItemReportForm(data=self.structured_data(item_type="other", custom_item_type="Music player", brand="", model="", additional_details=""), files={"image": test_image()}, report_type="lost")
+        self.assertTrue(valid.is_valid(), valid.errors)
+
+    def test_sensitive_public_content_is_blocked(self):
+        form = ItemReportForm(data=self.structured_data(additional_details="password: secret123"), files={"image": test_image()}, report_type="lost")
+        self.assertFalse(form.is_valid())
+        self.assertIn("sensitive", str(form.errors["additional_details"]).lower())
+
+    def test_automatic_title_is_generated_when_blank(self):
+        form = ItemReportForm(data=self.structured_data(title=""), files={"image": test_image()}, report_type="lost")
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertIn("Samsung", form.save(commit=False).title)
+
+    def test_private_question_never_appears_publicly(self):
+        report, question = self.found_report()
+        response = self.client.get(report.get_absolute_url())
+        self.assertNotContains(response, question.question_text)
+        self.assertNotContains(response, question.expected_answer)
+
+    def test_claim_requires_login_and_prevents_self_claim(self):
+        report, question = self.found_report()
+        url = reverse("contact_request_create", args=(report.pk,))
+        self.assertRedirects(self.client.get(url), f"{reverse('login')}?next={url}")
+        self.client.force_login(self.owner)
+        self.assertEqual(self.client.get(url).status_code, 403)
+
+    def submit_claim(self, report, question, claimant):
+        self.client.force_login(claimant)
+        return self.client.post(reverse("contact_request_create", args=(report.pk,)), {
+            "initial_message": "I believe this is mine", "loss_location": "Library second floor",
+            "loss_timeframe": "Yesterday afternoon", "truthful_confirmation": "on",
+            f"question_{question.pk}": "A star under the case",
+        })
+
+    def test_claim_answers_are_private_and_finder_can_approve(self):
+        report, question = self.found_report()
+        claimant = User.objects.create_user("claimant", password="StrongPass123!")
+        response = self.submit_claim(report, question, claimant)
+        claim = ContactRequest.objects.get(requesting_user=claimant)
+        self.assertRedirects(response, reverse("contact_request_detail", args=(claim.pk,)))
+        self.assertEqual(ClaimAnswer.objects.get(contact_request=claim).answer, "A star under the case")
+        stranger = User.objects.create_user("stranger_claim", password="StrongPass123!")
+        self.client.force_login(stranger)
+        self.assertEqual(self.client.get(reverse("contact_request_detail", args=(claim.pk,))).status_code, 403)
+        self.client.force_login(claimant)
+        self.assertNotContains(self.client.get(reverse("contact_request_detail", args=(claim.pk,))), question.expected_answer)
+        self.client.force_login(self.owner)
+        self.client.post(reverse("claim_action", args=(claim.pk, "approve")))
+        claim.refresh_from_db()
+        self.assertEqual(claim.status, ContactRequest.Status.APPROVED)
+        self.assertTrue(hasattr(claim, "conversation"))
+
+    def test_duplicate_claim_and_resolved_report_are_rejected(self):
+        report, question = self.found_report()
+        claimant = User.objects.create_user("duplicate_claimant", password="StrongPass123!")
+        self.submit_claim(report, question, claimant)
+        second = self.submit_claim(report, question, claimant)
+        self.assertEqual(ContactRequest.objects.filter(requesting_user=claimant).count(), 1)
+        report.status = ItemReport.Status.RESOLVED
+        report.save()
+        other = User.objects.create_user("late_claimant", password="StrongPass123!")
+        response = self.submit_claim(report, question, other)
+        self.assertEqual(ContactRequest.objects.filter(requesting_user=other).count(), 0)
+
+    def test_two_party_handover_resolves_report(self):
+        report, question = self.found_report()
+        claimant = User.objects.create_user("handover_claimant", password="StrongPass123!")
+        self.submit_claim(report, question, claimant)
+        claim = ContactRequest.objects.get(requesting_user=claimant)
+        self.client.force_login(self.owner)
+        self.client.post(reverse("claim_action", args=(claim.pk, "approve")))
+        self.client.force_login(claimant)
+        self.client.post(reverse("claim_handover_confirm", args=(claim.pk,)))
+        claim.refresh_from_db(); report.refresh_from_db()
+        self.assertEqual(claim.status, ContactRequest.Status.APPROVED)
+        self.assertEqual(report.status, ItemReport.Status.CLAIM_IN_PROGRESS)
+        self.client.force_login(self.owner)
+        self.client.post(reverse("claim_handover_confirm", args=(claim.pk,)))
+        claim.refresh_from_db(); report.refresh_from_db()
+        self.assertEqual(claim.status, ContactRequest.Status.COMPLETED)
+        self.assertEqual(report.status, ItemReport.Status.RESOLVED)
+        self.assertEqual(HandoverConfirmation.objects.filter(contact_request=claim).count(), 2)
+
+    def test_matching_ignores_private_answers_and_wrong_direction_dates(self):
+        lost = self.create_report(item_type="mobile_phone", primary_colour="black", report_type="lost", item_date=date.today())
+        found, question = self.found_report()
+        found.item_date = date.today() - timedelta(days=5); found.save()
+        baseline = MatchingService.compare(lost, found).total_score
+        question.expected_answer = "black headphones library samsung secret"; question.save()
+        self.assertEqual(MatchingService.compare(lost, found).total_score, baseline)
+        self.assertEqual(MatchingService.compare(lost, found).date_points, 0)
 
 
 class AdministratorDashboardTests(MediaTestCase):
@@ -407,9 +560,10 @@ class AdministratorDashboardTests(MediaTestCase):
         self.assertContains(response, self.owner.email)
         toggle_url = reverse("dashboard_user_toggle_active", args=[self.owner.pk])
         self.assertEqual(self.client.get(toggle_url).status_code, 405)
-        self.client.post(toggle_url)
+        self.client.post(toggle_url, {"reason": "Repeated abuse confirmed by a human moderator."})
         self.owner.refresh_from_db()
         self.assertFalse(self.owner.is_active)
+        self.assertTrue(ContactAuditLog.objects.filter(event_type=ContactAuditLog.EventType.USER_SUSPENDED).exists())
 
     @override_settings(DEBUG=False)
     def test_custom_not_found_page(self):
@@ -420,12 +574,12 @@ class AdministratorDashboardTests(MediaTestCase):
 class CanonicalSitemapTests(MediaTestCase):
     def test_public_canonical_routes(self):
         expected_paths = {
-            "home": "/",
-            "item_list": "/items/",
-            "lost_item_list": "/items/lost/",
-            "found_item_list": "/items/found/",
-            "register": "/accounts/register/",
-            "login": "/accounts/login/",
+            "home": "/en/",
+            "item_list": "/en/items/",
+            "lost_item_list": "/en/items/lost/",
+            "found_item_list": "/en/items/found/",
+            "register": "/en/accounts/register/",
+            "login": "/en/accounts/login/",
         }
         for url_name, expected_path in expected_paths.items():
             with self.subTest(url_name=url_name):
@@ -434,11 +588,11 @@ class CanonicalSitemapTests(MediaTestCase):
 
     def test_item_routes_use_integer_id(self):
         report = self.create_report()
-        self.assertEqual(reverse("item_detail", args=[report.pk]), f"/items/{report.pk}/")
+        self.assertEqual(reverse("item_detail", args=[report.pk]), f"/en/items/{report.pk}/")
         self.assertEqual(
-            reverse("item_matches", args=[report.pk]), f"/items/{report.pk}/matches/"
+            reverse("item_matches", args=[report.pk]), f"/en/items/{report.pk}/matches/"
         )
-        self.assertEqual(self.client.get("/items/999999/").status_code, 404)
+        self.assertEqual(self.client.get("/en/items/999999/").status_code, 404)
 
     def test_dedicated_type_lists_only_show_the_requested_type(self):
         lost = self.create_report(title="Lost calculator")
@@ -497,6 +651,14 @@ class SecureContactTests(MediaTestCase):
         return {
             "initial_message": "I can explain where the item was seen.",
             "private_details": "A private identifying detail for staff review.",
+        }
+
+    def ownership_claim_data(self):
+        return {
+            "initial_message": "I can explain where the item was seen.",
+            "loss_location": "Library",
+            "loss_timeframe": "Yesterday afternoon",
+            "truthful_confirmation": "on",
         }
 
     def create_contact_request(self, item_report=None, status=ContactRequest.Status.PENDING):
@@ -559,21 +721,22 @@ class SecureContactTests(MediaTestCase):
             (self.lost_report, ContactRequest.RequestType.FOUND_ITEM),
         ):
             response = self.client.post(
-                reverse("contact_request_create", args=[report.pk]), self.request_data()
+                reverse("contact_request_create", args=[report.pk]),
+                self.ownership_claim_data() if report.report_type == ItemReport.ReportType.FOUND else self.request_data(),
             )
             created = ContactRequest.objects.get(item_report=report)
-            self.assertRedirects(
-                response,
-                reverse("conversation_detail", args=[created.conversation.pk]),
-                fetch_redirect_response=False,
-            )
             self.assertEqual(created.request_type, expected_type)
-            self.assertEqual(created.status, ContactRequest.Status.INITIATED)
+            if report.report_type == ItemReport.ReportType.FOUND:
+                self.assertRedirects(response, reverse("contact_request_detail", args=[created.pk]), fetch_redirect_response=False)
+                self.assertEqual(created.status, ContactRequest.Status.PENDING)
+            else:
+                self.assertRedirects(response, reverse("conversation_detail", args=[created.conversation.pk]), fetch_redirect_response=False)
+                self.assertEqual(created.status, ContactRequest.Status.INITIATED)
         self.assertEqual(
             ContactAuditLog.objects.filter(
                 event_type=ContactAuditLog.EventType.CONVERSATION_OPENED
             ).count(),
-            2,
+            1,
         )
 
     def test_self_contact_is_blocked_and_duplicate_opens_existing_conversation(self):
@@ -584,10 +747,10 @@ class SecureContactTests(MediaTestCase):
         )
         self.client.force_login(self.requester)
         create_url = reverse("contact_request_create", args=[self.found_report.pk])
-        self.client.post(create_url, self.request_data())
-        response = self.client.post(create_url, self.request_data())
-        conversation = Conversation.objects.get(item_report=self.found_report)
-        self.assertRedirects(response, reverse("conversation_detail", args=[conversation.pk]))
+        self.client.post(create_url, self.ownership_claim_data())
+        response = self.client.post(create_url, self.ownership_claim_data())
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "already have an active claim")
         self.assertEqual(ContactRequest.objects.count(), 1)
 
     def test_requester_can_cancel_only_pending_request(self):
@@ -842,181 +1005,37 @@ class SecureContactTests(MediaTestCase):
         self.assertEqual(self.client.post(reverse("notification_mark_read", args=[foreign.pk])).status_code, 404)
 
 
-class AIAssistantTests(MediaTestCase):
-    def setUp(self):
-        super().setUp()
-        self.staff = User.objects.create_user(
-            "assistant_staff", password="StrongPass123!", is_staff=True
-        )
-        self.superuser = User.objects.create_superuser(
-            "assistant_superuser", "root@example.invalid", "StrongPass123!"
-        )
-        self.report = self.create_report(
-            description="Black headphones. Contact me at student@example.com or +90 555 123 45 67."
-        )
+class RemovedAIFeatureTests(MediaTestCase):
+    def test_removed_management_urls_return_not_found(self):
+        staff = User.objects.create_user("no_ai_staff", password="StrongPass123!", is_staff=True)
+        self.client.force_login(staff)
+        self.assertEqual(self.client.get("/en/management/ai-assistant/").status_code, 404)
+        self.assertEqual(self.client.get("/en/management/ai-assistant/settings/").status_code, 404)
 
-    def enable_capability(self, code):
-        settings_record = AIAssistantSettings.get_solo()
-        settings_record.is_enabled = True
-        settings_record.save(update_fields=["is_enabled", "updated_at"])
-        capability = AICapability.objects.get(code=code)
-        capability.is_available = True
-        capability.save(update_fields=["is_available", "updated_at"])
-        setting = AICapabilitySetting.objects.get(capability=capability)
-        setting.is_enabled = True
-        setting.save(update_fields=["is_enabled", "updated_at"])
-        return capability
+    def test_management_navigation_has_no_ai_link(self):
+        staff = User.objects.create_user("plain_staff", password="StrongPass123!", is_staff=True)
+        self.client.force_login(staff)
+        response = self.client.get(reverse("management_dashboard"))
+        self.assertNotContains(response, "AI Assistant")
+        self.assertNotContains(response, "ai-assistant")
 
-    def test_seeded_configuration_has_stable_capabilities_and_one_setting_each(self):
-        self.assertEqual(AICapability.objects.count(), 8)
-        self.assertEqual(AICapabilitySetting.objects.count(), 8)
-        self.assertEqual(AICapability.objects.values("code").distinct().count(), 8)
-        self.assertFalse(AIAssistantSettings.get_solo().is_enabled)
+    def test_no_ai_module_or_environment_configuration_is_required(self):
+        self.assertIsNone(importlib.util.find_spec("items.ai_assistant"))
+        for setting_name in (
+            "IMAGE_ANALYSIS_ENABLED", "IMAGE_ANALYSIS_PROVIDER", "IMAGE_ANALYSIS_API_KEY",
+            "IMAGE_ANALYSIS_MODEL", "IMAGE_ANALYSIS_TIMEOUT", "OPENAI_API_KEY",
+            "OLLAMA_BASE_URL", "OLLAMA_MODEL",
+        ):
+            self.assertFalse(hasattr(settings, setting_name), setting_name)
 
-    def test_only_staff_can_access_and_disabled_master_rejects_execution(self):
-        self.client.force_login(self.owner)
-        self.assertEqual(self.client.get(reverse("management_ai_assistant")).status_code, 403)
-        self.client.force_login(self.staff)
-        response = self.client.get(reverse("management_ai_assistant"))
-        self.assertContains(response, "The AI Assistant is currently disabled.")
-        response = self.client.post(
-            reverse("management_ai_assistant"),
-            {"form_action": "execute", "capability": "analytics_insights"},
-        )
-        self.assertEqual(response.status_code, 403)
-        self.assertTrue(
-            AICapabilityAuditLog.objects.filter(event_type="request_blocked").exists()
-        )
-
-    def test_global_settings_require_permission_and_enabled_master_requires_capability(self):
-        self.client.force_login(self.staff)
-        self.assertEqual(
-            self.client.get(reverse("management_ai_assistant_settings")).status_code, 403
-        )
-        self.client.force_login(self.superuser)
-        response = self.client.post(
-            reverse("management_ai_assistant_settings"),
-            {
-                "is_enabled": "on",
-                "provider_name": "Local deterministic provider",
-                "model_name": "findmatch-local-v1",
-                "request_timeout_seconds": 15,
-                "maximum_input_length": 5000,
-            },
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Enable at least one capability")
-        self.assertFalse(AIAssistantSettings.get_solo().is_enabled)
-        capability = AICapability.objects.get(code="analytics_insights")
-        response = self.client.post(
-            reverse("management_ai_assistant_settings"),
-            {
-                "is_enabled": "on",
-                "provider_name": "Local deterministic provider",
-                "model_name": "findmatch-local-v1",
-                "request_timeout_seconds": 15,
-                "maximum_input_length": 5000,
-                "enabled_capabilities": [capability.pk],
-            },
-        )
-        self.assertRedirects(response, reverse("management_ai_assistant_settings"))
-        self.assertTrue(AIAssistantSettings.get_solo().is_enabled)
-
-    def test_personal_override_can_disable_but_not_enable_globally_disabled(self):
-        enabled = self.enable_capability("report_summarization")
-        self.assertTrue(AICapabilityService.is_enabled(self.staff, enabled.code))
-        AICapabilityService.update_override(
-            user=self.staff,
-            capability=enabled,
-            setting=AdminCapabilityOverride.OverrideSetting.DISABLED,
-        )
-        self.assertFalse(AICapabilityService.is_enabled(self.staff, enabled.code))
-        disabled = AICapability.objects.get(code="conversation_summarization")
-        AICapabilitySetting.objects.filter(capability=disabled).update(is_enabled=False)
-        with self.assertRaises(ValidationError):
-            AICapabilityService.update_override(
-                user=self.staff,
-                capability=disabled,
-                setting=AdminCapabilityOverride.OverrideSetting.ENABLED,
-            )
-
-    def test_report_summary_redacts_contact_data_and_never_mutates_report(self):
-        self.enable_capability("report_summarization")
-        original_status = self.report.status
-        result = AIAssistantService.execute(
-            user=self.staff,
-            capability_code="report_summarization",
-            reports=[self.report],
-        )
-        self.assertNotIn("student@example.com", result.content)
-        self.assertNotIn("+90 555 123 45 67", result.content)
-        self.assertIn("[email removed]", result.content)
-        self.report.refresh_from_db()
-        self.assertEqual(self.report.status, original_status)
-        audit_text = " ".join(
-            AICapabilityAuditLog.objects.values_list("safe_description", flat=True)
-        )
-        self.assertNotIn("student@example.com", audit_text)
-
-    def test_matching_insight_uses_deterministic_service_and_disclaims_ownership(self):
-        self.enable_capability("matching_insights")
+    def test_manual_report_and_rule_based_matching_work_without_provider(self):
         found = self.create_report(
             report_type=ItemReport.ReportType.FOUND,
             title="Found black headphones",
-            image=test_image("assistant-found.jpg"),
+            image=test_image("manual-found.jpg"),
         )
-        result = AIAssistantService.execute(
-            user=self.staff,
-            capability_code="matching_insights",
-            reports=[self.report, found],
-        )
-        expected = MatchingService.compare(self.report, found)
-        self.assertIn(f"{expected.total_score}/100", result.title)
-        self.assertIn("never proves ownership", result.disclaimer)
-
-    def test_conversation_summary_uses_all_non_deleted_messages(self):
-        self.enable_capability("conversation_summarization")
-        participant = User.objects.create_user(
-            "assistant_participant", password="StrongPass123!"
-        )
-        contact_request = ContactRequest.objects.create(
-            item_report=self.report,
-            requesting_user=participant,
-            receiving_user=self.owner,
-            request_type=ContactRequest.RequestType.OWNERSHIP_CLAIM,
-            initial_message="Private request",
-            private_details="Private evidence",
-            status=ContactRequest.Status.APPROVED,
-        )
-        conversation = Conversation.objects.create(
-            item_report=self.report,
-            approved_contact_request=contact_request,
-            first_participant=participant,
-            second_participant=self.owner,
-        )
-        Message.objects.create(
-            conversation=conversation,
-            sender=participant,
-            body="Where should we meet?",
-        )
-        Message.objects.create(
-            conversation=conversation,
-            sender=participant,
-            body="Second immediate question?",
-        )
-
-        result = AIAssistantService.execute(
-            user=self.staff,
-            capability_code="conversation_summarization",
-            conversation=conversation,
-        )
-        self.assertIn("Where should we meet?", result.content)
-        self.assertIn("Second immediate question", result.content)
-
-    def test_settings_model_contains_no_api_key_field(self):
-        field_names = {field.name for field in AIAssistantSettings._meta.fields}
-        self.assertNotIn("api_key", field_names)
-        self.assertNotIn("secret", field_names)
+        result = MatchingService.compare(self.create_report(image=test_image("manual-lost.jpg")), found)
+        self.assertGreater(result.total_score, 0)
 
 
 class NotificationBellTemplateTests(MediaTestCase):
@@ -1050,4 +1069,142 @@ class SeedDataTests(MediaTestCase):
         self.assertGreaterEqual(ItemReport.objects.filter(report_type="lost").count(), 1)
         self.assertGreaterEqual(ItemReport.objects.filter(report_type="found").count(), 1)
 
-# Create your tests here.
+
+class InternationalizationTests(TestCase):
+    def tearDown(self):
+        translation.activate("en")
+        super().tearDown()
+
+    def test_language_prefixed_homepages_and_direction(self):
+        for code, direction in (("en", "ltr"), ("tr", "ltr"), ("ar", "rtl")):
+            with self.subTest(language=code):
+                response = self.client.get(f"/{code}/")
+                self.assertEqual(response.status_code, 200)
+                self.assertContains(response, f'lang="{code}"')
+                self.assertContains(response, f'dir="{direction}"')
+
+    def test_unprefixed_root_uses_browser_language(self):
+        response = self.client.get("/", HTTP_ACCEPT_LANGUAGE="tr-TR,tr;q=0.9")
+        self.assertRedirects(response, "/tr/", fetch_redirect_response=False)
+
+    def test_authentication_redirect_keeps_language(self):
+        response = self.client.get("/tr/my-reports/")
+        self.assertRedirects(
+            response,
+            "/tr/accounts/login/?next=/tr/my-reports/",
+            fetch_redirect_response=False,
+        )
+
+    def test_translated_navigation_and_choice_labels(self):
+        self.assertContains(self.client.get("/tr/"), "Ana Sayfa")
+        self.assertContains(self.client.get("/ar/"), "الرئيسية")
+        with translation.override("tr"):
+            self.assertEqual(ItemReport(report_type="lost").get_report_type_display(), "Kayıp")
+        with translation.override("ar"):
+            self.assertEqual(ItemReport(report_type="found").get_report_type_display(), "تم العثور عليه")
+
+    def test_structured_claim_labels_are_translated(self):
+        with translation.override("tr"):
+            self.assertEqual(gettext("Item type"), "Eşya türü")
+            self.assertEqual(gettext("Ownership claim"), "Mülkiyet talebi")
+        with translation.override("ar"):
+            self.assertEqual(gettext("Item type"), "نوع الغرض")
+            self.assertEqual(gettext("Ownership claim"), "مطالبة بالملكية")
+
+    def test_switcher_keeps_path_and_query(self):
+        response = self.client.get("/en/items/?q=phone&page=2")
+        self.assertContains(response, 'href="/tr/items/?q=phone&amp;page=2"')
+        self.assertContains(response, 'href="/ar/items/?q=phone&amp;page=2"')
+
+    def test_user_content_uses_automatic_direction(self):
+        owner = User.objects.create_user(username="owner", password="test-pass-123")
+        report = ItemReport.objects.create(
+            owner=owner,
+            report_type="lost",
+            title="هاتف أزرق",
+            description="A mixed-language description",
+            category="electronics",
+            colour="blue",
+            campus_location="library",
+            item_date=date.today(),
+            image=test_image(),
+        )
+        response = self.client.get(f"/ar/items/{report.pk}/")
+        self.assertContains(response, 'dir="auto">هاتف أزرق')
+
+    def test_localized_error_pages(self):
+        expected_404 = {"en": "Page not found", "tr": "Sayfa bulunamadı", "ar": "الصفحة غير موجودة"}
+        expected_403 = {"en": "Permission denied", "tr": "Erişim reddedildi", "ar": "تم رفض الإذن"}
+        for code in ("en", "tr", "ar"):
+            with self.subTest(language=code):
+                self.assertContains(
+                    self.client.get(f"/{code}/does-not-exist/"), expected_404[code], status_code=404
+                )
+                self.assertContains(self.client.get(f"/{code}/403/"), expected_403[code], status_code=403)
+
+    def test_arabic_plural_forms_and_english_fallback(self):
+        with translation.override("ar"):
+            forms = [
+                ngettext("%(count)s report", "%(count)s reports", count) % {"count": count}
+                for count in (0, 1, 2, 3, 11, 102)
+            ]
+            self.assertEqual(len(set(forms)), 6)
+            self.assertEqual(gettext("Uncatalogued FindMatch test phrase"), "Uncatalogued FindMatch test phrase")
+
+    def test_rtl_profile_keeps_email_left_to_right(self):
+        user = User.objects.create_user(username="rtl-user", email="student@example.edu", password="test-pass-123")
+        self.client.force_login(user)
+        response = self.client.get("/ar/accounts/profile/")
+        self.assertContains(response, 'dir="ltr">student@example.edu')
+
+class ResponsiveInterfaceTests(MediaTestCase):
+    def setUp(self):
+        self.user = User.objects.create_user("responsive-user", password="StrongPass123!")
+        self.owner = self.user
+        self.report = self.create_report(owner=self.user, title="Blue campus backpack", exact_private_location="Private locker 42")
+
+    def tearDown(self):
+        translation.activate("en")
+        super().tearDown()
+
+    def test_mobile_and_desktop_navigation_markup_is_available(self):
+        response = self.client.get(reverse("home"))
+        self.assertContains(response, 'fm-navbar')
+        self.assertContains(response, 'class="mobile-bottom-nav"')
+        self.assertContains(response, 'aria-label="Mobile navigation"')
+        self.assertContains(response, 'class="mobile-primary-action"')
+
+    def test_authenticated_mobile_navigation_uses_authorized_destinations(self):
+        self.client.force_login(self.user)
+        response = self.client.get(reverse("user_dashboard"))
+        self.assertContains(response, reverse("my_possible_matches"))
+        self.assertContains(response, reverse("user_dashboard"))
+        self.assertNotContains(response, reverse("management_dashboard"))
+
+    def test_report_cards_have_responsive_image_metadata_and_public_fields(self):
+        response = self.client.get(reverse("item_list"))
+        self.assertContains(response, 'class="card-img-top report-image"')
+        self.assertContains(response, 'width="640" height="480" loading="lazy"')
+        self.assertContains(response, self.report.get_item_type_display())
+        self.assertNotContains(response, self.report.exact_private_location)
+
+    def test_filter_panel_preserves_query_and_has_accessible_controls(self):
+        response = self.client.get(reverse("item_list"), {"city": self.report.city, "sort": "oldest"})
+        self.assertContains(response, 'data-filter-panel')
+        self.assertContains(response, 'data-filter-open')
+        self.assertContains(response, 'data-filter-close')
+        self.assertContains(response, 'name="city"')
+        self.assertContains(response, 'sort=oldest')
+
+    def test_report_form_has_guided_progress_and_no_javascript_fallback_form(self):
+        self.client.force_login(self.user)
+        response = self.client.get(reverse("item_create_lost"))
+        self.assertContains(response, 'data-current-step')
+        self.assertContains(response, 'data-wizard-actions')
+        self.assertContains(response, 'data-report-form-fields')
+        self.assertContains(response, 'name="submission_action" value="submit"')
+
+    def test_arabic_shell_is_rtl_and_mobile_labels_are_translatable(self):
+        response = self.client.get("/ar/")
+        self.assertContains(response, '<html lang="ar" dir="rtl">')
+        self.assertContains(response, 'class="mobile-bottom-nav"')

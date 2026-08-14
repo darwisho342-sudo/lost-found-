@@ -1,16 +1,16 @@
-{% extends 'base.html' %}
-{% block title %}Profile — FindMatch{% endblock %}
+{% extends 'base.html' %}{% load i18n %}
+{% block title %}{% translate "Profile" %} — FindMatch{% endblock %}
 {% block content %}
-<header class="page-hero"><div class="container"><span class="hero-label"><i class="bi bi-person-gear"></i>Privacy settings</span><h1 class="mt-3">Your Profile</h1><p class="mb-0">Control your private phone-number sharing preferences.</p></div></header>
+<header class="page-hero"><div class="container"><span class="hero-label"><i class="bi bi-person-gear"></i>{% translate "Privacy settings" %}</span><h1 class="mt-3">{% translate "Your Profile" %}</h1><p class="mb-0">{% translate "Control your private phone-number sharing preferences." %}</p></div></header>
 <section class="container py-5"><div class="form-shell contact-panel">
-  <div class="d-flex justify-content-between gap-3 align-items-start"><div><h2 class="h4">Privacy preferences</h2><p class="text-secondary">Your phone number is never displayed publicly.</p></div><a class="btn btn-primary" href="{% url 'profile_edit' %}">Edit profile</a></div>
+  <div class="d-flex justify-content-between gap-3 align-items-start"><div><h2 class="h4">{% translate "Privacy preferences" %}</h2><p class="text-secondary">{% translate "Your phone number is never displayed publicly." %}</p></div><a class="btn btn-primary" href="{% url 'profile_edit' %}">{% translate "Edit profile" %}</a></div>
   <dl class="detail-list">
-    <div><dt>Username</dt><dd>{{ user.username }}</dd></div>
-    <div><dt>Email</dt><dd>{{ user.email }}</dd></div>
-    <div><dt>Phone number</dt><dd>{% if profile.phone_number %}Saved privately{% else %}Not provided{% endif %}</dd></div>
-    <div><dt>Sharing consent</dt><dd>{% if profile.consent_to_share_phone %}Enabled{% else %}Disabled{% endif %}</dd></div>
-    <div><dt>Phone masking</dt><dd>{% if profile.mask_phone_number %}Show final four digits only{% else %}Show full number in an active conversation{% endif %}</dd></div>
+    <div><dt>{% translate "Username" %}</dt><dd dir="auto">{{ user.username }}</dd></div>
+    <div><dt>{% translate "Email" %}</dt><dd dir="ltr">{{ user.email }}</dd></div>
+    <div><dt>{% translate "Phone number" %}</dt><dd>{% if profile.phone_number %}{% translate "Saved privately" %}{% else %}{% translate "Not provided" %}{% endif %}</dd></div>
+    <div><dt>{% translate "Sharing consent" %}</dt><dd>{% if profile.consent_to_share_phone %}{% translate "Enabled" %}{% else %}{% translate "Disabled" %}{% endif %}</dd></div>
+    <div><dt>{% translate "Phone masking" %}</dt><dd>{% if profile.mask_phone_number %}{% translate "Show final four digits only" %}{% else %}{% translate "Show full number in an active conversation" %}{% endif %}</dd></div>
   </dl>
-  <p class="small text-secondary mb-0"><i class="bi bi-shield-lock me-1"></i>Turning consent off hides your number immediately.</p>
+  <div class="alert {% if profile.email_verified_at %}alert-success{% else %}alert-warning{% endif %}">{% if profile.email_verified_at %}{% translate "Email verified" %}{% else %}{% translate "Email verification is required before ownership claims and private messaging." %}<form class="mt-2" method="post" action="{% url 'resend_verification' %}">{% csrf_token %}<button class="btn btn-sm btn-outline-dark" type="submit">{% translate "Resend verification link" %}</button></form>{% endif %}</div><p class="small text-secondary"><i class="bi bi-shield-lock me-1"></i>{% translate "Turning consent off hides your number immediately." %}</p><a class="btn btn-outline-primary" href="{% url 'privacy_centre' %}">{% translate "Open privacy centre" %}</a>
 </div></section>
 {% endblock %}

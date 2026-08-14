@@ -1,0 +1,11 @@
+{% load i18n i18n_urls %}
+{% get_current_language as LANGUAGE_CODE %}
+{% get_available_languages as AVAILABLE_LANGUAGES %}
+<nav class="language-switcher" aria-label="{% translate 'Language selection' %}">
+  {% for code, name in AVAILABLE_LANGUAGES %}
+    {% language_url request code as language_path %}
+    <a href="{{ language_path }}" lang="{{ code }}" hreflang="{{ code }}"{% if code == LANGUAGE_CODE %} aria-current="page"{% endif %}>
+      {% if code == 'en' %}English{% elif code == 'tr' %}Türkçe{% else %}العربية{% endif %}
+    </a>
+  {% endfor %}
+</nav>

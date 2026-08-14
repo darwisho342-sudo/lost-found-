@@ -41,7 +41,10 @@ class Command(BaseCommand):
             user.is_superuser = is_staff
             user.set_password(password)
             user.save()
-            UserProfile.objects.get_or_create(user=user)
+            profile, _ = UserProfile.objects.get_or_create(user=user)
+            if not profile.email_verified_at:
+                profile.email_verified_at = timezone.now()
+                profile.save(update_fields=("email_verified_at", "updated_at"))
             user_objects[username] = user
 
         today = timezone.localdate()
@@ -63,6 +66,21 @@ class Command(BaseCommand):
             )
             if created:
                 created_count += 1
+            structured_types = {
+                "electronics": "headphones" if "headphone" in title.casefold() else "usb_drive",
+                "bags": "backpack", "keys": "house_keys", "books": "textbook",
+                "wallets": "wallet", "documents": "notebook",
+            }
+            report.item_type = report.item_type or structured_types.get(category, "not_sure")
+            report.primary_colour = report.primary_colour or colour.casefold().replace(" ", "_")
+            if report.primary_colour not in dict(report._meta.get_field("primary_colour").choices):
+                report.primary_colour = "not_sure"
+            report.country = report.country or "Türkiye"
+            report.city = report.city or "Istanbul"
+            report.place_type = report.place_type or "university_school"
+            report.place_name = report.place_name or report.get_campus_location_display()
+            report.expires_at = report.expires_at or timezone.now() + timedelta(days=90)
+            report.save()
 
         self.stdout.write(
             self.style.SUCCESS(

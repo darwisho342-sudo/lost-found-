@@ -1,19 +1,21 @@
 from django.contrib import admin
 
 from .models import (
-    AIAssistantSettings,
-    AICapability,
-    AICapabilityAuditLog,
-    AICapabilitySetting,
-    AdminCapabilityOverride,
     ContactAuditLog,
     ContactRequest,
+    ClaimAnswer,
+    ClaimEvidence,
     Conversation,
     ItemReport,
+    PrivateVerificationQuestion,
+    HandoverConfirmation,
+    SuspiciousClaimReport,
     Message,
     Notification,
     UserBlock,
     UserProfile,
+    TrustedOrganization, OrganizationMembership, ReturnArrangement, CustodyEvent,
+    SavedSearch, SavedSearchNotification, ContentReport,
 )
 
 
@@ -54,6 +56,28 @@ class ContactRequestAdmin(admin.ModelAdmin):
     list_filter = ("request_type", "status")
     search_fields = ("item_report__title", "requesting_user__username", "receiving_user__username")
     readonly_fields = ("requested_at", "reviewed_at")
+
+
+@admin.register(PrivateVerificationQuestion)
+class PrivateVerificationQuestionAdmin(admin.ModelAdmin):
+    list_display = ("item_report", "question_type", "position")
+    exclude = ("expected_answer",)
+
+
+@admin.register(ClaimAnswer)
+class ClaimAnswerAdmin(admin.ModelAdmin):
+    list_display = ("contact_request", "question")
+    exclude = ("answer",)
+
+
+@admin.register(ClaimEvidence)
+class ClaimEvidenceAdmin(admin.ModelAdmin):
+    list_display = ("contact_request", "uploaded_at")
+    exclude = ("file",)
+
+
+admin.site.register(HandoverConfirmation)
+admin.site.register(SuspiciousClaimReport)
 
 
 @admin.register(Conversation)
@@ -97,50 +121,22 @@ class NotificationAdmin(admin.ModelAdmin):
     readonly_fields = ("created_at", "read_at", "deduplication_key")
 
 
-@admin.register(AICapability)
-class AICapabilityAdmin(admin.ModelAdmin):
-    list_display = ("name", "code", "risk_level", "is_available", "display_order")
-    list_filter = ("risk_level", "is_available")
-    search_fields = ("name", "code", "description")
-    readonly_fields = ("code", "created_at", "updated_at")
+@admin.register(TrustedOrganization)
+class TrustedOrganizationAdmin(admin.ModelAdmin):
+    list_display = ("name", "organization_type", "country", "city", "is_verified")
+    list_filter = ("organization_type", "is_verified", "country")
+    search_fields = ("name", "country", "city")
 
 
-@admin.register(AIAssistantSettings)
-class AIAssistantSettingsAdmin(admin.ModelAdmin):
-    list_display = ("is_enabled", "provider_name", "model_name", "updated_by", "updated_at")
-
-    def has_add_permission(self, request):
-        return not AIAssistantSettings.objects.exists()
-
-    def has_delete_permission(self, request, obj=None):
-        return False
+admin.site.register(OrganizationMembership)
+admin.site.register(CustodyEvent)
+admin.site.register(SavedSearch)
+admin.site.register(SavedSearchNotification)
+admin.site.register(ContentReport)
 
 
-@admin.register(AICapabilitySetting)
-class AICapabilitySettingAdmin(admin.ModelAdmin):
-    list_display = ("capability", "is_enabled", "updated_by", "updated_at")
-    list_filter = ("is_enabled",)
-
-
-@admin.register(AdminCapabilityOverride)
-class AdminCapabilityOverrideAdmin(admin.ModelAdmin):
-    list_display = ("administrator", "capability", "setting")
-    list_filter = ("setting", "capability")
-
-
-@admin.register(AICapabilityAuditLog)
-class AICapabilityAuditLogAdmin(admin.ModelAdmin):
-    list_display = ("event_type", "acting_administrator", "capability", "scope", "created_at")
-    list_filter = ("event_type", "scope")
-    readonly_fields = (
-        "acting_administrator", "capability", "event_type", "old_value", "new_value",
-        "scope", "safe_description", "ip_address", "created_at",
-    )
-
-    def has_add_permission(self, request):
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        return False
-
-# Register your models here.
+@admin.register(ReturnArrangement)
+class ReturnArrangementAdmin(admin.ModelAdmin):
+    list_display = ("contact_request", "return_method", "status", "trusted_organization", "updated_at")
+    list_filter = ("return_method", "status", "legal_or_safety_hold")
+    exclude = ("delivery_address", "tracking_reference")

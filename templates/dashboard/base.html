@@ -1,14 +1,13 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/management/management-base.css' %}">
+<link rel="stylesheet" href="{% static 'css/management/management-base.css' %}?v=20260814">
 {% with page=request.resolver_match.url_name %}
   {% if page == 'management_dashboard' or page == 'dashboard_home' %}<link rel="stylesheet" href="{% static 'css/management/dashboard.css' %}">{% endif %}
   {% if page == 'management_reports' or page == 'dashboard_reports' or page == 'management_report_bulk_action' or page == 'management_report_bulk_confirm' or page == 'management_report_visibility' or page == 'dashboard_report_visibility' %}<link rel="stylesheet" href="{% static 'css/management/reports.css' %}">{% endif %}
   {% if page == 'management_users' or page == 'dashboard_users' or page == 'management_user_detail' or page == 'dashboard_user_detail' or page == 'management_user_toggle_active' or page == 'dashboard_user_toggle_active' %}<link rel="stylesheet" href="{% static 'css/management/users.css' %}">{% endif %}
   {% if page == 'management_conversations' or page == 'management_conversation_deactivate' or page == 'management_conversation_complete' or page == 'management_conversation_reopen' %}<link rel="stylesheet" href="{% static 'css/management/conversations.css' %}">{% endif %}
   {% if page == 'management_audit_log' %}<link rel="stylesheet" href="{% static 'css/management/audit-log.css' %}">{% endif %}
-  {% if page == 'management_ai_assistant' or page == 'management_ai_assistant_settings' %}<link rel="stylesheet" href="{% static 'css/management/ai-assistant.css' %}">{% endif %}
 {% endwith %}
 {% block dashboard_extra_css %}{% endblock %}
 {% endblock %}
@@ -18,25 +17,24 @@
 {% block main %}
 <div class="admin-layout">
   <aside class="admin-sidebar">
-    <a class="admin-brand" href="{% url 'management_dashboard' %}"><span class="brand-mark"><i class="bi bi-search-heart"></i></span><span>FindMatch<small>Campus Admin</small></span></a>
-    <nav class="admin-menu" aria-label="Administrator dashboard">
-      <a href="{% url 'management_dashboard' %}"{% if request.resolver_match.url_name == 'management_dashboard' %} aria-current="page"{% endif %}><i class="bi bi-grid-1x2"></i>Dashboard</a>
-      <a href="{% url 'management_reports' %}"{% if request.resolver_match.url_name == 'management_reports' %} aria-current="page"{% endif %}><i class="bi bi-clipboard-data"></i>Reports</a>
-      <a href="{% url 'management_users' %}"{% if request.resolver_match.url_name == 'management_users' or request.resolver_match.url_name == 'management_user_detail' %} aria-current="page"{% endif %}><i class="bi bi-people"></i>Users</a>
-      <span class="admin-menu-label">Private contact</span>
-      <a href="{% url 'management_conversations' %}"><i class="bi bi-chat-dots"></i>Conversations</a>
-      <a href="{% url 'management_ai_assistant' %}"{% if request.resolver_match.url_name == 'management_ai_assistant' or request.resolver_match.url_name == 'management_ai_assistant_settings' %} aria-current="page"{% endif %}><i class="bi bi-robot"></i>AI Assistant</a>
-      <a href="{% url 'management_audit_log' %}"><i class="bi bi-journal-check"></i>Audit Log</a>
-      <span class="admin-menu-label">Report views</span>
-      <a href="{% url 'management_reports' %}?report_type=lost"><i class="bi bi-question-circle"></i>Lost Items</a>
-      <a href="{% url 'management_reports' %}?report_type=found"><i class="bi bi-check-circle"></i>Found Items</a>
-      <a href="{% url 'management_reports' %}?status=resolved"><i class="bi bi-patch-check"></i>Resolved Items</a>
+    <a class="admin-brand" href="{% url 'management_dashboard' %}"><span class="brand-mark"><i class="bi bi-search-heart"></i></span><span>FindMatch<small>{% translate "Campus Admin" %}</small></span></a>
+    <nav class="admin-menu" aria-label="{% translate 'Administrator dashboard' %}">
+      <a href="{% url 'management_dashboard' %}"{% if request.resolver_match.url_name == 'management_dashboard' %} aria-current="page"{% endif %}><i class="bi bi-grid-1x2"></i>{% translate "Dashboard" %}</a>
+      <a href="{% url 'management_reports' %}"{% if request.resolver_match.url_name == 'management_reports' %} aria-current="page"{% endif %}><i class="bi bi-clipboard-data"></i>{% translate "Reports" %}</a>
+      <a href="{% url 'management_users' %}"{% if request.resolver_match.url_name == 'management_users' or request.resolver_match.url_name == 'management_user_detail' %} aria-current="page"{% endif %}><i class="bi bi-people"></i>{% translate "Users" %}</a>
+      <span class="admin-menu-label">{% translate "Private contact" %}</span>
+      <a href="{% url 'management_conversations' %}"><i class="bi bi-chat-dots"></i>{% translate "Conversations" %}</a>
+      <a href="{% url 'management_audit_log' %}"><i class="bi bi-journal-check"></i>{% translate "Audit Log" %}</a>
+      <span class="admin-menu-label">{% translate "Report views" %}</span>
+      <a href="{% url 'management_reports' %}?report_type=lost"><i class="bi bi-question-circle"></i>{% translate "Lost Items" %}</a>
+      <a href="{% url 'management_reports' %}?report_type=found"><i class="bi bi-check-circle"></i>{% translate "Found Items" %}</a>
+      <a href="{% url 'management_reports' %}?status=resolved"><i class="bi bi-patch-check"></i>{% translate "Resolved Items" %}</a>
     </nav>
-    <div class="admin-sidebar-footer"><a href="{% url 'home' %}"><i class="bi bi-box-arrow-up-right"></i>View public site</a><form method="post" action="{% url 'logout' %}">{% csrf_token %}<button type="submit"><i class="bi bi-box-arrow-left"></i>Log out</button></form></div>
+    <div class="admin-sidebar-footer"><a href="{% url 'home' %}"><i class="bi bi-box-arrow-up-right"></i>{% translate "View public site" %}</a><form method="post" action="{% url 'logout' %}">{% csrf_token %}<button type="submit"><i class="bi bi-box-arrow-left"></i>{% translate "Log out" %}</button></form></div>
   </aside>
   <main class="admin-main" id="main-content">
-    <header class="admin-topbar"><button class="admin-menu-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#mobileAdminMenu" aria-expanded="false" aria-controls="mobileAdminMenu"><i class="bi bi-list"></i><span>Menu</span></button><div class="admin-topbar-tools"><ul class="navbar-nav">{% include 'includes/notification_center.html' %}</ul><div class="admin-user"><i class="bi bi-person-circle"></i><span>{{ user.username }}<small>Staff account</small></span></div></div></header>
-    <div class="collapse mobile-admin-menu" id="mobileAdminMenu"><a href="{% url 'management_dashboard' %}">Dashboard</a><a href="{% url 'management_reports' %}">Reports</a><a href="{% url 'management_users' %}">Users</a><a href="{% url 'management_conversations' %}">Conversations</a><a href="{% url 'management_ai_assistant' %}">AI Assistant</a><a href="{% url 'management_audit_log' %}">Audit Log</a><a href="{% url 'home' %}">Public site</a></div>
+    <header class="admin-topbar"><button class="admin-menu-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#mobileAdminMenu" aria-expanded="false" aria-controls="mobileAdminMenu"><i class="bi bi-list"></i><span>{% translate "Menu" %}</span></button><div class="admin-topbar-tools">{% include 'includes/language_switcher.html' %}<ul class="navbar-nav">{% include 'includes/notification_center.html' %}</ul><div class="admin-user"><i class="bi bi-person-circle"></i><span dir="auto">{{ user.username }}<small>{% translate "Staff account" %}</small></span></div></div></header>
+    <div class="collapse mobile-admin-menu" id="mobileAdminMenu">{% include 'includes/language_switcher.html' %}<a href="{% url 'management_dashboard' %}">{% translate "Dashboard" %}</a><a href="{% url 'management_reports' %}">{% translate "Reports" %}</a><a href="{% url 'management_users' %}">{% translate "Users" %}</a><a href="{% url 'management_conversations' %}">{% translate "Conversations" %}</a><a href="{% url 'management_audit_log' %}">{% translate "Audit Log" %}</a><a href="{% url 'home' %}">{% translate "Public site" %}</a></div>
     <div class="admin-page">{% include 'includes/messages.html' %}{% block dashboard_content %}{% endblock %}</div>
   </main>
 </div>

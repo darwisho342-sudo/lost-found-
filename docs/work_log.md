@@ -31,7 +31,7 @@ Suggested screenshots: registration validation, create-report form and the My Re
 
 - Added responsive report cards, details, pagination, keyword search and combinable filters.
 - Created a separate `MatchingService` using `SequenceMatcher` and the required weighted score.
-- Limited results to the five strongest opposite-type reports scoring at least 50%.
+- Limited results to the five strongest opposite-type Active reports scoring at least 70%, with 85% as the deduplicated strong-match notification threshold.
 - Added a readable component-by-component score explanation.
 
 Concepts used: query objects, pagination, text normalization, data classes, service separation and deterministic scoring.
@@ -96,18 +96,58 @@ The following commands were run successfully:
 - Live HTTP checks returned 200 for the redesigned homepage, Browse, login and registration pages and for the new local CSS and JavaScript assets. The latest browser screenshot pass could not run because the app's browser connection was unavailable; template rendering and route behavior were covered by the full Django suite and HTTP checks.
 
 The first test run found an argument collision inside a matching test helper. The helper was changed to merge defaults before creating the report, and the complete suite then passed.
-## 2026-08-06 — Moderation, completed returns and notifications
+## Moderation, completed returns and notifications
 
 - Added reviewed and soft-deleted report metadata, reusable staff bulk actions, selection controls and confirmation pages.
 - Added explicit conversation deal states with atomic, idempotent completion and staff-only reopening with an audit reason.
 - Added recipient-scoped in-app notifications, a notification page, unread-count JSON endpoint and visibility-aware 15-second polling.
 - Preserved prior secure-contact rules: closed/completed conversations are read-only and no longer reveal approved phone details.
 - Added regression coverage for authorization, confirmations, soft deletion, notification isolation, duplicate completion and reopening. The full suite passes 57 tests.
-## 2026-08-06 — Configurable administrator AI Assistant
+# Internationalization
 
-- Added a disabled-by-default master assistant configuration and eight stable capability records with one global setting each.
-- Added staff-only assistant execution, permission-restricted global settings, personal disable overrides and privacy-aware capability evaluation.
-- Added deterministic advisory handlers for reports, conversations, extraction, drafts, support, moderation risks, match explanations and aggregate analytics.
-- Added private-data redaction and a safe assistant audit log that never stores prompts or outputs.
-- Added responsive Bootstrap assistant/settings pages and the sidebar entry between Conversations and Audit Log.
-- Added regression tests for access control, disabled-mode rejection, settings permissions, override rules, redaction, no mutation and matching explanations.
+- Configured English, Turkish, and Arabic with `LocaleMiddleware`, locale paths, and language-prefixed public/custom-management routes.
+- Added automatic document language/direction, a reusable path-preserving language switcher, Arabic RTL overrides, Arabic-capable font fallbacks, logical CSS properties, and mixed-direction safeguards.
+- Marked shared navigation, authentication, homepage, report browsing/forms/details, profile, conversation, notification, matching, error, and core management interface strings for translation. User-written titles, descriptions, and messages remain unchanged and use automatic direction where rendered.
+- Added Turkish and Arabic PO catalogs and generated MO artifacts with the documented local fallback compiler. Django's official commands remain the supported update process.
+- Translation commands: `python manage.py makemessages -l tr -l ar`, `python manage.py compilemessages`, `python manage.py check`, and `python manage.py test`.
+- GNU gettext is required on Windows. Catalog extraction currently reports: `Can't find msguniq. Make sure you have GNU gettext tools 0.19 or newer installed.`
+- Suggested review screenshots: homepage, report list/detail/form, conversation, and custom management dashboard in English, Turkish, and Arabic at 390, 768, 1024, and 1440 pixels.
+- Inspected every visible template string. The Turkish and Arabic catalogs cover extracted template strings, Python labels/choices, validation and runtime messages, variable messages, and pluralized count messages; user-written content remains untranslated by design.
+- Added automated route, language/direction, switcher-context, authentication-redirect, translated-choice, error-page, mixed-direction, email-direction, fallback, and Arabic plural-form coverage. The complete regression suite passed after the internationalization changes.
+- Manually checked the Arabic homepage and localized report browsing at 390, 768, 1024, and 1440 pixels. No horizontal overflow remained; the navigation collapses through 1024 pixels and expands at 1440 pixels.
+- Turkish and Arabic wording should still receive fluent-speaker review before a production release. No external translation service was used.
+
+## Structured reports and ownership verification
+
+- Centralized category, item-type, appearance, brand, and location choices in `items/choices.py` using stable stored values and translated labels.
+- Added compatibility-safe structured fields; pre-existing reports retain their original public colour and description values.
+- Added conditional report controls, editable title suggestions, future-date checks, an expandable details field, sensitive-content blocking, and secure upload validation.
+- Stored finder verification questions separately from public reports and claimant answers separately from expected answers.
+- Found-item claims remain pending until finder approval. One clarification, rejection, dispute, suspicious-claim reporting, claimant blocking, attempt limits, and duplicate prevention are enforced in Django services and views.
+- Verified claims create conversations only after approval and do not expose phone or email details automatically.
+- Two unique participant confirmations are required to complete handover; completion transactionally resolves the report and closes competing claims.
+- Matching uses public structured fields, ignores unknown, blank, and private values, rejects implausible date direction, and returns five candidates at or above 70%.
+- Browse and management filters combine report type, category, item type, primary colour, brand, material, size, location, date range, and status.
+- Added automated tests for structured validation, sensitive-content rejection, privacy boundaries, direct URL protection, approval, duplicate claims, two-party completion, and private-field exclusion from matching.
+
+## AI feature removal
+
+- Removed the administrator assistant routes, views, forms, templates, navigation, stylesheet, provider service, models, permissions, AI-only audit records, and tests.
+- Removed the AI database tables with a schema migration after confirming that they contained only seeded configuration and AI-specific audit metadata, with no links to reports, claims, conversations, notifications, users, or the normal contact audit log.
+- Reviewed configuration and requirements: no OpenAI, Ollama, image-analysis, provider secret, API-key setting, background task, or AI-only dependency is required.
+
+## Worldwide platform foundation
+
+- Replaced new-report dependence on campus locations with country, region, city, district, place type/name, safe public location, private exact location, private full-precision coordinates, and derived approximate coordinates. Legacy campus rows remain usable without guessed geography.
+- Expanded report lifecycle states with private drafts, claim/return progress, expiry, disputes, renewal metadata, and an expiration/retention command.
+- Rebalanced deterministic Smart Matching to 100 points across structured identity, appearance, public international location, approximate distance, and date. Only Active opposite-type reports at 70% or above qualify; 85% triggers a deduplicated strong-match notice.
+- Added private return/delivery arrangements, explicit address consent, cost responsibility, courier/tracking fields, status changes, dispute retention, and transactional two-participant completion.
+- Added administrator-approved trusted organizations, organization memberships, and privacy-safe custody events.
+- Added saved public-search alerts, privacy-safe notification deduplication, account privacy centre/data export/deactivation requests, email-verification links, password reset, login/report/claim/message rate controls, and a database health endpoint.
+- Added PostgreSQL environment configuration while retaining SQLite by default, a portable private-media storage migration, production security settings, an environment example, and database/media transfer and recovery documentation.
+- Added optional manual image preparation, server-side re-encoding/metadata removal, exact-file hashing for duplicate warnings, optional report images, and private message attachments.
+- Verified representative query counts: homepage 6, public report list 2, personal dashboard 10, and custom staff dashboard 9 queries with demonstration data.
+- Verified mobile English and Arabic RTL pages in a real browser without horizontal overflow at the tested viewport; ordinary-user and staff dashboards loaded under their correct roles.
+- Ran the complete 95-test suite successfully in isolated workers after migration and compatibility fixes.
+- Retained Smart Matching as an ordinary local rule-based scoring system. It uses explicit public structured fields and `SequenceMatcher`; it makes no provider or network calls.
+- Retained deterministic sensitive-information validation and all normal report, ownership, conversation, notification, moderation, audit, and multilingual features.
