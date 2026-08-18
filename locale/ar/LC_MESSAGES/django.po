@@ -1422,3 +1422,33 @@ msgstr "سياسة الخصوصية"
 
 msgid "Terms"
 msgstr "الشروط"
+
+msgid "FindMatch homepage"
+msgstr "صفحة FindMatch الرئيسية"
+
+msgid "Primary navigation"
+msgstr "التنقل الرئيسي"
+
+msgid "Select language"
+msgstr "اختر اللغة"
+
+msgid "Close navigation"
+msgstr "إغلاق قائمة التنقل"
+
+msgid "Mobile menu"
+msgstr "قائمة الهاتف المحمول"
+
+msgid "unread notification"
+msgstr "إشعار غير مقروء"
+
+msgid "unread notifications"
+msgstr "إشعارات غير مقروءة"
+
+msgid "%(count)s unread notification"
+msgid_plural "%(count)s unread notifications"
+msgstr[0] "%(count)s إشعارات غير مقروءة"
+msgstr[1] "%(count)s إشعار غير مقروء"
+msgstr[2] "%(count)s إشعاران غير مقروءان"
+msgstr[3] "%(count)s إشعارات غير مقروءة"
+msgstr[4] "%(count)s إشعارًا غير مقروء"
+msgstr[5] "%(count)s إشعار غير مقروء"

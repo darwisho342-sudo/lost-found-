@@ -1,8 +1,8 @@
 {% load i18n %}<li class="nav-item dropdown notification-center" data-notification-center data-count-url="{% url 'notification_unread_count' %}">
-  <button class="nav-link notification-button notification-bell-button" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="{% translate 'Notifications' %}">
+  <button class="nav-link notification-button notification-bell-button" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="notificationMenu" data-unread-singular="{% translate 'unread notification' %}" data-unread-plural="{% translate 'unread notifications' %}" aria-label="{% blocktranslate count count=notification_unread_count %}{{ count }} unread notification{% plural %}{{ count }} unread notifications{% endblocktranslate %}">
     <i class="bi bi-bell"></i><span class="notification-count{% if not notification_unread_count %} d-none{% endif %}" data-notification-count>{{ notification_unread_count }}</span>
   </button>
-  <div class="dropdown-menu dropdown-menu-end notification-menu">
+  <div class="dropdown-menu dropdown-menu-end notification-menu" id="notificationMenu">
     <div class="notification-menu-heading"><strong>{% translate "Notifications" %}</strong><a href="{% url 'notification_list' %}">{% translate "View all" %}</a></div>
     <div data-notification-preview>
       {% for notification in notification_preview %}

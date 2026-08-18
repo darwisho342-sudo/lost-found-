@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static i18n %}
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/management/management-base.css' %}?v=20260814">
+<link rel="stylesheet" href="{% static 'css/management/management-base.css' %}?v=20260814b">
 {% with page=request.resolver_match.url_name %}
   {% if page == 'management_dashboard' or page == 'dashboard_home' %}<link rel="stylesheet" href="{% static 'css/management/dashboard.css' %}">{% endif %}
   {% if page == 'management_reports' or page == 'dashboard_reports' or page == 'management_report_bulk_action' or page == 'management_report_bulk_confirm' or page == 'management_report_visibility' or page == 'dashboard_report_visibility' %}<link rel="stylesheet" href="{% static 'css/management/reports.css' %}">{% endif %}
@@ -33,8 +33,8 @@
     <div class="admin-sidebar-footer"><a href="{% url 'home' %}"><i class="bi bi-box-arrow-up-right"></i>{% translate "View public site" %}</a><form method="post" action="{% url 'logout' %}">{% csrf_token %}<button type="submit"><i class="bi bi-box-arrow-left"></i>{% translate "Log out" %}</button></form></div>
   </aside>
   <main class="admin-main" id="main-content">
-    <header class="admin-topbar"><button class="admin-menu-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#mobileAdminMenu" aria-expanded="false" aria-controls="mobileAdminMenu"><i class="bi bi-list"></i><span>{% translate "Menu" %}</span></button><div class="admin-topbar-tools">{% include 'includes/language_switcher.html' %}<ul class="navbar-nav">{% include 'includes/notification_center.html' %}</ul><div class="admin-user"><i class="bi bi-person-circle"></i><span dir="auto">{{ user.username }}<small>{% translate "Staff account" %}</small></span></div></div></header>
-    <div class="collapse mobile-admin-menu" id="mobileAdminMenu">{% include 'includes/language_switcher.html' %}<a href="{% url 'management_dashboard' %}">{% translate "Dashboard" %}</a><a href="{% url 'management_reports' %}">{% translate "Reports" %}</a><a href="{% url 'management_users' %}">{% translate "Users" %}</a><a href="{% url 'management_conversations' %}">{% translate "Conversations" %}</a><a href="{% url 'management_audit_log' %}">{% translate "Audit Log" %}</a><a href="{% url 'home' %}">{% translate "Public site" %}</a></div>
+    <header class="admin-topbar"><button class="admin-menu-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#mobileAdminMenu" aria-expanded="false" aria-controls="mobileAdminMenu"><i class="bi bi-list"></i><span>{% translate "Menu" %}</span></button><div class="admin-topbar-tools">{% include 'includes/language_switcher.html' with language_menu_id='adminDesktopLanguageMenu' %}<ul class="navbar-nav">{% include 'includes/notification_center.html' %}</ul><div class="admin-user"><i class="bi bi-person-circle"></i><span dir="auto">{{ user.username }}<small>{% translate "Staff account" %}</small></span></div></div></header>
+    <div class="collapse mobile-admin-menu" id="mobileAdminMenu">{% include 'includes/language_switcher.html' with language_menu_id='adminMobileLanguageMenu' %}<a href="{% url 'management_dashboard' %}">{% translate "Dashboard" %}</a><a href="{% url 'management_reports' %}">{% translate "Reports" %}</a><a href="{% url 'management_users' %}">{% translate "Users" %}</a><a href="{% url 'management_conversations' %}">{% translate "Conversations" %}</a><a href="{% url 'management_audit_log' %}">{% translate "Audit Log" %}</a><a href="{% url 'home' %}">{% translate "Public site" %}</a></div>
     <div class="admin-page">{% include 'includes/messages.html' %}{% block dashboard_content %}{% endblock %}</div>
   </main>
 </div>

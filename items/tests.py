@@ -1208,3 +1208,34 @@ class ResponsiveInterfaceTests(MediaTestCase):
         response = self.client.get("/ar/")
         self.assertContains(response, '<html lang="ar" dir="rtl">')
         self.assertContains(response, 'class="mobile-bottom-nav"')
+        self.assertContains(response, 'aria-label="اختر اللغة"')
+        self.assertContains(response, 'aria-label="صفحة FindMatch الرئيسية"')
+        response = self.client.get("/tr/")
+        self.assertContains(response, 'aria-label="Dil seçin"')
+
+    def test_anonymous_navigation_uses_compact_grouping(self):
+        response = self.client.get(reverse("home"))
+        self.assertContains(response, 'class="fm-primary-links"')
+        self.assertContains(response, 'id="browseMenuButton"')
+        self.assertContains(response, 'id="reportMenuButton"')
+        self.assertContains(response, 'id="desktopLanguageMenuButton"')
+        self.assertContains(response, 'id="mobileNavigation"')
+        self.assertNotContains(response, 'id="profileMenuButton"')
+
+    def test_authenticated_profile_menu_contains_secure_account_actions(self):
+        self.client.force_login(self.user)
+        response = self.client.get(reverse("home"))
+        self.assertContains(response, 'id="profileMenuButton"')
+        self.assertContains(response, reverse("user_dashboard"))
+        self.assertContains(response, reverse("my_reports"))
+        self.assertContains(response, f'method="post" action="{reverse("logout")}"')
+        self.assertNotContains(response, 'class="navbar-text user-chip"')
+
+    def test_staff_navigation_is_not_exposed_to_normal_user(self):
+        self.client.force_login(self.user)
+        response = self.client.get(reverse("home"))
+        self.assertNotContains(response, reverse("management_dashboard"))
+        self.user.is_staff = True
+        self.user.save(update_fields=["is_staff"])
+        response = self.client.get(reverse("home"))
+        self.assertContains(response, reverse("management_dashboard"))

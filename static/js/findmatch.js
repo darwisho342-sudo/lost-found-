@@ -1,3 +1,7 @@
+document.querySelectorAll(".fm-desktop-navigation .nav-link.active").forEach((item) => {
+  item.setAttribute("aria-current", "page");
+});
+
 document.querySelectorAll("[data-password-toggle]").forEach((button) => {
   button.addEventListener("click", () => {
     const input = button.parentElement.querySelector("input");

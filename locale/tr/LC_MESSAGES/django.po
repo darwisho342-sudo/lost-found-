@@ -1406,3 +1406,29 @@ msgstr "Gizlilik Politikası"
 
 msgid "Terms"
 msgstr "Koşullar"
+
+msgid "FindMatch homepage"
+msgstr "FindMatch ana sayfası"
+
+msgid "Primary navigation"
+msgstr "Birincil gezinme"
+
+msgid "Select language"
+msgstr "Dil seçin"
+
+msgid "Close navigation"
+msgstr "Gezinmeyi kapat"
+
+msgid "Mobile menu"
+msgstr "Mobil menü"
+
+msgid "unread notification"
+msgstr "okunmamış bildirim"
+
+msgid "unread notifications"
+msgstr "okunmamış bildirim"
+
+msgid "%(count)s unread notification"
+msgid_plural "%(count)s unread notifications"
+msgstr[0] "%(count)s okunmamış bildirim"
+msgstr[1] "%(count)s okunmamış bildirim"
