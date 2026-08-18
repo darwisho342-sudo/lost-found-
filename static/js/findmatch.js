@@ -140,3 +140,14 @@ if (filterPanel) {
   filterPanel.addEventListener("keydown", (event) => { if (event.key === "Escape") close(); if (event.key !== "Tab") return; const items = focusable(); if (!items.length) return; if (event.shiftKey && document.activeElement === items[0]) { event.preventDefault(); items.at(-1).focus(); } else if (!event.shiftKey && document.activeElement === items.at(-1)) { event.preventDefault(); items[0].focus(); } });
   if (window.matchMedia("(max-width: 767.98px)").matches) { filterPanel.setAttribute("inert", ""); filterPanel.setAttribute("aria-hidden", "true"); }
 }
+
+const sessionSeconds = Number(document.body.dataset.sessionSeconds || 0);
+if (sessionSeconds > 600) {
+  window.setTimeout(() => {
+    const warning = document.createElement("div");
+    warning.className = "alert alert-warning session-expiry-warning";
+    warning.setAttribute("role", "status");
+    warning.textContent = document.body.dataset.sessionMessage;
+    document.querySelector("main")?.prepend(warning);
+  }, Math.max(1, sessionSeconds - 300) * 1000);
+}

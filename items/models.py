@@ -12,7 +12,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from .choices import (
-    ALL_ITEM_TYPE_CHOICES, BRAND_CHOICES, CATEGORY_CHOICES, COLOUR_CHOICES,
+    ALL_ITEM_TYPE_CHOICES, BRAND_CHOICES, CATEGORY_CHOICES, COLOUR_CHOICES, COUNTRY_CHOICES,
     CONDITION_CHOICES, LOCATION_CHOICES, MATERIAL_CHOICES, PATTERN_CHOICES,
     PLACE_TYPE_CHOICES, RETURN_METHOD_CHOICES, RETURN_STATUS_CHOICES,
     SIZE_CHOICES, VERIFICATION_QUESTION_TYPES, ITEM_TYPE_CHOICES,
@@ -65,6 +65,17 @@ def report_image_path(instance, filename):
     return f"reports/user_{instance.owner_id}/{instance.report_type}_{instance.pk or 'new'}{suffix}"
 
 
+def additional_report_image_path(instance, filename):
+    suffix = Path(filename).suffix.lower()
+    report = instance.report
+    return f"reports/user_{report.owner_id}/{report.report_type}_{report.pk}_extra_{instance.position}{suffix}"
+
+
+def sensitive_report_image_path(instance, filename):
+    suffix = Path(filename).suffix.lower()
+    return f"private_sensitive_reports/report_{instance.pk or 'new'}{suffix}"
+
+
 def claim_evidence_path(instance, filename):
     suffix = Path(filename).suffix.lower()
     return f"private_claim_evidence/claim_{instance.contact_request_id}/{instance.pk or 'new'}{suffix}"
@@ -90,7 +101,31 @@ def validate_evidence_content(upload):
         raise ValidationError(_("Upload a genuine JPG, PNG, WebP, or PDF file."))
 
 
+class UniversityLocation(models.Model):
+    """Administrator-managed campus/building choice with stable local identity."""
+
+    campus = models.CharField(max_length=120, db_index=True)
+    building = models.CharField(max_length=120, blank=True, db_index=True)
+    general_area = models.CharField(max_length=120)
+    location_type = models.CharField(max_length=30, choices=LOCATION_CHOICES, default="not_sure")
+    is_active = models.BooleanField(default=True, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ("campus", "building", "general_area")
+        constraints = [models.UniqueConstraint(
+            fields=("campus", "building", "general_area"), name="unique_university_location"
+        )]
+
+    def __str__(self):
+        return " · ".join(part for part in (self.campus, self.building, self.general_area) if part)
+
+
 class ItemReport(models.Model):
+    class Scope(models.TextChoices):
+        UNIVERSITY = "university", _("University or Campus")
+        INTERNATIONAL = "international", _("Outside University / International")
+
     class ReportType(models.TextChoices):
         LOST = "lost", _("Lost")
         FOUND = "found", _("Found")
@@ -141,6 +176,9 @@ class ItemReport(models.Model):
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="item_reports"
     )
+    scope = models.CharField(
+        max_length=16, choices=Scope.choices, default=Scope.UNIVERSITY, db_index=True
+    )
     report_type = models.CharField(max_length=5, choices=ReportType.choices, db_index=True)
     title = models.CharField(max_length=120)
     description = models.TextField(max_length=1500)
@@ -178,8 +216,23 @@ class ItemReport(models.Model):
     campus_location = models.CharField(
         max_length=30, choices=CampusLocation.choices, blank=True, db_index=True
     )
+    university_location = models.ForeignKey(
+        UniversityLocation, null=True, blank=True, on_delete=models.PROTECT,
+        related_name="reports",
+    )
     item_date = models.DateField(_("date lost or found"), db_index=True)
     image = models.ImageField(upload_to=report_image_path, validators=[validate_image_size], blank=True)
+    image_is_hidden = models.BooleanField(
+        default=False,
+        db_index=True,
+        help_text=_("Hide this image from all public pages while preserving it for staff review."),
+    )
+    private_sensitive_image = models.ImageField(
+        storage=private_evidence_storage,
+        upload_to=sensitive_report_image_path,
+        blank=True,
+        validators=[validate_image_size],
+    )
     image_sha256 = models.CharField(max_length=64, blank=True, db_index=True, editable=False)
     duplicate_confirmed = models.BooleanField(default=False)
     status = models.CharField(
@@ -234,8 +287,16 @@ class ItemReport(models.Model):
             raise ValidationError({"custom_item_type": _("Specify the item type when Other is selected.")})
         if self.brand == "other" and not self.custom_brand.strip():
             raise ValidationError({"custom_brand": _("Specify the brand when Other is selected.")})
-        if self.campus_location == "other" and not self.custom_location.strip():
+        if self.scope == self.Scope.UNIVERSITY and self.campus_location == "other" and not self.custom_location.strip():
             raise ValidationError({"custom_location": _("Specify a general location when Other is selected.")})
+        if self.scope == self.Scope.UNIVERSITY:
+            if not self.university_location_id and not self.campus_location:
+                raise ValidationError({"university_location": _("Choose a University location or a general campus area.")})
+        elif self.scope == self.Scope.INTERNATIONAL:
+            if not self.country.strip():
+                raise ValidationError({"country": _("Country is required for International reports.")})
+            if not self.city.strip():
+                raise ValidationError({"city": _("City is required for International reports.")})
         if (self.latitude is None) != (self.longitude is None):
             raise ValidationError(_("Latitude and longitude must be supplied together."))
         if self.latitude is not None and not -90 <= self.latitude <= 90:
@@ -255,6 +316,18 @@ class ItemReport(models.Model):
             self.public_longitude = round(self.longitude, precision)
         else:
             self.public_latitude = self.public_longitude = None
+        if self.item_type in {"student_id", "bank_card", "driver_licence", "national_id", "passport"}:
+            self.require_official_handover = True
+            if self.image:
+                if not self.private_sensitive_image:
+                    source = self.image.file
+                    position = source.tell() if hasattr(source, "tell") else 0
+                    source.seek(0)
+                    self.private_sensitive_image.save(Path(self.image.name).name, source, save=False)
+                    if hasattr(source, "seek"):
+                        source.seek(position)
+                self.image = None
+                self.image_is_hidden = True
         if self.image and not self.image_sha256:
             digest = hashlib.sha256()
             try:
@@ -270,13 +343,40 @@ class ItemReport(models.Model):
                 self.image_sha256 = digest.hexdigest()
         super().save(*args, **kwargs)
 
+    def hide_public_image(self):
+        """Move a public image into protected local storage for staff review."""
+        if self.image:
+            public_name = self.image.name
+            public_storage = self.image.storage
+            source = self.image.file
+            position = source.tell() if hasattr(source, "tell") else 0
+            source.seek(0)
+            self.private_sensitive_image.save(Path(public_name).name, source, save=False)
+            if hasattr(source, "seek"):
+                source.seek(position)
+            self.image = None
+            self.image_is_hidden = True
+            super().save(update_fields=("image", "image_is_hidden", "private_sensitive_image", "updated_at"))
+            if hasattr(source, "close"):
+                source.close()
+            if public_name and public_storage.exists(public_name):
+                public_storage.delete(public_name)
+        elif not self.image_is_hidden:
+            self.image_is_hidden = True
+            super().save(update_fields=("image_is_hidden", "updated_at"))
+
     @property
     def public_details(self):
         return self.additional_details or self.description
 
     @property
     def public_location_display(self):
-        parts = [self.place_name, self.district, self.city, self.region, self.country]
+        if self.scope == self.Scope.UNIVERSITY:
+            if self.university_location_id:
+                return str(self.university_location)
+            return self.custom_location or self.get_campus_location_display()
+        country = str(dict(COUNTRY_CHOICES).get(self.country, self.country))
+        parts = [self.place_name, self.district, self.city, self.region, country]
         value = ", ".join(part for part in parts if part)
         return value or self.public_location or self.custom_location or self.get_campus_location_display()
 
@@ -289,6 +389,41 @@ class ItemReport(models.Model):
             status__in=(ContactRequest.Status.APPROVED, ContactRequest.Status.RETURN_IN_PROGRESS),
             requesting_user=user,
         ).exists()
+
+
+class ReportImage(models.Model):
+    """Optional additional public images; ItemReport.image remains the primary image."""
+
+    report = models.ForeignKey(ItemReport, on_delete=models.CASCADE, related_name="additional_images")
+    image = models.ImageField(upload_to=additional_report_image_path, validators=[validate_image_size])
+    position = models.PositiveSmallIntegerField(default=2)
+    is_hidden = models.BooleanField(default=False, db_index=True)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ("position", "pk")
+        constraints = [
+            models.UniqueConstraint(fields=("report", "position"), name="unique_report_image_position"),
+            models.CheckConstraint(condition=Q(position__gte=2) & Q(position__lte=3), name="report_image_position_2_to_3"),
+        ]
+
+
+class DismissedMatch(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="dismissed_matches")
+    lost_report = models.ForeignKey(ItemReport, on_delete=models.CASCADE, related_name="dismissed_as_lost")
+    found_report = models.ForeignKey(ItemReport, on_delete=models.CASCADE, related_name="dismissed_as_found")
+    dismissed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=("user", "lost_report", "found_report"), name="unique_dismissed_match")
+        ]
+
+    def clean(self):
+        if self.lost_report_id and self.lost_report.report_type != ItemReport.ReportType.LOST:
+            raise ValidationError({"lost_report": _("The first report must be Lost.")})
+        if self.found_report_id and self.found_report.report_type != ItemReport.ReportType.FOUND:
+            raise ValidationError({"found_report": _("The second report must be Found.")})
 
 
 class UserProfile(models.Model):
@@ -309,6 +444,15 @@ class UserProfile(models.Model):
         help_text=_("Show active conversation contacts only the final four digits of your phone number."),
     )
     email_verified_at = models.DateTimeField(null=True, blank=True)
+    university_eligible = models.BooleanField(
+        default=False,
+        help_text=_("University eligibility is separate from ordinary email verification."),
+    )
+    university_eligibility_lost_at = models.DateTimeField(null=True, blank=True)
+    preferred_scope = models.CharField(
+        max_length=16, choices=ItemReport.Scope.choices,
+        default=ItemReport.Scope.INTERNATIONAL,
+    )
     display_name = models.CharField(max_length=80, blank=True)
     preferred_language = models.CharField(
         max_length=8, choices=(("en", "English"), ("tr", "Türkçe"), ("ar", "العربية")), default="en"
@@ -338,6 +482,12 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return f"Profile for {self.user.username}"
+
+    @property
+    def has_verified_university_access(self):
+        from .university import UniversityAccessService
+
+        return UniversityAccessService.is_verified(self.user)
 
 
 class UserBlock(models.Model):
@@ -514,6 +664,31 @@ class SuspiciousClaimReport(models.Model):
     reported_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="reported_suspicious_claims")
     reason = models.TextField(max_length=1000)
     created_at = models.DateTimeField(auto_now_add=True)
+
+
+class ClaimAppeal(models.Model):
+    class Status(models.TextChoices):
+        PENDING = "pending", _("Pending")
+        UPHELD = "upheld", _("Upheld")
+        DENIED = "denied", _("Denied")
+
+    contact_request = models.OneToOneField(
+        ContactRequest, on_delete=models.PROTECT, related_name="appeal"
+    )
+    submitted_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="claim_appeals"
+    )
+    reason = models.TextField(max_length=1000)
+    status = models.CharField(max_length=16, choices=Status.choices, default=Status.PENDING, db_index=True)
+    submitted_at = models.DateTimeField(auto_now_add=True)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    reviewed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.PROTECT,
+        related_name="reviewed_claim_appeals",
+    )
+
+    class Meta:
+        ordering = ("-submitted_at",)
 
 
 class TrustedOrganization(models.Model):
@@ -890,8 +1065,9 @@ class SavedSearch(models.Model):
     @staticmethod
     def public_filter_keys():
         return {
-            "report_type", "country", "region", "city", "district", "place_type", "place_name",
-            "category", "item_type", "primary_colour", "brand", "material", "approximate_size",
+            "scope", "report_type", "campus_location", "university_location", "category", "item_type",
+            "primary_colour", "brand", "material", "approximate_size", "country", "region",
+            "city", "district", "place_type", "place_name",
             "date_from", "date_to",
         }
 
@@ -940,3 +1116,93 @@ class ContentReport(models.Model):
                 condition=Q(status="open"), name="unique_open_content_report",
             )
         ]
+
+
+class CustodyRecord(models.Model):
+    """Current University Lost and Found room state for a physical Found item."""
+
+    class Status(models.TextChoices):
+        RECEIVED = "received", _("Received")
+        STORED = "stored", _("Stored")
+        RESERVED = "reserved", _("Reserved for approved claimant")
+        HANDED_OVER = "handed_over", _("Handed Over")
+        MISSING = "missing", _("Missing in Storage")
+        DISPOSED = "disposed", _("Disposition Recorded")
+
+    found_report = models.OneToOneField(ItemReport, on_delete=models.PROTECT, related_name="custody_record")
+    reference = models.CharField(max_length=32, unique=True)
+    intake_at = models.DateTimeField(default=timezone.now, db_index=True)
+    received_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="custody_intakes")
+    intake_point = models.CharField(max_length=120)
+    storage_reference = models.CharField(max_length=120, help_text=_("Private cabinet, shelf, room, or bin reference."))
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.RECEIVED, db_index=True)
+    is_high_value = models.BooleanField(default=False)
+    is_locked_storage = models.BooleanField(default=False)
+    requires_two_staff_release = models.BooleanField(default=False)
+    retention_expires_at = models.DateTimeField(null=True, blank=True, db_index=True)
+    handover_staff = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.PROTECT, related_name="custody_handovers")
+    handed_over_at = models.DateTimeField(null=True, blank=True)
+    recipient_confirmed_at = models.DateTimeField(null=True, blank=True)
+    disposition = models.CharField(max_length=160, blank=True)
+    disposition_at = models.DateTimeField(null=True, blank=True)
+    disposition_decided_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.PROTECT,
+        related_name="custody_dispositions",
+    )
+    second_release_staff = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.PROTECT,
+        related_name="second_custody_release_confirmations",
+    )
+    notes = models.TextField(blank=True, validators=[MaxLengthValidator(1000)])
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("-intake_at",)
+        permissions = (("manage_custody", "Can manage University item custody"),)
+
+    def clean(self):
+        super().clean()
+        if self.found_report_id and self.found_report.report_type != ItemReport.ReportType.FOUND:
+            raise ValidationError({"found_report": _("Only Found reports may enter University custody.")})
+        if self.found_report_id and self.found_report.scope != ItemReport.Scope.UNIVERSITY:
+            raise ValidationError({"found_report": _("Only University Found reports may enter University custody.")})
+        if self.status == self.Status.HANDED_OVER and not self.handed_over_at:
+            raise ValidationError({"handed_over_at": _("Record the handover date and time.")})
+        if self.requires_two_staff_release and self.status == self.Status.HANDED_OVER:
+            if not self.second_release_staff_id or self.second_release_staff_id == self.handover_staff_id:
+                raise ValidationError({"second_release_staff": _("A different second staff member must confirm this high-value release.")})
+
+    def save(self, *args, **kwargs):
+        if not self.retention_expires_at:
+            from datetime import timedelta
+            self.retention_expires_at = self.intake_at + timedelta(days=settings.ITEM_RETENTION_DAYS)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.reference}: {self.found_report.title}"
+
+
+class CustodyMovement(models.Model):
+    """Append-only custody history; entries never replace earlier state."""
+
+    custody_record = models.ForeignKey(CustodyRecord, on_delete=models.PROTECT, related_name="movements")
+    event_type = models.CharField(max_length=24, choices=(("intake", _("Intake")), ("move", _("Storage movement")), ("review", _("Inventory review")), ("release", _("Release")), ("disposition", _("Disposition")), ("incident", _("Incident"))))
+    recorded_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    recorded_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    safe_note = models.CharField(max_length=255, blank=True)
+
+    class Meta:
+        ordering = ("-recorded_at",)
+
+
+class StorageIncident(models.Model):
+    custody_record = models.ForeignKey(CustodyRecord, on_delete=models.PROTECT, related_name="incidents")
+    reported_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="storage_incidents")
+    summary = models.CharField(max_length=255)
+    opened_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)
+    reviewed_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.PROTECT, related_name="reviewed_storage_incidents")
+
+    class Meta:
+        ordering = ("-opened_at",)

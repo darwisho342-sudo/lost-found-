@@ -12,6 +12,7 @@ from .communications import record_contact_event
 from .conversation_service import ConversationInitiationService
 from .models import ContactAuditLog, ContactRequest, HandoverConfirmation, ItemReport, Notification
 from .notification_service import NotificationService
+from .university import UniversityAccessService
 
 
 class OwnershipVerificationService:
@@ -20,6 +21,7 @@ class OwnershipVerificationService:
 
     @classmethod
     def validate_new_claim(cls, *, report, claimant):
+        UniversityAccessService.require_scope(claimant, report.scope)
         if report.report_type != ItemReport.ReportType.FOUND:
             raise ValidationError(_("Ownership verification is available only for Found reports."))
         if claimant.pk == report.owner_id:
@@ -66,6 +68,10 @@ class OwnershipVerificationService:
 
     @classmethod
     def change_status(cls, *, claim, actor, action, clarification=""):
+        if (actor.is_staff and actor.pk != claim.receiving_user_id
+                and claim.item_report.scope == ItemReport.Scope.UNIVERSITY
+                and not hasattr(claim.item_report, "custody_record")):
+            raise PermissionDenied(_("University staff may review this claim only after official custody is recorded."))
         if action == "dispute":
             if actor.pk != claim.requesting_user_id and not actor.is_staff:
                 raise PermissionDenied
@@ -134,6 +140,11 @@ class OwnershipVerificationService:
         with transaction.atomic():
             claim = ContactRequest.objects.select_for_update().select_related("item_report", "requesting_user", "receiving_user").get(pk=claim.pk)
             HandoverConfirmation.objects.get_or_create(contact_request=claim, user=user)
+            if claim.item_report.scope == ItemReport.Scope.UNIVERSITY:
+                # Participant receipt is retained, but only authorized University
+                # staff can record the official handover/Returned action.
+                cls.audit(claim, user, ContactAuditLog.EventType.RETURN_UPDATED, _("A participant confirmed the University handover step."))
+                return False
             if claim.handover_confirmations.count() < 2:
                 return False
             claim.status = ContactRequest.Status.COMPLETED

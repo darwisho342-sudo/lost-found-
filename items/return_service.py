@@ -85,7 +85,8 @@ class ReturnWorkflowService:
             else:
                 raise PermissionDenied
             arrangement.save(update_fields=("finder_confirmed_at", "owner_confirmed_at", "status", "updated_at"))
-            if arrangement.finder_confirmed_at and arrangement.owner_confirmed_at:
+            if (arrangement.finder_confirmed_at and arrangement.owner_confirmed_at
+                    and claim.item_report.scope == ItemReport.Scope.INTERNATIONAL):
                 claim.status = ContactRequest.Status.COMPLETED
                 claim.reviewed_at = now
                 claim.save(update_fields=("status", "reviewed_at"))

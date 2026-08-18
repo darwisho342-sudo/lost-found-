@@ -117,24 +117,39 @@ PLACE_TYPE_CHOICES = (
     ("not_sure", _("Not Sure")),
 )
 
+# A deliberately bundled, local list. Stable ISO-style codes are stored while
+# translated labels are rendered by Django; no runtime country service is used.
+COUNTRY_CHOICES = (
+    ("TR", _("Türkiye")), ("CY", _("Cyprus")), ("GB", _("United Kingdom")),
+    ("US", _("United States")), ("CA", _("Canada")), ("DE", _("Germany")),
+    ("FR", _("France")), ("IT", _("Italy")), ("ES", _("Spain")),
+    ("NL", _("Netherlands")), ("BE", _("Belgium")), ("GR", _("Greece")),
+    ("AU", _("Australia")), ("NZ", _("New Zealand")),
+    ("AE", _("United Arab Emirates")), ("SA", _("Saudi Arabia")),
+    ("EG", _("Egypt")), ("JO", _("Jordan")), ("LB", _("Lebanon")),
+    ("IQ", _("Iraq")), ("QA", _("Qatar")), ("KW", _("Kuwait")),
+    ("MA", _("Morocco")), ("TN", _("Tunisia")), ("DZ", _("Algeria")),
+    ("IN", _("India")), ("PK", _("Pakistan")), ("BD", _("Bangladesh")),
+    ("JP", _("Japan")), ("KR", _("South Korea")), ("CN", _("China")),
+    ("BR", _("Brazil")), ("MX", _("Mexico")), ("AR", _("Argentina")),
+    ("ZA", _("South Africa")), ("NG", _("Nigeria")), ("KE", _("Kenya")),
+    ("OTHER", _("Other country")),
+)
+
 RETURN_METHOD_CHOICES = (
-    ("safe_public_meeting", _("Meet at a safe public location")),
-    ("trusted_organization", _("Trusted organization or official return point")),
-    ("security", _("University, company, or building security")),
-    ("police_lost_property", _("Police or official lost-property office")),
-    ("local_pickup", _("Local pickup")),
-    ("courier_post", _("Courier or postal delivery")),
-    ("custom", _("Custom arrangement through the private conversation")),
+    ("security", _("University Lost and Found office")),
+    ("trusted_organization", _("Authorized public authority")),
+    ("safe_public_meeting", _("In-person meeting in a safe public place")),
+    ("local_authority", _("Trusted local authority or organization")),
+    ("private_shipping", _("Privately arranged shipping (FindMatch does not provide shipping)")),
 )
 
 RETURN_STATUS_CHOICES = (
     ("arranging", _("Arranging Return")),
     ("ready_pickup", _("Ready for Pickup")),
-    ("sent", _("Sent")),
     ("handed_over", _("Handed Over")),
     ("awaiting_receipt", _("Awaiting Receipt Confirmation")),
     ("received", _("Received")),
-    ("failed_delivery", _("Failed Delivery")),
     ("disputed", _("Disputed")),
 )
 

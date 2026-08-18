@@ -1452,3 +1452,120 @@ msgstr[2] "%(count)s إشعاران غير مقروءان"
 msgstr[3] "%(count)s إشعارات غير مقروءة"
 msgstr[4] "%(count)s إشعارًا غير مقروء"
 msgstr[5] "%(count)s إشعار غير مقروء"
+msgid "Custody inventory"
+msgstr "سجل العهدة"
+
+msgid "University Lost and Found room"
+msgstr "غرفة المفقودات والموجودات بالجامعة"
+
+msgid "Storage references are private and visible only to staff."
+msgstr "مراجع التخزين خاصة ولا تظهر إلا للموظفين."
+
+msgid "Record an intake"
+msgstr "تسجيل استلام"
+
+msgid "Physical inventory"
+msgstr "الجرد الفعلي"
+
+msgid "Create custody record"
+msgstr "إنشاء سجل عهدة"
+
+msgid "Report missing"
+msgstr "الإبلاغ عن فقدان"
+
+msgid "Campus location and date"
+msgstr "موقع الحرم والتاريخ"
+
+msgid "Campus area"
+msgstr "منطقة الحرم الجامعي"
+
+msgid "Verify an approved University email address before using this feature."
+msgstr "تحقق من عنوان بريد جامعي معتمد قبل استخدام هذه الميزة."
+msgid "University Mode"
+msgstr "وضع الجامعة"
+
+msgid "International Mode"
+msgstr "الوضع الدولي"
+
+msgid "Outside University / International"
+msgstr "خارج الجامعة / دولي"
+
+msgid "Where did you lose or find the item?"
+msgstr "أين فقدت أو عثرت على الغرض؟"
+
+msgid "Mode"
+msgstr "الوضع"
+
+msgid "Switch"
+msgstr "تبديل"
+
+msgid "University or Campus"
+msgstr "الجامعة أو الحرم الجامعي"
+
+msgid "University"
+msgstr "الجامعة"
+
+msgid "International"
+msgstr "دولي"
+
+msgid "Country is required for International reports."
+msgstr "الدولة مطلوبة للبلاغات الدولية."
+
+msgid "City is required for International reports."
+msgstr "المدينة مطلوبة للبلاغات الدولية."
+
+msgid "Claims and appeals"
+msgstr "المطالبات والاستئنافات"
+
+msgid "Locations"
+msgstr "المواقع"
+
+msgid "University locations"
+msgstr "مواقع الجامعة"
+
+msgid "Dismiss suggestion"
+msgstr "تجاهل الاقتراح"
+
+msgid "Appeal rejection"
+msgstr "استئناف الرفض"
+
+msgid "Confirm your identity"
+msgstr "تأكيد هويتك"
+
+msgid "Continue securely"
+msgstr "المتابعة بأمان"
+
+msgid "Report content or image"
+msgstr "الإبلاغ عن المحتوى أو الصورة"
+
+msgid "Item photographs"
+msgstr "صور الغرض"
+
+msgid "Additional view of"
+msgstr "صورة إضافية لـ"
+
+msgid "University handover completed"
+msgstr "اكتمل التسليم الجامعي"
+msgid "Mode overview"
+msgstr "نظرة عامة على الوضع"
+
+msgid "Pending claims"
+msgstr "مطالبات معلّقة"
+
+msgid "Open disputes"
+msgstr "نزاعات مفتوحة"
+
+msgid "and International Lost and Found"
+msgstr "والمفقودات الدولية"
+
+msgid "FindMatch University and International lost-and-found service"
+msgstr "خدمة FindMatch للمفقودات الجامعية والدولية"
+
+msgid "Account access"
+msgstr "وصول الحساب"
+
+msgid "University and International modes"
+msgstr "وضعا الجامعة والدولي"
+
+msgid "Preferred mode"
+msgstr "الوضع المفضّل"

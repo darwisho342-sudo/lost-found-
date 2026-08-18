@@ -1,1 +1,16 @@
-{% load i18n %}<div class="score-circle" aria-label="{% blocktranslate with score=match.total_score %}Match score {{ score }} percent{% endblocktranslate %}">{{ match.total_score }}<small>%</small></div><h3 class="h5 mt-3">{% if match.total_score >= 85 %}{% translate "Strong possible match" %}{% else %}{% translate "Possible match" %}{% endif %}</h3><p class="small">{% translate "This deterministic score identifies candidates; it never proves ownership or approves a claim." %}</p><ul class="score-list"><li><span>{% translate "Category" %}</span><strong>{{ match.category_points }}/12</strong></li><li><span>{% translate "Item type" %}</span><strong>{{ match.item_type_points }}/12</strong></li><li><span>{% translate "Title" %}</span><strong>{{ match.title_points }}/8</strong></li><li><span>{% translate "Public details" %}</span><strong>{{ match.description_points }}/8</strong></li><li><span>{% translate "Primary colour" %}</span><strong>{{ match.primary_colour_points }}/8</strong></li><li><span>{% translate "Secondary colour" %}</span><strong>{{ match.secondary_colour_points }}/4</strong></li><li><span>{% translate "Brand" %}</span><strong>{{ match.brand_points }}/6</strong></li><li><span>{% translate "Model" %}</span><strong>{{ match.model_points }}/4</strong></li><li><span>{% translate "Material" %}</span><strong>{{ match.material_points }}/4</strong></li><li><span>{% translate "Size" %}</span><strong>{{ match.size_points }}/4</strong></li><li><span>{% translate "Approximate location" %}</span><strong>{{ match.location_points }}/20</strong></li><li><span>{% translate "Date" %}</span><strong>{{ match.date_points }}/10</strong></li></ul>
+{% load i18n %}
+<div class="score-circle" aria-label="{% blocktranslate with score=match.total_score %}Match score {{ score }} percent{% endblocktranslate %}">{{ match.total_score }}<small>%</small></div>
+<h3 class="h5 mt-3">{% if match.total_score >= 85 %}{% translate "Strong possible match" %}{% else %}{% translate "Possible match" %}{% endif %}</h3>
+<p class="small">{% translate "This deterministic score identifies candidates; it never proves ownership or approves a claim." %}</p>
+<ul class="score-list">
+  <li><span>{% translate "Category" %}</span><strong>{{ match.category_points }}/15</strong></li>
+  <li><span>{% translate "Item type" %}</span><strong>{{ match.item_type_points }}/15</strong></li>
+  <li><span>{% translate "Public details" %}</span><strong>{{ match.description_points }}/15</strong></li>
+  <li><span>{% translate "Primary colour" %}</span><strong>{{ match.primary_colour_points }}/10</strong></li>
+  <li><span>{% translate "Secondary colour" %}</span><strong>{{ match.secondary_colour_points }}/5</strong></li>
+  <li><span>{% translate "Brand" %}</span><strong>{{ match.brand_points }}/10</strong></li>
+  <li><span>{% translate "Model" %}</span><strong>{{ match.model_points }}/5</strong></li>
+  <li><span>{% translate "Campus area" %}</span><strong>{{ match.location_points }}/10</strong></li>
+  <li><span>{% translate "Date" %}</span><strong>{{ match.date_points }}/10</strong></li>
+  <li><span>{% translate "Title" %}</span><strong>{{ match.title_points }}/5</strong></li>
+</ul>

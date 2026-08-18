@@ -1,7 +1,7 @@
 {% extends 'base.html' %}{% load i18n %}
 {% block title %}{% translate "Browse reports" %} — FindMatch{% endblock %}
 {% block content %}
-<header class="page-hero"><div class="container"><span class="hero-label"><i class="bi bi-grid" aria-hidden="true"></i>{% translate "Reports" %}</span><h1 class="mt-3 mb-2">{{ list_title|title }}</h1><p class="mb-0">{% translate "Search reports and narrow results by item and location details." %}</p></div></header>
+<header class="page-hero"><div class="container"><span class="hero-label"><i class="bi bi-grid" aria-hidden="true"></i>{% if active_scope == 'university' %}{% translate "University Mode" %}{% else %}{% translate "International Mode" %}{% endif %}</span><h1 class="mt-3 mb-2">{{ list_title|title }}</h1><p class="mb-0">{% translate "Search reports and narrow results by item and location details." %}</p></div></header>
 <section class="container reports-page pb-5">
   <form class="search-panel report-search-form mb-4" method="get" role="search" data-filter-form>
     <div class="mobile-search-row">

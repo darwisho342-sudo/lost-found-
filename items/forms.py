@@ -3,6 +3,7 @@ from pathlib import Path
 from uuid import uuid4
 
 from django import forms
+from django.conf import settings
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.utils import timezone
@@ -12,24 +13,30 @@ from PIL import Image, UnidentifiedImageError
 
 from .choices import (
     ALL_ITEM_TYPE_CHOICES, BRAND_CHOICES, COLOUR_CHOICES, CONDITION_CHOICES,
-    ITEM_TYPE_CHOICES, MATERIAL_CHOICES, PATTERN_CHOICES, SIZE_CHOICES,
+    COUNTRY_CHOICES, ITEM_TYPE_CHOICES, MATERIAL_CHOICES, PATTERN_CHOICES, SIZE_CHOICES,
     VERIFICATION_QUESTION_TYPES, PLACE_TYPE_CHOICES, RETURN_METHOD_CHOICES, RETURN_STATUS_CHOICES,
 )
 from .models import (
+    ClaimAppeal,
+    ContentReport,
     ContactRequest,
     ClaimEvidence,
     Conversation,
+    CustodyRecord,
     ItemReport,
     Message,
+    ReportImage,
     ReturnArrangement,
     SavedSearch,
     UserProfile,
+    UniversityLocation,
     normalize_phone_number,
     validate_evidence_size,
     validate_evidence_content,
     validate_phone_number,
 )
 from .moderation import SensitiveContentModerationService
+from .university import UniversityAccessService
 
 
 class RegistrationForm(UserCreationForm):
@@ -79,6 +86,12 @@ class RegistrationForm(UserCreationForm):
                     "consent_to_share_phone": self.cleaned_data.get(
                         "consent_to_share_phone", False
                     ),
+                    "university_eligible": UniversityAccessService.email_is_eligible(user.email),
+                    "preferred_scope": (
+                        ItemReport.Scope.UNIVERSITY
+                        if UniversityAccessService.email_is_eligible(user.email)
+                        else ItemReport.Scope.INTERNATIONAL
+                    ),
                 },
             )
         return user
@@ -94,7 +107,7 @@ class UserProfileForm(forms.ModelForm):
     class Meta:
         model = UserProfile
         fields = (
-            "display_name", "preferred_language", "phone_number",
+            "display_name", "preferred_language", "preferred_scope", "phone_number",
             "consent_to_share_phone",
             "mask_phone_number",
             "notify_strong_matches", "notify_claim_updates", "notify_messages", "email_notifications",
@@ -118,9 +131,16 @@ class UserProfileForm(forms.ModelForm):
         validate_phone_number(raw_phone_number)
         return normalize_phone_number(raw_phone_number)
 
+    def clean_preferred_scope(self):
+        scope = self.cleaned_data.get("preferred_scope") or self.instance.preferred_scope
+        if scope == ItemReport.Scope.UNIVERSITY and not UniversityAccessService.is_verified(self.instance.user):
+            raise forms.ValidationError(_("Your verified account has International access only."))
+        return scope
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["preferred_language"].required = False
+        self.fields["preferred_scope"].required = False
 
 
 class ContactRequestForm(forms.ModelForm):
@@ -202,7 +222,56 @@ class ConversationReopenForm(forms.Form):
         return reason
 
 
+class MultipleFileInput(forms.ClearableFileInput):
+    allow_multiple_selected = True
+
+
+class MultipleImageField(forms.FileField):
+    widget = MultipleFileInput
+
+    def clean(self, data, initial=None):
+        if not data:
+            return []
+        items = data if isinstance(data, (list, tuple)) else [data]
+        return [super(MultipleImageField, self).clean(item, initial) for item in items]
+
+
+def prepare_report_image(upload):
+    """Validate real image bytes, resize locally, and strip embedded metadata."""
+    if not upload or not isinstance(upload, UploadedFile):
+        return upload
+    try:
+        upload.seek(0)
+        with Image.open(upload) as source:
+            source.verify()
+        upload.seek(0)
+        with Image.open(upload) as source:
+            if source.width < 1 or source.height < 1 or source.width > 12000 or source.height > 12000:
+                raise forms.ValidationError(_("Use an image no larger than 12,000×12,000 pixels."))
+            image = source.convert("RGB") if source.mode not in ("RGB", "RGBA") else source.copy()
+            image.thumbnail((2400, 2400))
+            output = BytesIO()
+            suffix = Path(upload.name).suffix.lower()
+            image_format = "PNG" if suffix == ".png" else "WEBP" if suffix == ".webp" else "JPEG"
+            if image_format == "JPEG" and image.mode != "RGB":
+                image = image.convert("RGB")
+            image.save(output, format=image_format, quality=88, optimize=True)
+    except (UnidentifiedImageError, OSError, ValueError):
+        raise forms.ValidationError(_("Upload a genuine JPG, PNG, or WebP image."))
+    output.seek(0)
+    extension = {"JPEG": ".jpg", "PNG": ".png", "WEBP": ".webp"}[image_format]
+    return InMemoryUploadedFile(
+        output, "ImageField", f"report-{uuid4().hex}{extension}",
+        f"image/{image_format.lower()}", output.getbuffer().nbytes, None,
+    )
+
+
 class ItemReportForm(forms.ModelForm):
+    country = forms.ChoiceField(required=False, choices=(("", _("Select a country")), *COUNTRY_CHOICES))
+    additional_images = MultipleImageField(
+        required=False,
+        help_text=_("Optional. Add up to two more images, for three images total."),
+    )
     verification_question_1_type = forms.ChoiceField(required=False, choices=(("", _("Select a question")), *VERIFICATION_QUESTION_TYPES))
     verification_question_1_text = forms.CharField(required=False, max_length=240)
     verification_question_1_answer = forms.CharField(required=False, max_length=500, widget=forms.Textarea(attrs={"rows": 2, "dir": "auto"}))
@@ -221,11 +290,11 @@ class ItemReportForm(forms.ModelForm):
             "item_type", "custom_item_type", "primary_colour", "secondary_colour",
             "material", "approximate_size", "pattern", "item_condition",
             "brand", "custom_brand", "model",
-            "country", "region", "city", "district", "place_type", "place_name",
-            "public_location", "exact_private_location", "latitude", "longitude",
-            "public_location_precision_km",
             "campus_location",
+            "university_location",
             "custom_location",
+            "country", "region", "city", "district", "place_type", "place_name",
+            "public_location", "exact_private_location",
             "item_date",
             "additional_details",
             "image", "duplicate_confirmed",
@@ -239,9 +308,11 @@ class ItemReportForm(forms.ModelForm):
             "longitude": forms.NumberInput(attrs={"step": "0.000001"}),
         }
 
-    def __init__(self, *args, report_type=None, **kwargs):
+    def __init__(self, *args, report_type=None, scope=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.report_type = report_type or getattr(self.instance, "report_type", "")
+        self.scope = scope or getattr(self.instance, "scope", ItemReport.Scope.UNIVERSITY)
+        self.instance.scope = self.scope
         self.fields["category"].choices = (("", _("Select a category")), *ItemReport.Category.choices)
         self.fields["title"].required = False
         self.fields["item_type"].choices = (("", _("Select an item type")), *ALL_ITEM_TYPE_CHOICES)
@@ -251,16 +322,20 @@ class ItemReportForm(forms.ModelForm):
             self.fields[field_name].choices = (("", _("Not specified")), *self.fields[field_name].choices)
         self.fields["campus_location"].choices = (("", _("Select a general location")), *ItemReport.CampusLocation.choices)
         self.fields["campus_location"].required = False
+        self.fields["university_location"].queryset = self.fields["university_location"].queryset.filter(is_active=True)
+        self.fields["university_location"].required = False
+        self.fields["university_location"].label = _("Campus, building, and general area")
+        submitted_country = self.data.get("country") if self.is_bound else ""
+        legacy_country = self.instance.country if self.instance.pk else submitted_country
+        if legacy_country and legacy_country not in dict(COUNTRY_CHOICES):
+            self.fields["country"].choices = (
+                ("", _("Select a country")), (legacy_country, legacy_country), *COUNTRY_CHOICES
+            )
+        self.fields["place_type"].choices = (("", _("Select a place type")), *PLACE_TYPE_CHOICES)
+        self.fields["exact_private_location"].help_text = _(
+            "Strictly private. Never used in matching, search, notifications, analytics, or public pages."
+        )
         legacy_post = bool(self.data.get("colour"))
-        self.fields["country"].required = not legacy_post
-        self.fields["city"].required = not legacy_post
-        self.fields["place_type"].choices = (("", _("Select a place type (optional)")), *PLACE_TYPE_CHOICES)
-        self.fields["exact_private_location"].help_text = _("Private. Visible only to you, approved return participants when necessary, and authorized administrators.")
-        self.fields["latitude"].help_text = _("Optional full-precision coordinate. It is never displayed publicly.")
-        self.fields["longitude"].help_text = _("Optional full-precision coordinate. It is never displayed publicly.")
-        self.fields["public_location_precision_km"].help_text = _("Controls how broadly an approximate map location may be displayed.")
-        self.fields["public_location_precision_km"].required = False
-        self.fields["public_location_precision_km"].initial = self.instance.public_location_precision_km or 5
         self.fields["duplicate_confirmed"].widget = forms.HiddenInput()
         self.fields["item_date"].label = _("Date found") if self.report_type == ItemReport.ReportType.FOUND else _("Date lost")
         self.fields["approximate_size"].help_text = _("Choose the closest approximate size.")
@@ -277,7 +352,6 @@ class ItemReportForm(forms.ModelForm):
 
     def clean(self):
         cleaned = super().clean()
-        cleaned["public_location_precision_km"] = cleaned.get("public_location_precision_km") or 5
         category = cleaned.get("category")
         item_type = cleaned.get("item_type")
         legacy_post = bool(self.data.get("colour"))
@@ -293,8 +367,25 @@ class ItemReportForm(forms.ModelForm):
             self.add_error("custom_item_type", _("Specify the item type when Other is selected."))
         if cleaned.get("brand") == "other" and not cleaned.get("custom_brand"):
             self.add_error("custom_brand", _("Specify the brand when Other is selected."))
-        if cleaned.get("campus_location") == "other" and not cleaned.get("custom_location"):
-            self.add_error("custom_location", _("Specify a general location when Other is selected."))
+        if self.scope == ItemReport.Scope.UNIVERSITY:
+            if cleaned.get("campus_location") == "other" and not cleaned.get("custom_location"):
+                self.add_error("custom_location", _("Specify a general location when Other is selected."))
+            if not cleaned.get("university_location") and not cleaned.get("campus_location"):
+                self.add_error("university_location", _("Choose a University location or a general campus area."))
+            for name in ("country", "region", "city", "district", "place_type", "place_name", "public_location", "exact_private_location"):
+                cleaned[name] = ""
+        else:
+            country_aliases = {"turkey": "TR", "türkiye": "TR"}
+            cleaned["country"] = country_aliases.get((cleaned.get("country") or "").casefold(), cleaned.get("country"))
+            if not cleaned.get("country"):
+                self.add_error("country", _("Country is required for International reports."))
+            if not (cleaned.get("city") or "").strip():
+                self.add_error("city", _("City is required for International reports."))
+            cleaned["university_location"] = None
+            cleaned["campus_location"] = ""
+            cleaned["custom_location"] = ""
+        if item_type in {"student_id", "bank_card", "driver_licence", "national_id", "passport"} and cleaned.get("additional_images"):
+            self.add_error("additional_images", _("Sensitive documents cannot have public additional images."))
         if not cleaned.get("primary_colour") and legacy_post:
             raw = " ".join(self.data.get("colour", "").split()).casefold().replace(" ", "_")
             cleaned["primary_colour"] = raw if raw in dict(COLOUR_CHOICES) else "not_sure"
@@ -322,36 +413,18 @@ class ItemReportForm(forms.ModelForm):
         return item_date
 
     def clean_image(self):
-        upload = self.cleaned_data.get("image")
-        if not upload or not isinstance(upload, UploadedFile):
-            return upload
-        try:
-            upload.seek(0)
-            with Image.open(upload) as source:
-                source.verify()
-            upload.seek(0)
-            with Image.open(upload) as source:
-                if source.width < 1 or source.height < 1 or source.width > 12000 or source.height > 12000:
-                    raise forms.ValidationError(_("Use an image no larger than 12,000×12,000 pixels."))
-                image = source.convert("RGB") if source.mode not in ("RGB", "RGBA") else source.copy()
-                image.thumbnail((2400, 2400))
-                output = BytesIO()
-                suffix = Path(upload.name).suffix.lower()
-                image_format = "PNG" if suffix == ".png" else "WEBP" if suffix == ".webp" else "JPEG"
-                if image_format == "JPEG" and image.mode != "RGB":
-                    image = image.convert("RGB")
-                image.save(output, format=image_format, quality=88, optimize=True)
-        except (UnidentifiedImageError, OSError, ValueError):
-            raise forms.ValidationError(_("Upload a genuine JPG, PNG, or WebP image."))
-        output.seek(0)
-        extension = {"JPEG": ".jpg", "PNG": ".png", "WEBP": ".webp"}[image_format]
-        return InMemoryUploadedFile(
-            output, "ImageField", f"report-{uuid4().hex}{extension}",
-            f"image/{image_format.lower()}", output.getbuffer().nbytes, None,
-        )
+        return prepare_report_image(self.cleaned_data.get("image"))
+
+    def clean_additional_images(self):
+        uploads = self.cleaned_data.get("additional_images") or []
+        existing_count = self.instance.additional_images.filter(is_hidden=False).count() if self.instance.pk else 0
+        if existing_count + len(uploads) > 2:
+            raise forms.ValidationError(_("A report may contain no more than three images total."))
+        return [prepare_report_image(upload) for upload in uploads]
 
     def save(self, commit=True):
         report = super().save(commit=False)
+        report.scope = self.scope
         report.colour = (" ".join(self.data.get("colour", "").split()) if self.data.get("colour") else (report.get_primary_colour_display() or report.primary_colour))
         report.description = self.cleaned_data.get("additional_details", "")
         if not report.title:
@@ -359,6 +432,13 @@ class ItemReportForm(forms.ModelForm):
         if commit:
             report.save()
             self.save_m2m()
+            next_position = 2
+            used = set(report.additional_images.values_list("position", flat=True))
+            for upload in self.cleaned_data.get("additional_images", []):
+                while next_position in used:
+                    next_position += 1
+                ReportImage.objects.create(report=report, image=upload, position=next_position)
+                used.add(next_position)
         return report
 
     def suggested_title(self):
@@ -366,59 +446,43 @@ class ItemReportForm(forms.ModelForm):
         colour = dict(COLOUR_CHOICES).get(self.cleaned_data.get("primary_colour"), "")
         brand = self.cleaned_data.get("custom_brand") if self.cleaned_data.get("brand") == "other" else dict(BRAND_CHOICES).get(self.cleaned_data.get("brand"), "")
         item_type = self.cleaned_data.get("custom_item_type") if self.cleaned_data.get("item_type") == "other" else dict(ALL_ITEM_TYPE_CHOICES).get(self.cleaned_data.get("item_type"), "")
-        city = self.cleaned_data.get("city", "")
+        city = self.cleaned_data.get("city", "") if self.scope == ItemReport.Scope.INTERNATIONAL else ""
         title = " ".join(str(part) for part in (report_type, colour, brand, item_type) if part)
         return (f"{title} in {city}" if city else title)[:120]
 
 
 class ReturnArrangementForm(forms.ModelForm):
-    share_delivery_address = forms.BooleanField(
-        required=False,
-        label=_("I explicitly consent to share this delivery address with the approved participant"),
-    )
-
     class Meta:
         model = ReturnArrangement
         fields = (
             "return_method", "status", "safe_public_location", "trusted_organization",
-            "custom_arrangement", "delivery_address", "delivery_cost_payer", "courier_name",
-            "tracking_reference", "failure_report",
+            "custom_arrangement", "failure_report",
         )
         widgets = {
             "custom_arrangement": forms.Textarea(attrs={"rows": 3, "dir": "auto"}),
-            "delivery_address": forms.Textarea(attrs={"rows": 3, "dir": "auto"}),
             "failure_report": forms.Textarea(attrs={"rows": 3, "dir": "auto"}),
         }
 
     def __init__(self, *args, user, **kwargs):
         super().__init__(*args, **kwargs)
         self.user = user
-        self.fields["return_method"].choices = (("", _("Choose a return method")), *RETURN_METHOD_CHOICES)
+        scope = self.instance.contact_request.item_report.scope
+        if scope == ItemReport.Scope.UNIVERSITY:
+            methods = [choice for choice in RETURN_METHOD_CHOICES if choice[0] in {"security", "trusted_organization"}]
+        else:
+            methods = [choice for choice in RETURN_METHOD_CHOICES if choice[0] in {
+                "safe_public_meeting", "local_authority", "private_shipping"
+            }]
+        self.allowed_methods = {value for value, label in methods}
+        self.fields["return_method"].choices = (("", _("Choose a return method")), *methods)
         self.fields["status"].choices = RETURN_STATUS_CHOICES
         self.fields["trusted_organization"].queryset = self.fields["trusted_organization"].queryset.filter(is_verified=True)
-        self.fields["delivery_address"].help_text = _("Private. Never used for matching, search, analytics, or notification text.")
-        if self.instance.pk and self.instance.address_consent_at and not self.instance.address_consent_withdrawn_at:
-            self.fields["share_delivery_address"].initial = True
 
     def clean(self):
         cleaned = super().clean()
-        claim = self.instance.contact_request
-        if cleaned.get("delivery_address") and self.user.pk != claim.requesting_user_id:
-            self.add_error("delivery_address", _("Only the approved owner may provide and consent to share a delivery address."))
-        if cleaned.get("delivery_address") and not cleaned.get("share_delivery_address"):
-            self.add_error("share_delivery_address", _("Explicit consent is required before sharing a delivery address."))
-        elif cleaned.get("delivery_address") and cleaned.get("share_delivery_address"):
-            self.instance.address_consent_at = self.instance.address_consent_at or timezone.now()
-            self.instance.address_consent_withdrawn_at = None
-        if (
-            self.instance.pk and self.instance.address_consent_at
-            and not cleaned.get("share_delivery_address")
-            and self.instance.status in ("sent", "handed_over", "awaiting_receipt", "received")
-        ):
-            self.add_error("share_delivery_address", _("Address consent can be withdrawn only before shipment or handover."))
-        if cleaned.get("return_method") == "courier_post" and not cleaned.get("delivery_cost_payer"):
-            self.add_error("delivery_cost_payer", _("Agree who pays the delivery cost."))
-        for field in ("delivery_address", "tracking_reference", "custom_arrangement", "failure_report"):
+        if cleaned.get("return_method") and cleaned["return_method"] not in self.allowed_methods:
+            self.add_error("return_method", _("Choose a return method appropriate for this report scope."))
+        for field in ("custom_arrangement", "failure_report"):
             try:
                 cleaned[field] = SensitiveContentModerationService.reject_forbidden_secret(cleaned.get(field, ""))
             except forms.ValidationError as exc:
@@ -484,7 +548,28 @@ class SuspiciousClaimForm(forms.Form):
     reason = forms.CharField(max_length=1000, widget=forms.Textarea(attrs={"rows": 4, "dir": "auto"}))
 
 
+class ClaimAppealForm(forms.ModelForm):
+    class Meta:
+        model = ClaimAppeal
+        fields = ("reason",)
+        widgets = {"reason": forms.Textarea(attrs={"rows": 5, "maxlength": 1000, "dir": "auto"})}
+
+    def clean_reason(self):
+        return SensitiveContentModerationService.reject_forbidden_secret(self.cleaned_data["reason"])
+
+
+class ContentReportForm(forms.ModelForm):
+    class Meta:
+        model = ContentReport
+        fields = ("reason",)
+        widgets = {"reason": forms.Textarea(attrs={"rows": 4, "maxlength": 1000, "dir": "auto"})}
+
+    def clean_reason(self):
+        return SensitiveContentModerationService.clean(self.cleaned_data["reason"])
+
+
 class ReportFilterForm(forms.Form):
+    scope = forms.ChoiceField(choices=ItemReport.Scope.choices, label=_("Mode"))
     query = forms.CharField(required=False, label=_("Keyword"))
     report_type = forms.ChoiceField(
         required=False, choices=[("", _("All types")), *ItemReport.ReportType.choices]
@@ -497,16 +582,19 @@ class ReportFilterForm(forms.Form):
     brand = forms.ChoiceField(required=False, choices=(("", _("All brands")), *BRAND_CHOICES))
     material = forms.ChoiceField(required=False, choices=(("", _("All materials")), *MATERIAL_CHOICES))
     approximate_size = forms.ChoiceField(required=False, choices=(("", _("All sizes")), *SIZE_CHOICES), label=_("Size"))
-    country = forms.CharField(required=False, label=_("Country"))
+    campus_location = forms.ChoiceField(
+        required=False,
+        choices=[("", _("All locations")), *ItemReport.CampusLocation.choices],
+    )
+    university_location = forms.ModelChoiceField(
+        required=False, queryset=None, label=_("Campus or building")
+    )
+    country = forms.ChoiceField(required=False, choices=(("", _("All countries")), *COUNTRY_CHOICES))
     region = forms.CharField(required=False, label=_("State, province, or region"))
     city = forms.CharField(required=False, label=_("City"))
     district = forms.CharField(required=False, label=_("District or area"))
     place_type = forms.ChoiceField(required=False, choices=(("", _("All place types")), *PLACE_TYPE_CHOICES))
     place_name = forms.CharField(required=False, label=_("Place name"))
-    campus_location = forms.ChoiceField(
-        required=False,
-        choices=[("", _("All locations")), *ItemReport.CampusLocation.choices],
-    )
     status = forms.ChoiceField(
         required=False, choices=(("", _("All public reports")), (ItemReport.Status.ACTIVE, _("Active")))
     )
@@ -523,6 +611,21 @@ class ReportFilterForm(forms.Form):
             self.add_error("date_to", _("The end date must not be before the start date."))
         return cleaned
 
+    def __init__(self, *args, scope=ItemReport.Scope.UNIVERSITY, include_all_scopes=False, **kwargs):
+        super().__init__(*args, **kwargs)
+        from .models import UniversityLocation
+        self.fields["university_location"].queryset = UniversityLocation.objects.filter(is_active=True)
+        self.fields["scope"].initial = scope
+        if include_all_scopes:
+            self.fields["scope"].required = False
+            self.fields["scope"].choices = (("", _("All modes")), *ItemReport.Scope.choices)
+        elif scope == ItemReport.Scope.UNIVERSITY:
+            for name in ("country", "region", "city", "district", "place_type", "place_name"):
+                self.fields.pop(name)
+        else:
+            self.fields.pop("campus_location")
+            self.fields.pop("university_location")
+
 
 class AdminReportFilterForm(ReportFilterForm):
     visibility = forms.ChoiceField(
@@ -531,6 +634,7 @@ class AdminReportFilterForm(ReportFilterForm):
     )
 
     def __init__(self, *args, **kwargs):
+        kwargs["include_all_scopes"] = True
         super().__init__(*args, **kwargs)
         self.fields["status"].choices = (("", _("All statuses")), *ItemReport.Status.choices)
 
@@ -558,3 +662,75 @@ class AdminUserStatusForm(forms.Form):
         if not reason:
             raise forms.ValidationError(_("Enter a reason for this account action."))
         return reason
+
+
+class UniversityLocationForm(forms.ModelForm):
+    class Meta:
+        model = UniversityLocation
+        fields = ("campus", "building", "general_area", "location_type", "is_active")
+
+
+class CustodyRecordForm(forms.ModelForm):
+    class Meta:
+        model = CustodyRecord
+        fields = (
+            "found_report", "reference", "intake_at", "intake_point", "storage_reference",
+            "status", "is_high_value", "is_locked_storage", "requires_two_staff_release", "notes",
+        )
+        widgets = {"intake_at": forms.DateTimeInput(attrs={"type": "datetime-local"}),
+                   "notes": forms.Textarea(attrs={"rows": 3, "dir": "auto"})}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["found_report"].queryset = ItemReport.objects.filter(
+            report_type=ItemReport.ReportType.FOUND, scope=ItemReport.Scope.UNIVERSITY,
+            is_deleted=False
+        ).exclude(custody_record__isnull=False)
+
+    def clean(self):
+        cleaned = super().clean()
+        if cleaned.get("is_high_value") and not cleaned.get("is_locked_storage"):
+            self.add_error("is_locked_storage", _("High-value items require locked storage."))
+        return cleaned
+
+
+class StorageIncidentForm(forms.Form):
+    summary = forms.CharField(max_length=255, widget=forms.Textarea(attrs={"rows": 3, "dir": "auto"}))
+
+    def clean_summary(self):
+        return SensitiveContentModerationService.clean(self.cleaned_data["summary"])
+
+
+class CustodyMovementForm(forms.Form):
+    event_type = forms.ChoiceField(choices=(("move", _("Storage movement")), ("review", _("Inventory review"))))
+    new_storage_reference = forms.CharField(required=False, max_length=120, label=_("New private storage reference"))
+    safe_note = forms.CharField(required=False, max_length=255, widget=forms.Textarea(attrs={"rows": 2, "dir": "auto"}))
+
+    def clean_safe_note(self):
+        return SensitiveContentModerationService.clean(self.cleaned_data.get("safe_note", ""))
+
+
+class CustodyReleaseForm(forms.Form):
+    recipient_confirmed = forms.BooleanField(label=_("The recipient confirmed collection"))
+    second_staff = forms.ModelChoiceField(
+        required=False, queryset=User.objects.none(), label=_("Second staff confirmation")
+    )
+
+    def __init__(self, *args, acting_user, custody_record, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.acting_user = acting_user
+        self.record = custody_record
+        self.fields["second_staff"].queryset = User.objects.filter(is_staff=True, is_active=True).exclude(pk=acting_user.pk)
+        self.fields["second_staff"].required = custody_record.requires_two_staff_release
+
+
+class CustodyDispositionForm(forms.Form):
+    disposition = forms.ChoiceField(choices=(
+        ("authority_transfer", _("Transfer to an appropriate authority")),
+        ("issuer_return", _("Return to card issuer")),
+        ("secure_destruction", _("Secure destruction under approved policy")),
+        ("donation", _("Donation under approved policy")),
+        ("recycling", _("Approved recycling/data handling")),
+        ("other_authorized", _("Other authorized University decision")),
+    ))
+    safe_note = forms.CharField(required=False, max_length=255, widget=forms.Textarea(attrs={"rows": 2, "dir": "auto"}))

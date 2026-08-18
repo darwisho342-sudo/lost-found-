@@ -8,6 +8,8 @@
 .hero-copy-centred h1 { color: var(--color-white); font-size: clamp(2.7rem,6vw,5rem); font-weight: 700; letter-spacing: -.045em; line-height: 1.04; margin: 1.25rem 0; }
 .hero-copy-centred > p { color: #DDD6FE; font-size: clamp(1rem,2vw,1.2rem); margin: auto; max-width: 680px; }
 .hero-actions { display: flex; flex-wrap: wrap; gap: .8rem; justify-content: center; margin-top: 2rem; }
+.scope-choice { align-items:center; display:flex; flex-direction:column; gap:.65rem; margin:1.25rem auto; }
+.scope-choice > div { display:flex; flex-wrap:wrap; gap:.5rem; justify-content:center; }
 .hero-btn-primary, .hero-btn-secondary { border-radius: .65rem; font-weight: 600; padding: .8rem 1.2rem; }
 .hero-btn-primary { background: #F97316; border-color: #F97316; box-shadow: 0 10px 25px rgba(249,115,22,.25); color: var(--color-white); }
 .hero-btn-primary:hover { background: #EA580C; border-color: #EA580C; color: var(--color-white); }

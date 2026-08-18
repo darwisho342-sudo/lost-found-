@@ -25,9 +25,10 @@ class AdminReportActionService:
         "mark_resolved": gettext_lazy("Mark as Resolved"),
         "close": gettext_lazy("Close Selected"),
         "hide": gettext_lazy("Hide Selected"),
+        "hide_images": gettext_lazy("Hide Images Immediately"),
         "delete": gettext_lazy("Delete Selected"),
     }
-    CONFIRMATION_ACTIONS = {"mark_resolved", "close", "hide", "delete"}
+    CONFIRMATION_ACTIONS = {"mark_resolved", "close", "hide", "hide_images", "delete"}
 
     @classmethod
     def apply(cls, *, administrator, reports, action):
@@ -104,6 +105,12 @@ class AdminReportActionService:
                 return _("Already hidden reports were skipped.")
             report.is_hidden = True
             report.save(update_fields=["is_hidden", "updated_at"])
+        elif action == "hide_images":
+            if not report.image and not report.additional_images.filter(is_hidden=False).exists():
+                return _("Reports without a public image were skipped.")
+            if report.image:
+                report.hide_public_image()
+            report.additional_images.filter(is_hidden=False).update(is_hidden=True)
         elif action == "delete":
             report.is_deleted = True
             report.is_hidden = True

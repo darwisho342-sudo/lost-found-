@@ -12,6 +12,7 @@
       </div>
 
       <ul class="fm-nav-actions">
+        <li class="desktop-scope-selector">{% include 'includes/scope_selector.html' with scope_selector_id='desktopScopeSelector' %}</li>
         {% if user.is_authenticated %}
           <li class="dropdown"><button class="nav-link dropdown-toggle fm-messages-trigger{% if page == 'conversation_list' or page == 'conversation_detail' or page == 'contact_requests_sent' or page == 'contact_requests_received' %} active{% endif %}" type="button" id="messagesMenuButton" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="messagesMenu"><i class="bi bi-chat-dots" aria-hidden="true"></i><span>{% translate "Messages" %}</span></button><ul class="dropdown-menu dropdown-menu-end" id="messagesMenu" aria-labelledby="messagesMenuButton"><li><a class="dropdown-item" href="{% url 'conversation_list' %}"><i class="bi bi-chat-dots" aria-hidden="true"></i>{% translate "Conversations" %}</a></li><li><a class="dropdown-item" href="{% url 'contact_requests_sent' %}"><i class="bi bi-send" aria-hidden="true"></i>{% translate "Requests Sent" %}</a></li><li><a class="dropdown-item" href="{% url 'contact_requests_received' %}"><i class="bi bi-inbox" aria-hidden="true"></i>{% translate "Requests Received" %}</a></li></ul></li>
           {% include 'includes/notification_center.html' %}
@@ -33,6 +34,7 @@
 <aside class="offcanvas offcanvas-end fm-mobile-drawer" tabindex="-1" id="mobileNavigation" aria-labelledby="mobileNavigationTitle">
   <div class="offcanvas-header"><a class="fm-brand" href="{% url 'home' %}" data-bs-dismiss="offcanvas"><span class="brand-mark" aria-hidden="true"><i class="bi bi-search-heart"></i></span><span id="mobileNavigationTitle">FindMatch</span></a><button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="{% translate 'Close navigation' %}"></button></div>
   <div class="offcanvas-body"><nav class="mobile-drawer-links" aria-label="{% translate 'Mobile menu' %}">
+    {% include 'includes/scope_selector.html' with scope_selector_id='mobileScopeSelector' %}
     <a href="{% url 'home' %}" data-bs-dismiss="offcanvas"{% if page == 'home' %} aria-current="page"{% endif %}><i class="bi bi-house"></i>{% translate "Home" %}</a>
     <a href="{% url 'item_list' %}" data-bs-dismiss="offcanvas"{% if page == 'item_list' or page == 'lost_item_list' or page == 'found_item_list' %} aria-current="page"{% endif %}><i class="bi bi-search"></i>{% translate "Browse Items" %}</a>
     <a href="{% url 'item_create_lost' %}" data-bs-dismiss="offcanvas"><i class="bi bi-plus-circle"></i>{% translate "Report Item" %}</a>

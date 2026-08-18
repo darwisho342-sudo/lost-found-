@@ -1,1 +1,6 @@
-{% load i18n %}<footer class="border-top mt-5 py-4"><div class="container text-muted small d-flex flex-wrap justify-content-between gap-3"><span>{% translate "FindMatch — an international lost-and-found demonstration" %}</span><nav aria-label="{% translate 'Legal and privacy' %}"><a href="{% url 'privacy_policy' %}">{% translate "Privacy" %}</a> · <a href="{% url 'terms' %}">{% translate "Terms" %}</a>{% if user.is_authenticated %} · <a href="{% url 'privacy_centre' %}">{% translate "Privacy centre" %}</a> · <a href="{% url 'saved_search_list' %}">{% translate "Saved alerts" %}</a>{% endif %}</nav><span>{% translate "Do not post private contact or exact-location information in public reports." %}</span></div></footer>
+{% load i18n %}
+<footer class="border-top mt-5 py-4"><div class="container text-muted small d-flex flex-wrap justify-content-between gap-3">
+  <span>FindMatch — {{ university_name }} {% translate "and International Lost and Found" %}</span>
+  <nav aria-label="{% translate 'Legal and privacy' %}"><a href="{% url 'privacy_policy' %}">{% translate "Privacy" %}</a> · <a href="{% url 'terms' %}">{% translate "Terms" %}</a>{% if user.is_authenticated %} · <a href="{% url 'privacy_centre' %}">{% translate "Privacy centre" %}</a> · <a href="{% url 'saved_search_list' %}">{% translate "Saved alerts" %}</a>{% endif %}</nav>
+  <span>{% translate "Do not post private contact or exact-location information in public reports." %}</span>
+</div></footer>

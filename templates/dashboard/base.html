@@ -22,6 +22,7 @@
       <a href="{% url 'management_dashboard' %}"{% if request.resolver_match.url_name == 'management_dashboard' %} aria-current="page"{% endif %}><i class="bi bi-grid-1x2"></i>{% translate "Dashboard" %}</a>
       <a href="{% url 'management_reports' %}"{% if request.resolver_match.url_name == 'management_reports' %} aria-current="page"{% endif %}><i class="bi bi-clipboard-data"></i>{% translate "Reports" %}</a>
       <a href="{% url 'management_users' %}"{% if request.resolver_match.url_name == 'management_users' or request.resolver_match.url_name == 'management_user_detail' %} aria-current="page"{% endif %}><i class="bi bi-people"></i>{% translate "Users" %}</a>
+      <a href="{% url 'management_custody' %}"{% if request.resolver_match.url_name == 'management_custody' %} aria-current="page"{% endif %}><i class="bi bi-box-seam"></i>{% translate "Custody inventory" %}</a>
       <span class="admin-menu-label">{% translate "Private contact" %}</span>
       <a href="{% url 'management_conversations' %}"><i class="bi bi-chat-dots"></i>{% translate "Conversations" %}</a>
       <a href="{% url 'management_audit_log' %}"><i class="bi bi-journal-check"></i>{% translate "Audit Log" %}</a>

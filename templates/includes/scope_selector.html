@@ -1,0 +1,13 @@
+{% load i18n %}
+{% if international_mode_enabled %}
+<form class="scope-selector" method="post" action="{% url 'switch_scope' %}" aria-label="{% translate 'Report location mode' %}">
+  {% csrf_token %}
+  <input type="hidden" name="next" value="{{ request.get_full_path }}">
+  <label for="{{ scope_selector_id|default:'scopeSelector' }}">{% translate "Mode" %}</label>
+  <select id="{{ scope_selector_id|default:'scopeSelector' }}" name="scope" onchange="this.form.submit()">
+    {% if not user.is_authenticated or has_university_access %}<option value="university"{% if active_scope == 'university' %} selected{% endif %}>{% translate "University" %}</option>{% endif %}
+    <option value="international"{% if active_scope == 'international' %} selected{% endif %}>{% translate "International" %}</option>
+  </select>
+  <noscript><button class="btn btn-sm btn-outline-light" type="submit">{% translate "Switch" %}</button></noscript>
+</form>
+{% endif %}

@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="{% translate 'FindMatch university lost-and-found service' %}">
+  <meta name="description" content="{% translate 'FindMatch University and International lost-and-found service' %}">
   <title>{% block title %}FindMatch{% endblock %}</title>
   <link rel="stylesheet" href="{% static 'vendor/bootstrap.min.css' %}">
   <link rel="stylesheet" href="{% static 'vendor/bootstrap-icons.min.css' %}">
@@ -45,7 +45,7 @@
     {% endwith %}
   {% endblock %}
 </head>
-<body class="{% block body_class %}{% endblock %}">
+<body class="{% block body_class %}{% endblock %}"{% if user.is_authenticated %} data-session-seconds="{{ session_cookie_age }}" data-session-message="{% translate 'Your session will expire soon. Save long forms before continuing.' %}"{% endif %}>
   <a class="skip-link" href="#main-content">{% translate "Skip to main content" %}</a>
   {% block header %}{% include 'includes/navigation.html' %}{% endblock %}
   {% block main %}<main id="main-content">{% include 'includes/messages.html' %}{% block content %}{% endblock %}</main>{% endblock %}

@@ -7,6 +7,8 @@
   <dl class="detail-list">
     <div><dt>{% translate "Username" %}</dt><dd dir="auto">{{ user.username }}</dd></div>
     <div><dt>{% translate "Email" %}</dt><dd dir="ltr">{{ user.email }}</dd></div>
+    <div><dt>{% translate "Account access" %}</dt><dd>{% if profile.university_eligible %}{% translate "University and International modes" %}{% else %}{% translate "International Mode" %}{% endif %}</dd></div>
+    <div><dt>{% translate "Preferred mode" %}</dt><dd>{{ profile.get_preferred_scope_display }}</dd></div>
     <div><dt>{% translate "Phone number" %}</dt><dd>{% if profile.phone_number %}{% translate "Saved privately" %}{% else %}{% translate "Not provided" %}{% endif %}</dd></div>
     <div><dt>{% translate "Sharing consent" %}</dt><dd>{% if profile.consent_to_share_phone %}{% translate "Enabled" %}{% else %}{% translate "Disabled" %}{% endif %}</dd></div>
     <div><dt>{% translate "Phone masking" %}</dt><dd>{% if profile.mask_phone_number %}{% translate "Show final four digits only" %}{% else %}{% translate "Show full number in an active conversation" %}{% endif %}</dd></div>

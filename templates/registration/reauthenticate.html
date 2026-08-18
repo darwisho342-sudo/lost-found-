@@ -1,0 +1,3 @@
+{% extends 'base.html' %}{% load i18n %}
+{% block title %}{% translate "Confirm your identity" %} — FindMatch{% endblock %}
+{% block content %}<section class="container py-5"><div class="form-shell auth-card"><h1>{% translate "Confirm your identity" %}</h1><p>{% translate "For this sensitive action, re-enter the password for your current account." %}</p><form method="post">{% csrf_token %}<input type="hidden" name="next" value="{{ next }}">{{ form.non_field_errors }}{% for field in form %}{% include 'items/includes/form_field.html' with field=field %}{% endfor %}<button class="btn btn-primary w-100" type="submit">{% translate "Continue securely" %}</button></form></div></section>{% endblock %}

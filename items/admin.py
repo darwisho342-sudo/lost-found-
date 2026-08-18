@@ -4,9 +4,12 @@ from .models import (
     ContactAuditLog,
     ContactRequest,
     ClaimAnswer,
+    ClaimAppeal,
     ClaimEvidence,
     Conversation,
     ItemReport,
+    ReportImage,
+    DismissedMatch,
     PrivateVerificationQuestion,
     HandoverConfirmation,
     SuspiciousClaimReport,
@@ -16,6 +19,8 @@ from .models import (
     UserProfile,
     TrustedOrganization, OrganizationMembership, ReturnArrangement, CustodyEvent,
     SavedSearch, SavedSearchNotification, ContentReport,
+    CustodyRecord, CustodyMovement, StorageIncident,
+    UniversityLocation,
 )
 
 
@@ -23,6 +28,7 @@ from .models import (
 class ItemReportAdmin(admin.ModelAdmin):
     list_display = (
         "title",
+        "scope",
         "report_type",
         "category",
         "campus_location",
@@ -32,10 +38,11 @@ class ItemReportAdmin(admin.ModelAdmin):
         "is_reviewed",
         "is_deleted",
     )
-    list_filter = ("report_type", "category", "campus_location", "status", "is_reviewed", "is_deleted")
+    list_filter = ("scope", "report_type", "category", "campus_location", "country", "status", "is_reviewed", "is_deleted")
     search_fields = ("title", "description", "colour", "owner__username")
     list_select_related = ("owner",)
     readonly_fields = ("created_at", "updated_at")
+    exclude = ("private_sensitive_image",)
 
 
 @admin.register(UserProfile)
@@ -78,6 +85,9 @@ class ClaimEvidenceAdmin(admin.ModelAdmin):
 
 admin.site.register(HandoverConfirmation)
 admin.site.register(SuspiciousClaimReport)
+admin.site.register(ClaimAppeal)
+admin.site.register(ReportImage)
+admin.site.register(DismissedMatch)
 
 
 @admin.register(Conversation)
@@ -133,6 +143,33 @@ admin.site.register(CustodyEvent)
 admin.site.register(SavedSearch)
 admin.site.register(SavedSearchNotification)
 admin.site.register(ContentReport)
+
+
+@admin.register(CustodyRecord)
+class CustodyRecordAdmin(admin.ModelAdmin):
+    list_display = ("reference", "found_report", "status", "intake_at", "retention_expires_at", "is_high_value")
+    list_filter = ("status", "is_high_value", "is_locked_storage")
+    search_fields = ("reference", "found_report__title")
+    exclude = ("storage_reference", "notes")
+
+
+@admin.register(CustodyMovement)
+class CustodyMovementAdmin(admin.ModelAdmin):
+    list_display = ("custody_record", "event_type", "recorded_by", "recorded_at")
+    readonly_fields = ("custody_record", "event_type", "recorded_by", "recorded_at", "safe_note")
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+admin.site.register(StorageIncident)
+
+
+@admin.register(UniversityLocation)
+class UniversityLocationAdmin(admin.ModelAdmin):
+    list_display = ("campus", "building", "general_area", "location_type", "is_active")
+    list_filter = ("campus", "location_type", "is_active")
+    search_fields = ("campus", "building", "general_area")
 
 
 @admin.register(ReturnArrangement)

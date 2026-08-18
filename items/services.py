@@ -1,6 +1,5 @@
 import re
 import unicodedata
-from math import asin, cos, radians, sin, sqrt
 from dataclasses import dataclass
 from difflib import SequenceMatcher
 
@@ -82,32 +81,26 @@ class MatchingService:
         ratio = SequenceMatcher(None, a, b).ratio()
         return round(maximum * ratio) if ratio >= .35 else 0
 
-    @staticmethod
-    def approximate_distance_km(first, second):
-        values = (first.public_latitude, first.public_longitude, second.public_latitude, second.public_longitude)
-        if any(value is None for value in values):
-            return None
-        lat1, lon1, lat2, lon2 = map(radians, map(float, values))
-        delta_lat, delta_lon = lat2 - lat1, lon2 - lon1
-        value = sin(delta_lat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(delta_lon / 2) ** 2
-        return 6371 * 2 * asin(sqrt(value))
-
     @classmethod
     def location_points(cls, lost, found):
-        points = sum(
-            cls.exact_points(lost, found, field, maximum)
-            for field, maximum in (
-                ("country", 5), ("region", 2), ("city", 5), ("district", 2),
-                ("place_type", 2), ("place_name", 2),
-            )
-        )
-        distance = cls.approximate_distance_km(lost, found)
-        if distance is not None:
-            points += 2 if distance <= 2 else 1 if distance <= 10 else 0
-        elif not lost.country and not found.country:
-            # Compatibility for reports created before international locations.
-            points += cls.exact_points(lost, found, "campus_location", 10, "custom_location")
-        return min(points, 20)
+        if lost.scope == ItemReport.Scope.UNIVERSITY:
+            if lost.university_location_id and found.university_location_id:
+                first, second = lost.university_location, found.university_location
+                if first.pk == second.pk:
+                    return 10
+                points = 4 if cls.normalize_text(first.campus) == cls.normalize_text(second.campus) else 0
+                points += 3 if first.building and cls.normalize_text(first.building) == cls.normalize_text(second.building) else 0
+                points += 3 if first.general_area and cls.normalize_text(first.general_area) == cls.normalize_text(second.general_area) else 0
+                return points
+            return cls.exact_points(lost, found, "campus_location", 10, "custom_location")
+        if cls.normalize_text(lost.country) != cls.normalize_text(found.country):
+            return 0
+        return min(10, sum((
+            cls.exact_points(lost, found, "city", 4),
+            cls.exact_points(lost, found, "district", 2),
+            cls.exact_points(lost, found, "place_type", 2),
+            cls.similarity_points(lost.place_name, found.place_name, 2),
+        )))
 
     @staticmethod
     def date_points(lost_date, found_date):
@@ -127,21 +120,26 @@ class MatchingService:
             raise ValueError("Matching requires one lost report and one found report.")
         lost = first if first.report_type == ItemReport.ReportType.LOST else second
         found = second if lost is first else first
+        if lost.scope != found.scope:
+            raise ValueError("Matching requires reports in the same scope.")
+        if (lost.scope == ItemReport.Scope.INTERNATIONAL
+                and cls.normalize_text(lost.country) != cls.normalize_text(found.country)):
+            raise ValueError("International matching requires the same country.")
         # Legacy rows remain matchable through their existing colour/description fields.
         lost_primary = lost.primary_colour or lost.colour
         found_primary = found.primary_colour or found.colour
         return MatchResult(
             lost_item=lost, found_item=found,
-            category_points=cls.exact_points(lost, found, "category", 12, "custom_item_type"),
-            item_type_points=cls.exact_points(lost, found, "item_type", 12, "custom_item_type"),
-            title_points=cls.similarity_points(lost.title, found.title, 8),
-            description_points=cls.similarity_points(lost.public_details, found.public_details, 8),
-            primary_colour_points=8 if cls.normalize_text(lost_primary) and cls.normalize_text(lost_primary) == cls.normalize_text(found_primary) and cls.normalize_text(lost_primary) != "not sure" else 0,
-            secondary_colour_points=cls.exact_points(lost, found, "secondary_colour", 4),
-            brand_points=cls.exact_points(lost, found, "brand", 6, "custom_brand"),
-            model_points=cls.similarity_points(lost.model, found.model, 4),
-            material_points=cls.exact_points(lost, found, "material", 4),
-            size_points=cls.exact_points(lost, found, "approximate_size", 4),
+            category_points=cls.exact_points(lost, found, "category", 15),
+            item_type_points=cls.exact_points(lost, found, "item_type", 15, "custom_item_type"),
+            title_points=cls.similarity_points(lost.title, found.title, 5),
+            description_points=cls.similarity_points(lost.public_details, found.public_details, 15),
+            primary_colour_points=10 if cls.normalize_text(lost_primary) and cls.normalize_text(lost_primary) == cls.normalize_text(found_primary) and cls.normalize_text(lost_primary) != "not sure" else 0,
+            secondary_colour_points=cls.exact_points(lost, found, "secondary_colour", 5),
+            brand_points=cls.exact_points(lost, found, "brand", 10, "custom_brand"),
+            model_points=cls.similarity_points(lost.model, found.model, 5),
+            material_points=0,
+            size_points=0,
             location_points=cls.location_points(lost, found),
             date_points=cls.date_points(lost.item_date, found.item_date),
         )
@@ -152,6 +150,11 @@ class MatchingService:
             return []
         opposite = ItemReport.ReportType.FOUND if report.report_type == ItemReport.ReportType.LOST else ItemReport.ReportType.LOST
         candidates = queryset if queryset is not None else ItemReport.objects.all()
-        candidates = candidates.filter(report_type=opposite, status=ItemReport.Status.ACTIVE, is_hidden=False, is_deleted=False).exclude(pk=report.pk)
+        candidates = candidates.filter(
+            report_type=opposite, scope=report.scope, status=ItemReport.Status.ACTIVE,
+            is_hidden=False, is_deleted=False,
+        ).exclude(pk=report.pk)
+        if report.scope == ItemReport.Scope.INTERNATIONAL:
+            candidates = candidates.filter(country__iexact=report.country)
         results = (cls.compare(report, candidate) for candidate in candidates)
         return sorted((result for result in results if result.total_score >= cls.minimum_score), key=lambda result: result.total_score, reverse=True)[:cls.maximum_results]

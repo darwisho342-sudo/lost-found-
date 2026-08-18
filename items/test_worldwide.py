@@ -17,7 +17,7 @@ from .security import EmailVerificationService
 from .services import MatchingService
 
 
-class WorldwideReportTests(TestCase):
+class InternationalReportTests(TestCase):
     def setUp(self):
         self.owner = User.objects.create_user("world-owner", email="owner@example.invalid", password="StrongPass123!")
 
@@ -27,8 +27,9 @@ class WorldwideReportTests(TestCase):
             "item_type": "mobile_phone", "primary_colour": "black", "secondary_colour": "grey",
             "material": "metal", "approximate_size": "small", "pattern": "plain",
             "item_condition": "used", "brand": "samsung", "model": "Galaxy S",
-            "country": "Türkiye", "region": "Marmara", "city": "Istanbul", "district": "Fatih",
+            "country": "TR", "region": "Marmara", "city": "Istanbul", "district": "Fatih",
             "place_type": "public_transport", "place_name": "Sirkeci Station",
+            "campus_location": "library",
             "public_location": "Near the main public entrance", "exact_private_location": "Private platform detail",
             "latitude": "41.014000", "longitude": "28.976000", "public_location_precision_km": "5",
             "item_date": date.today().isoformat(), "additional_details": "Black case with a small scratch",
@@ -38,12 +39,13 @@ class WorldwideReportTests(TestCase):
 
     def create_report(self, report_type="lost", status="active", **overrides):
         values = {
-            "owner": self.owner, "report_type": report_type, "status": status,
+            "owner": self.owner, "report_type": report_type,
+            "scope": ItemReport.Scope.INTERNATIONAL, "status": status,
             "title": "Black Samsung phone", "description": "Black case with a small scratch",
             "additional_details": "Black case with a small scratch", "category": "electronics",
             "item_type": "mobile_phone", "colour": "Black", "primary_colour": "black",
             "secondary_colour": "grey", "material": "metal", "approximate_size": "small",
-            "brand": "samsung", "model": "Galaxy S", "country": "Türkiye", "region": "Marmara",
+            "brand": "samsung", "model": "Galaxy S", "country": "TR", "region": "Marmara",
             "city": "Istanbul", "district": "Fatih", "place_type": "public_transport",
             "place_name": "Sirkeci Station", "public_location": "Near the main entrance",
             "exact_private_location": "Private platform detail", "latitude": Decimal("41.014000"),
@@ -52,8 +54,11 @@ class WorldwideReportTests(TestCase):
         values.update(overrides)
         return ItemReport.objects.create(**values)
 
-    def test_new_report_requires_country_and_city(self):
-        form = ItemReportForm(data=self.form_data(country="", city=""), report_type="lost")
+    def test_international_report_requires_country_and_city(self):
+        form = ItemReportForm(
+            data=self.form_data(country="", city=""), report_type="lost",
+            scope=ItemReport.Scope.INTERNATIONAL,
+        )
         self.assertFalse(form.is_valid())
         self.assertIn("country", form.errors)
         self.assertIn("city", form.errors)
@@ -66,17 +71,17 @@ class WorldwideReportTests(TestCase):
         self.assertNotContains(response, "41.014")
 
     def test_public_lists_exclude_drafts_expired_and_closed_reports(self):
-        active = self.create_report(title="Visible worldwide item")
+        active = self.create_report(title="Visible local item")
         self.create_report(title="Private draft item", status="draft")
         self.create_report(title="Expired item", status="expired")
-        response = self.client.get(reverse("report_list"))
+        response = self.client.get(reverse("report_list"), {"scope": "international"})
         self.assertContains(response, active.title)
         self.assertNotContains(response, "Private draft item")
         self.assertNotContains(response, "Expired item")
 
     def test_deterministic_score_is_100_and_private_fields_are_excluded(self):
-        lost = self.create_report()
-        found = self.create_report(report_type="found", owner=User.objects.create_user("finder"))
+        lost = self.create_report(campus_location="library")
+        found = self.create_report(report_type="found", campus_location="library", owner=User.objects.create_user("finder"))
         result = MatchingService.compare(lost, found)
         self.assertEqual(result.total_score, 100)
         found.exact_private_location = "Completely different secret place"
@@ -101,9 +106,10 @@ class ReturnAlertAndPlatformTests(TestCase):
         for user in (self.finder, self.owner):
             UserProfile.objects.create(user=user, email_verified_at=timezone.now())
         self.report = ItemReport.objects.create(
-            owner=self.finder, report_type="found", title="Found phone", description="Black phone",
+            owner=self.finder, report_type="found", scope=ItemReport.Scope.INTERNATIONAL,
+            title="Found phone", description="Black phone",
             category="electronics", item_type="mobile_phone", colour="Black", primary_colour="black",
-            country="Türkiye", city="Istanbul", item_date=date.today(), status="claim_in_progress",
+            country="TR", city="Istanbul", item_date=date.today(), status="claim_in_progress",
         )
         self.claim = ContactRequest.objects.create(
             item_report=self.report, requesting_user=self.owner, receiving_user=self.finder,
@@ -115,24 +121,18 @@ class ReturnAlertAndPlatformTests(TestCase):
             first_participant=self.owner, second_participant=self.finder,
         )
 
-    def test_private_return_requires_participant_and_owner_address_consent(self):
+    def test_international_return_is_descriptive_without_delivery_integration_fields(self):
         arrangement = ReturnWorkflowService.get_or_create(claim=self.claim, user=self.owner)
         form = ReturnArrangementForm(data={
-            "return_method": "courier_post", "status": "arranging",
-            "delivery_address": "Private delivery location", "delivery_cost_payer": "owner",
-            "share_delivery_address": "on",
+            "return_method": "safe_public_meeting", "status": "arranging",
+            "safe_public_location": "Busy public meeting point",
         }, instance=arrangement, user=self.owner)
         self.assertTrue(form.is_valid(), form.errors)
         ReturnWorkflowService.update(arrangement=arrangement, user=self.owner, form=form)
         arrangement.refresh_from_db()
-        self.assertTrue(arrangement.address_consent_at)
-        finder_form = ReturnArrangementForm(data={
-            "return_method": "courier_post", "status": "arranging",
-            "delivery_address": "A different private address", "delivery_cost_payer": "finder",
-            "share_delivery_address": "on",
-        }, instance=arrangement, user=self.finder)
-        self.assertFalse(finder_form.is_valid())
-        self.assertIn("delivery_address", finder_form.errors)
+        self.assertEqual(arrangement.return_method, "safe_public_meeting")
+        self.assertEqual(arrangement.delivery_address, "")
+        self.assertNotIn("delivery_address", form.fields)
 
     def test_two_person_return_confirmation_resolves_once(self):
         arrangement = ReturnArrangement.objects.create(contact_request=self.claim, return_method="safe_public_meeting")
@@ -167,7 +167,7 @@ class ReturnAlertAndPlatformTests(TestCase):
         self.assertNotContains(response, "delivery_address")
 
     def test_email_verification_gates_claims_and_signed_link_verifies(self):
-        unverified = User.objects.create_user("unverified", email="unverified@example.invalid", password="StrongPass123!")
+        unverified = User.objects.create_user("unverified", email="unverified@student.demo.edu", password="StrongPass123!")
         UserProfile.objects.create(user=unverified)
         self.report.status = ItemReport.Status.ACTIVE
         self.report.save(update_fields=("status", "updated_at"))

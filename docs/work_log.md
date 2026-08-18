@@ -1,6 +1,17 @@
 # FindMatch Work Log
 
-This log records work genuinely completed for the local university MVP. It is organized by feature rather than by dates or day numbers.
+This log records work genuinely completed for the free local University and International MVP. It is organized by feature rather than by dates or day numbers.
+
+## Final two-mode integration
+
+- Preserved existing SQLite users, reports, claims, conversations, notifications, media references, and forward migration history.
+- Restored International Mode alongside University Mode using one explicit report scope and a central server-side access service.
+- Separated ordinary verified-email access from exact-domain University eligibility; personal-email users remain valid International users.
+- Added conditional University campus and International country/city/location forms without maps, geocoding, or third-party data calls.
+- Added up to three locally processed report images, match dismissal, claim appeals, content reporting, and scope-aware saved searches and notifications.
+- Completed University custody movement, incident, two-staff high-value release, disposition, and official handover controls.
+- Added International participant-confirmed return methods that describe safe coordination without pretending to book shipping, accept payments, or provide delivery.
+- Extended fictional demonstration data and automated coverage for both complete workflows.
 
 ## Project foundation
 
@@ -151,3 +162,10 @@ The first test run found an argument collision inside a matching test helper. Th
 - Ran the complete 95-test suite successfully in isolated workers after migration and compatibility fixes.
 - Retained Smart Matching as an ordinary local rule-based scoring system. It uses explicit public structured fields and `SequenceMatcher`; it makes no provider or network calls.
 - Retained deterministic sensitive-information validation and all normal report, ownership, conversation, notification, moderation, audit, and multilingual features.
+# Local University MVP alignment
+
+- Replaced the earlier worldwide runtime scope with a free localhost-only University configuration using SQLite, console email, local media, and deterministic matching.
+- Added exact approved-domain registration and verification checks, a shared server-side University access service, short configurable sessions, and eligibility-loss handling.
+- Simplified report creation to a general campus location, retained backward-compatible international database fields without presenting them as current MVP requirements, and changed matching to the requested 15/15/15/10/5/10/5/10/10/5 formula.
+- Added private sensitive-document image storage, public-image removal, official-handover enforcement, staff custody inventory, append-only movements, retention review dates, high-value controls, and missing-storage incidents.
+- Extended repeatable demo data with security staff, a pending claim, conversation, strong match notifications, and a custody record; updated tests and local documentation to match the current scope.

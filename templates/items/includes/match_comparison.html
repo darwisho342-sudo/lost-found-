@@ -1,17 +1,5 @@
 {% load i18n %}<article class="match-comparison mb-4">
-  <div class="match-item-panel">
-    <span class="type-badge type-lost">{% translate "LOST ITEM" %}</span>
-    {% if match.lost_item.image %}<img src="{{ match.lost_item.image.url }}" alt="{% translate 'Lost item' %}: {{ match.lost_item.title }}">{% endif %}
-    <h3 class="h5"><a dir="auto" href="{% url 'report_detail' match.lost_item.pk %}">{{ match.lost_item.title }}</a></h3>
-    <ul class="item-meta"><li><i class="bi bi-tag"></i>{{ match.lost_item.get_category_display }}</li><li><i class="bi bi-geo-alt"></i>{{ match.lost_item.get_campus_location_display }}</li><li><i class="bi bi-calendar3"></i>{{ match.lost_item.item_date|date:'j M Y' }}</li></ul>
-  </div>
-  <div class="match-score-panel">
-    {% include 'items/includes/match_score.html' %}
-  </div>
-  <div class="match-item-panel">
-    <span class="type-badge type-found">{% translate "FOUND ITEM" %}</span>
-    {% if match.found_item.image %}<img src="{{ match.found_item.image.url }}" alt="{% translate 'Found item' %}: {{ match.found_item.title }}">{% endif %}
-    <h3 class="h5"><a dir="auto" href="{% url 'report_detail' match.found_item.pk %}">{{ match.found_item.title }}</a></h3>
-    <ul class="item-meta"><li><i class="bi bi-tag"></i>{{ match.found_item.get_category_display }}</li><li><i class="bi bi-geo-alt"></i>{{ match.found_item.get_campus_location_display }}</li><li><i class="bi bi-calendar3"></i>{{ match.found_item.item_date|date:'j M Y' }}</li></ul>
-  </div>
+  <div class="match-item-panel"><span class="type-badge type-lost">{% translate "LOST ITEM" %}</span>{% if match.lost_item.image and not match.lost_item.image_is_hidden %}<img src="{{ match.lost_item.image.url }}" alt="{% translate 'Lost item' %}: {{ match.lost_item.title }}">{% endif %}<h3 class="h5"><a dir="auto" href="{% url 'report_detail' match.lost_item.pk %}">{{ match.lost_item.title }}</a></h3><ul class="item-meta"><li><i class="bi bi-tag"></i>{{ match.lost_item.get_category_display }}</li><li><i class="bi bi-geo-alt"></i>{{ match.lost_item.public_location_display }}</li><li><i class="bi bi-calendar3"></i>{{ match.lost_item.item_date|date:'j M Y' }}</li></ul></div>
+  <div class="match-score-panel">{% include 'items/includes/match_score.html' %}<form method="post" action="{% url 'dismiss_match' match.lost_item.pk match.found_item.pk %}">{% csrf_token %}<button class="btn btn-sm btn-outline-secondary mt-2" type="submit">{% translate "Dismiss suggestion" %}</button></form></div>
+  <div class="match-item-panel"><span class="type-badge type-found">{% translate "FOUND ITEM" %}</span>{% if match.found_item.image and not match.found_item.image_is_hidden %}<img src="{{ match.found_item.image.url }}" alt="{% translate 'Found item' %}: {{ match.found_item.title }}">{% endif %}<h3 class="h5"><a dir="auto" href="{% url 'report_detail' match.found_item.pk %}">{{ match.found_item.title }}</a></h3><ul class="item-meta"><li><i class="bi bi-tag"></i>{{ match.found_item.get_category_display }}</li><li><i class="bi bi-geo-alt"></i>{{ match.found_item.public_location_display }}</li><li><i class="bi bi-calendar3"></i>{{ match.found_item.item_date|date:'j M Y' }}</li></ul></div>
 </article>

@@ -11,7 +11,7 @@ from django.core.management import call_command
 from django.template.loader import render_to_string
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
-from django.utils import translation
+from django.utils import timezone, translation
 from django.utils.translation import gettext, ngettext
 from PIL import Image
 
@@ -57,8 +57,18 @@ class MediaTestCase(TestCase):
 
     def setUp(self):
         self.owner = User.objects.create_user(
-            username="student", email="student@example.invalid", password="StrongPass123!"
+            username="student", email="student@student.demo.edu", password="StrongPass123!"
         )
+        UserProfile.objects.create(
+            user=self.owner, email_verified_at=timezone.now(),
+            university_eligible=True, preferred_scope=ItemReport.Scope.UNIVERSITY,
+        )
+
+    def force_login_recently(self, user):
+        self.client.force_login(user)
+        session = self.client.session
+        session["findmatch_recent_auth"] = int(timezone.now().timestamp())
+        session.save()
 
     def create_report(self, **overrides):
         data = {
@@ -87,7 +97,7 @@ class HomepageAndAuthenticationTests(MediaTestCase):
             reverse("register"),
             {
                 "username": "new_student",
-                "email": "new@example.invalid",
+                "email": "new@student.demo.edu",
                 "password1": "A-Strong-Passphrase-135!",
                 "password2": "A-Strong-Passphrase-135!",
             },
@@ -176,14 +186,18 @@ class ReportTests(MediaTestCase):
         self.client.force_login(staff)
         self.assertEqual(self.client.get(reverse("report_edit", args=[report.pk])).status_code, 200)
 
-    def test_owner_can_resolve_and_close_reports(self):
+    def test_university_owner_can_close_but_not_resolve_reports(self):
         self.client.force_login(self.owner)
-        for status in ("resolved", "closed"):
-            report = self.create_report(title=f"Report {status}", image=test_image(f"{status}.jpg"))
-            response = self.client.post(reverse("change_status", args=[report.pk, status]))
-            self.assertRedirects(response, report.get_absolute_url())
-            report.refresh_from_db()
-            self.assertEqual(report.status, status)
+        university_report = self.create_report(title="Report resolved", image=test_image("resolved.jpg"))
+        self.assertEqual(
+            self.client.post(reverse("change_status", args=[university_report.pk, "resolved"])).status_code,
+            403,
+        )
+        report = self.create_report(title="Report closed", image=test_image("closed.jpg"))
+        response = self.client.post(reverse("change_status", args=[report.pk, "closed"]))
+        self.assertRedirects(response, report.get_absolute_url())
+        report.refresh_from_db()
+        self.assertEqual(report.status, ItemReport.Status.CLOSED)
 
     def test_final_status_requires_post(self):
         report = self.create_report()
@@ -256,11 +270,11 @@ class MatchingServiceTests(MediaTestCase):
     def test_identical_details_score_correctly(self):
         found = self.found_report()
         result = MatchingService.compare(self.lost, found)
-        self.assertEqual(result.category_points, 12)
+        self.assertEqual(result.category_points, 15)
         self.assertGreater(result.title_points, 0)
-        self.assertEqual(result.description_points, 8)
-        self.assertEqual(result.primary_colour_points, 8)
-        self.assertEqual(result.location_points, 20)
+        self.assertEqual(result.description_points, 15)
+        self.assertEqual(result.primary_colour_points, 10)
+        self.assertEqual(result.location_points, 10)
         self.assertEqual(result.date_points, 8)
 
     def test_same_report_types_are_rejected(self):
@@ -378,7 +392,8 @@ class StructuredReportAndOwnershipTests(MediaTestCase):
 
     def test_claim_answers_are_private_and_finder_can_approve(self):
         report, question = self.found_report()
-        claimant = User.objects.create_user("claimant", password="StrongPass123!")
+        claimant = User.objects.create_user("claimant", email="claimant@student.demo.edu", password="StrongPass123!")
+        UserProfile.objects.create(user=claimant, email_verified_at=timezone.now(), university_eligible=True)
         response = self.submit_claim(report, question, claimant)
         claim = ContactRequest.objects.get(requesting_user=claimant)
         self.assertRedirects(response, reverse("contact_request_detail", args=(claim.pk,)))
@@ -388,7 +403,7 @@ class StructuredReportAndOwnershipTests(MediaTestCase):
         self.assertEqual(self.client.get(reverse("contact_request_detail", args=(claim.pk,))).status_code, 403)
         self.client.force_login(claimant)
         self.assertNotContains(self.client.get(reverse("contact_request_detail", args=(claim.pk,))), question.expected_answer)
-        self.client.force_login(self.owner)
+        self.force_login_recently(self.owner)
         self.client.post(reverse("claim_action", args=(claim.pk, "approve")))
         claim.refresh_from_db()
         self.assertEqual(claim.status, ContactRequest.Status.APPROVED)
@@ -396,22 +411,25 @@ class StructuredReportAndOwnershipTests(MediaTestCase):
 
     def test_duplicate_claim_and_resolved_report_are_rejected(self):
         report, question = self.found_report()
-        claimant = User.objects.create_user("duplicate_claimant", password="StrongPass123!")
+        claimant = User.objects.create_user("duplicate_claimant", email="duplicate@student.demo.edu", password="StrongPass123!")
+        UserProfile.objects.create(user=claimant, email_verified_at=timezone.now(), university_eligible=True)
         self.submit_claim(report, question, claimant)
         second = self.submit_claim(report, question, claimant)
         self.assertEqual(ContactRequest.objects.filter(requesting_user=claimant).count(), 1)
         report.status = ItemReport.Status.RESOLVED
         report.save()
-        other = User.objects.create_user("late_claimant", password="StrongPass123!")
+        other = User.objects.create_user("late_claimant", email="late@student.demo.edu", password="StrongPass123!")
+        UserProfile.objects.create(user=other, email_verified_at=timezone.now(), university_eligible=True)
         response = self.submit_claim(report, question, other)
         self.assertEqual(ContactRequest.objects.filter(requesting_user=other).count(), 0)
 
     def test_two_party_handover_resolves_report(self):
         report, question = self.found_report()
-        claimant = User.objects.create_user("handover_claimant", password="StrongPass123!")
+        claimant = User.objects.create_user("handover_claimant", email="handover@student.demo.edu", password="StrongPass123!")
+        UserProfile.objects.create(user=claimant, email_verified_at=timezone.now(), university_eligible=True)
         self.submit_claim(report, question, claimant)
         claim = ContactRequest.objects.get(requesting_user=claimant)
-        self.client.force_login(self.owner)
+        self.force_login_recently(self.owner)
         self.client.post(reverse("claim_action", args=(claim.pk, "approve")))
         self.client.force_login(claimant)
         self.client.post(reverse("claim_handover_confirm", args=(claim.pk,)))
@@ -421,8 +439,8 @@ class StructuredReportAndOwnershipTests(MediaTestCase):
         self.client.force_login(self.owner)
         self.client.post(reverse("claim_handover_confirm", args=(claim.pk,)))
         claim.refresh_from_db(); report.refresh_from_db()
-        self.assertEqual(claim.status, ContactRequest.Status.COMPLETED)
-        self.assertEqual(report.status, ItemReport.Status.RESOLVED)
+        self.assertEqual(claim.status, ContactRequest.Status.APPROVED)
+        self.assertEqual(report.status, ItemReport.Status.CLAIM_IN_PROGRESS)
         self.assertEqual(HandoverConfirmation.objects.filter(contact_request=claim).count(), 2)
 
     def test_matching_ignores_private_answers_and_wrong_direction_dates(self):
@@ -495,7 +513,7 @@ class AdministratorDashboardTests(MediaTestCase):
         self.assertNotContains(response, "Black headphones")
 
     def test_staff_can_hide_and_show_report(self):
-        self.client.force_login(self.staff)
+        self.force_login_recently(self.staff)
         visibility_url = reverse("dashboard_report_visibility", args=[self.report.pk])
         self.assertEqual(self.client.get(visibility_url).status_code, 405)
         self.client.post(visibility_url)
@@ -521,7 +539,7 @@ class AdministratorDashboardTests(MediaTestCase):
         self.assertTrue(self.report.is_hidden)
 
     def test_staff_can_delete_any_report(self):
-        self.client.force_login(self.staff)
+        self.force_login_recently(self.staff)
         response = self.client.post(reverse("report_delete", args=[self.report.pk]))
         self.assertRedirects(response, reverse("dashboard_reports"))
         self.report.refresh_from_db()
@@ -532,7 +550,7 @@ class AdministratorDashboardTests(MediaTestCase):
         action_url = reverse("management_report_bulk_action")
         self.client.force_login(self.owner)
         self.assertEqual(self.client.post(action_url, {"action": "mark_reviewed", "report_ids[]": self.report.pk}).status_code, 403)
-        self.client.force_login(self.staff)
+        self.force_login_recently(self.staff)
         response = self.client.post(action_url, {"action": "mark_resolved", "report_ids[]": self.report.pk})
         self.assertEqual(response.status_code, 200)
         self.report.refresh_from_db()
@@ -543,7 +561,7 @@ class AdministratorDashboardTests(MediaTestCase):
         self.assertTrue(Notification.objects.filter(recipient=self.owner).exists())
 
     def test_bulk_review_is_idempotent_and_soft_delete_is_private(self):
-        self.client.force_login(self.staff)
+        self.force_login_recently(self.staff)
         payload = {"action": "mark_reviewed", "report_ids[]": [self.report.pk, 999999]}
         self.client.post(reverse("management_report_bulk_action"), payload)
         self.client.post(reverse("management_report_bulk_action"), payload)
@@ -555,7 +573,7 @@ class AdministratorDashboardTests(MediaTestCase):
         self.assertEqual(self.client.get(self.report.get_absolute_url()).status_code, 404)
 
     def test_staff_can_manage_regular_user_status(self):
-        self.client.force_login(self.staff)
+        self.force_login_recently(self.staff)
         response = self.client.get(reverse("dashboard_users"), {"query": self.owner.username})
         self.assertContains(response, self.owner.email)
         toggle_url = reverse("dashboard_user_toggle_active", args=[self.owner.pk])
@@ -631,11 +649,13 @@ class CanonicalSitemapTests(MediaTestCase):
 class SecureContactTests(MediaTestCase):
     def setUp(self):
         super().setUp()
-        self.requester = User.objects.create_user("requester", password="StrongPass123!")
+        self.requester = User.objects.create_user("requester", email="requester@student.demo.edu", password="StrongPass123!")
         self.staff = User.objects.create_user(
             "contact_admin", password="StrongPass123!", is_staff=True
         )
-        self.stranger = User.objects.create_user("contact_stranger", password="StrongPass123!")
+        self.stranger = User.objects.create_user("contact_stranger", email="stranger@student.demo.edu", password="StrongPass123!")
+        for user in (self.requester, self.stranger):
+            UserProfile.objects.create(user=user, email_verified_at=timezone.now(), university_eligible=True)
         self.found_report = self.create_report(
             report_type=ItemReport.ReportType.FOUND,
             title="Found blue headphones",
@@ -687,12 +707,13 @@ class SecureContactTests(MediaTestCase):
         return response, contact_request.conversation
 
     def test_phone_validation_and_normalization(self):
-        profile = UserProfile(user=self.requester, phone_number="not-a-number")
+        profile = self.requester.profile
+        profile.phone_number = "not-a-number"
         with self.assertRaises(ValidationError):
             profile.full_clean()
         form = UserProfileForm(
             {"phone_number": "+90 (555) 123-45-67", "consent_to_share_phone": True},
-            instance=UserProfile(user=self.requester),
+            instance=profile,
         )
         self.assertTrue(form.is_valid(), form.errors)
         self.assertEqual(form.save().phone_number, "+905551234567")
@@ -702,7 +723,7 @@ class SecureContactTests(MediaTestCase):
             reverse("register"),
             {
                 "username": "profile_student",
-                "email": "profile@example.invalid",
+                "email": "profile@student.demo.edu",
                 "phone_number": "+90 555 111 22 33",
                 "consent_to_share_phone": True,
                 "password1": "StrongPass123!",
@@ -1159,7 +1180,8 @@ class InternationalizationTests(TestCase):
 
 class ResponsiveInterfaceTests(MediaTestCase):
     def setUp(self):
-        self.user = User.objects.create_user("responsive-user", password="StrongPass123!")
+        self.user = User.objects.create_user("responsive-user", email="responsive@student.demo.edu", password="StrongPass123!")
+        UserProfile.objects.create(user=self.user, email_verified_at=timezone.now(), university_eligible=True)
         self.owner = self.user
         self.report = self.create_report(owner=self.user, title="Blue campus backpack", exact_private_location="Private locker 42")
 
@@ -1189,11 +1211,11 @@ class ResponsiveInterfaceTests(MediaTestCase):
         self.assertNotContains(response, self.report.exact_private_location)
 
     def test_filter_panel_preserves_query_and_has_accessible_controls(self):
-        response = self.client.get(reverse("item_list"), {"city": self.report.city, "sort": "oldest"})
+        response = self.client.get(reverse("item_list"), {"campus_location": self.report.campus_location, "sort": "oldest"})
         self.assertContains(response, 'data-filter-panel')
         self.assertContains(response, 'data-filter-open')
         self.assertContains(response, 'data-filter-close')
-        self.assertContains(response, 'name="city"')
+        self.assertContains(response, 'name="campus_location"')
         self.assertContains(response, 'sort=oldest')
 
     def test_report_form_has_guided_progress_and_no_javascript_fallback_form(self):

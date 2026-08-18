@@ -13,6 +13,7 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 
 from .models import UserProfile
+from .university import UniversityAccessService
 
 
 class RateLimitService:
@@ -50,9 +51,15 @@ class EmailVerificationService:
     def verify(cls, token, user_model):
         payload = signing.loads(token, salt=cls.salt, max_age=cls.max_age)
         user = user_model.objects.get(pk=payload["user_id"], email__iexact=payload["email"])
-        profile, _ = UserProfile.objects.get_or_create(user=user)
+        profile, profile_created = UserProfile.objects.get_or_create(user=user)
         profile.email_verified_at = timezone.now()
-        profile.save(update_fields=("email_verified_at", "updated_at"))
+        profile.university_eligible = UniversityAccessService.email_is_eligible(user.email)
+        profile.university_eligibility_lost_at = None if profile.university_eligible else profile.university_eligibility_lost_at
+        profile.preferred_scope = "university" if profile.university_eligible else "international"
+        profile.save(update_fields=(
+            "email_verified_at", "university_eligible", "university_eligibility_lost_at",
+            "preferred_scope", "updated_at",
+        ))
         return user
 
     @classmethod
@@ -66,3 +73,18 @@ class EmailVerificationService:
             fail_silently=True,
         )
         return url
+
+
+RECENT_AUTH_SECONDS = 30 * 60
+
+
+def mark_recent_authentication(request):
+    request.session["findmatch_recent_auth"] = int(timezone.now().timestamp())
+
+
+def has_recent_authentication(request):
+    try:
+        authenticated_at = int(request.session.get("findmatch_recent_auth", 0))
+    except (TypeError, ValueError):
+        return False
+    return int(timezone.now().timestamp()) - authenticated_at <= RECENT_AUTH_SECONDS

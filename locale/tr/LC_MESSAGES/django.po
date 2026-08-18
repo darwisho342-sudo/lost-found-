@@ -1432,3 +1432,120 @@ msgid "%(count)s unread notification"
 msgid_plural "%(count)s unread notifications"
 msgstr[0] "%(count)s okunmamış bildirim"
 msgstr[1] "%(count)s okunmamış bildirim"
+msgid "Custody inventory"
+msgstr "Emanet envanteri"
+
+msgid "University Lost and Found room"
+msgstr "Üniversite Kayıp Eşya Odası"
+
+msgid "Storage references are private and visible only to staff."
+msgstr "Depolama referansları özeldir ve yalnızca personele görünür."
+
+msgid "Record an intake"
+msgstr "Eşya kabulü kaydet"
+
+msgid "Physical inventory"
+msgstr "Fiziksel envanter"
+
+msgid "Create custody record"
+msgstr "Emanet kaydı oluştur"
+
+msgid "Report missing"
+msgstr "Kayıp bildir"
+
+msgid "Campus location and date"
+msgstr "Kampüs konumu ve tarih"
+
+msgid "Campus area"
+msgstr "Kampüs alanı"
+
+msgid "Verify an approved University email address before using this feature."
+msgstr "Bu özelliği kullanmadan önce onaylı bir üniversite e-posta adresini doğrulayın."
+msgid "University Mode"
+msgstr "Üniversite Modu"
+
+msgid "International Mode"
+msgstr "Uluslararası Mod"
+
+msgid "Outside University / International"
+msgstr "Üniversite Dışı / Uluslararası"
+
+msgid "Where did you lose or find the item?"
+msgstr "Eşyayı nerede kaybettiniz veya buldunuz?"
+
+msgid "Mode"
+msgstr "Mod"
+
+msgid "Switch"
+msgstr "Değiştir"
+
+msgid "University or Campus"
+msgstr "Üniversite veya Kampüs"
+
+msgid "University"
+msgstr "Üniversite"
+
+msgid "International"
+msgstr "Uluslararası"
+
+msgid "Country is required for International reports."
+msgstr "Uluslararası bildirimler için ülke zorunludur."
+
+msgid "City is required for International reports."
+msgstr "Uluslararası bildirimler için şehir zorunludur."
+
+msgid "Claims and appeals"
+msgstr "Talepler ve itirazlar"
+
+msgid "Locations"
+msgstr "Konumlar"
+
+msgid "University locations"
+msgstr "Üniversite konumları"
+
+msgid "Dismiss suggestion"
+msgstr "Öneriyi kaldır"
+
+msgid "Appeal rejection"
+msgstr "Red kararına itiraz et"
+
+msgid "Confirm your identity"
+msgstr "Kimliğinizi doğrulayın"
+
+msgid "Continue securely"
+msgstr "Güvenli şekilde devam et"
+
+msgid "Report content or image"
+msgstr "İçeriği veya görseli bildir"
+
+msgid "Item photographs"
+msgstr "Eşya fotoğrafları"
+
+msgid "Additional view of"
+msgstr "Ek görünüm:"
+
+msgid "University handover completed"
+msgstr "Üniversite teslim işlemi tamamlandı"
+msgid "Mode overview"
+msgstr "Mod görünümü"
+
+msgid "Pending claims"
+msgstr "Bekleyen talepler"
+
+msgid "Open disputes"
+msgstr "Açık anlaşmazlıklar"
+
+msgid "and International Lost and Found"
+msgstr "ve Uluslararası Kayıp Eşya"
+
+msgid "FindMatch University and International lost-and-found service"
+msgstr "FindMatch Üniversite ve Uluslararası kayıp eşya hizmeti"
+
+msgid "Account access"
+msgstr "Hesap erişimi"
+
+msgid "University and International modes"
+msgstr "Üniversite ve Uluslararası modlar"
+
+msgid "Preferred mode"
+msgstr "Tercih edilen mod"

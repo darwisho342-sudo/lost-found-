@@ -82,26 +82,12 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-if os.environ.get("DB_ENGINE", "sqlite").lower() in {"postgres", "postgresql"}:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": os.environ.get("DB_NAME", "findmatch"),
-            "USER": os.environ.get("DB_USER", "findmatch"),
-            "PASSWORD": os.environ.get("DB_PASSWORD", ""),
-            "HOST": os.environ.get("DB_HOST", "127.0.0.1"),
-            "PORT": os.environ.get("DB_PORT", "5432"),
-            "CONN_MAX_AGE": int(os.environ.get("DB_CONN_MAX_AGE", "60")),
-            "OPTIONS": {"sslmode": os.environ.get("DB_SSLMODE", "prefer")},
-        }
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": Path(os.environ.get("SQLITE_PATH", BASE_DIR / "db.sqlite3")),
     }
-else:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": Path(os.environ.get("SQLITE_PATH", BASE_DIR / "db.sqlite3")),
-        }
-    }
+}
 
 
 # Password validation
@@ -162,9 +148,31 @@ EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
 EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "1").lower() in {"1", "true", "yes"}
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "FindMatch <no-reply@localhost>")
 
-MAP_ENABLED = os.environ.get("MAP_ENABLED", "0").lower() in {"1", "true", "yes"}
-MAP_PROVIDER = os.environ.get("MAP_PROVIDER", "")
-MAP_PUBLIC_BROWSER_KEY = os.environ.get("MAP_PUBLIC_BROWSER_KEY", "")
+# Local University MVP configuration.  Values are environment-driven so the
+# demonstration institution can be renamed without changing application code.
+SITE_URL = os.environ.get("SITE_URL", "http://127.0.0.1:8000").rstrip("/")
+UNIVERSITY_NAME = os.environ.get("UNIVERSITY_NAME", "Demo University").strip()
+UNIVERSITY_EMAIL_DOMAINS = tuple(
+    domain.strip().casefold().lstrip("@")
+    for domain in os.environ.get(
+        "UNIVERSITY_EMAIL_DOMAINS", "student.demo.edu,staff.demo.edu"
+    ).split(",")
+    if domain.strip()
+)
+UNIVERSITY_CAMPUSES = tuple(
+    campus.strip()
+    for campus in os.environ.get("UNIVERSITY_CAMPUSES", "Main Campus").split(",")
+    if campus.strip()
+)
+UNIVERSITY_SECURITY_OFFICE = os.environ.get(
+    "UNIVERSITY_SECURITY_OFFICE", "University Lost and Found Office"
+).strip()
+INTERNATIONAL_MODE_ENABLED = os.environ.get("INTERNATIONAL_MODE_ENABLED", "True").lower() in {
+    "1", "true", "yes"
+}
+ITEM_RETENTION_DAYS = int(os.environ.get("ITEM_RETENTION_DAYS", "90"))
+SESSION_COOKIE_AGE = int(os.environ.get("SESSION_COOKIE_AGE", "259200"))
+SESSION_SAVE_EVERY_REQUEST = True
 
 CACHES = {
     "default": {
