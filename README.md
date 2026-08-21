@@ -37,7 +37,7 @@ DJANGO_ALLOWED_HOSTS=127.0.0.1,localhost
 SITE_URL=http://127.0.0.1:8000
 SQLITE_PATH=db.sqlite3
 UNIVERSITY_NAME=Demo University
-UNIVERSITY_EMAIL_DOMAINS=student.demo.edu,staff.demo.edu
+UNIVERSITY_EMAIL_DOMAINS=st.biruni.edu.tr
 UNIVERSITY_CAMPUSES=Main Campus
 UNIVERSITY_SECURITY_OFFICE=University Lost and Found Office
 INTERNATIONAL_MODE_ENABLED=True
@@ -78,10 +78,10 @@ The custom staff dashboard is `/en/management/`; Django's technical admin is `/a
 
 | Role | Username | Email | Password |
 |---|---|---|---|
-| University student A | `demo_student` | `student@student.demo.edu` | `FindMatchDemo123!` |
-| University student B | `demo_helper` | `helper@student.demo.edu` | `FindMatchDemo123!` |
-| Security staff | `security_staff` | `security@staff.demo.edu` | `SecurityDemo123!` |
-| Administrator | `campus_admin` | `admin@staff.demo.edu` | `AdminDemo123!` |
+| University student A | `demo_student` | `demo.student@st.biruni.edu.tr` | `FindMatchDemo123!` |
+| University student B | `demo_helper` | `demo.helper@st.biruni.edu.tr` | `FindMatchDemo123!` |
+| Security staff | `security_staff` | `security@st.biruni.edu.tr` | `SecurityDemo123!` |
+| Administrator | `campus_admin` | `admin@st.biruni.edu.tr` | `AdminDemo123!` |
 | Personal user A | `international_owner` | `owner.personal@example.com` | `FindMatchDemo123!` |
 | Personal user B | `international_finder` | `finder.personal@example.com` | `FindMatchDemo123!` |
 

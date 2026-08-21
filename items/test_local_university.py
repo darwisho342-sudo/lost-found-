@@ -23,13 +23,13 @@ class UniversityAccessTests(TestCase):
         })
         self.assertTrue(personal.is_valid(), personal.errors)
         accepted = RegistrationForm(data={
-            "username": "student", "email": "student@student.demo.edu",
+            "username": "student", "email": "student@st.biruni.edu.tr",
             "password1": "A-Strong-Passphrase-135!", "password2": "A-Strong-Passphrase-135!",
         })
         self.assertTrue(accepted.is_valid(), accepted.errors)
 
-    def test_verified_access_requires_domain_timestamp_and_active_account(self):
-        user = User.objects.create_user("verified", email="verified@student.demo.edu")
+    def test_verified_access_recalculates_domain_and_requires_active_account(self):
+        user = User.objects.create_user("verified", email="verified@st.biruni.edu.tr")
         profile = UserProfile.objects.create(
             user=user, email_verified_at=timezone.now(), university_eligible=True,
             preferred_scope=ItemReport.Scope.UNIVERSITY,
@@ -37,7 +37,9 @@ class UniversityAccessTests(TestCase):
         self.assertTrue(UniversityAccessService.is_verified(user))
         profile.university_eligibility_lost_at = timezone.now()
         profile.save(update_fields=("university_eligibility_lost_at", "updated_at"))
-        self.assertFalse(UniversityAccessService.is_verified(user))
+        self.assertTrue(UniversityAccessService.is_verified(user))
+        profile.refresh_from_db()
+        self.assertIsNone(profile.university_eligibility_lost_at)
         user.is_active = False
         user.save(update_fields=("is_active",))
         self.assertFalse(UniversityAccessService.is_verified(user))
@@ -84,7 +86,7 @@ class LocalReportMatchingAndCustodyTests(MediaTestCase):
         report.private_sensitive_image.delete(save=False)
 
     def test_staff_only_custody_inventory_and_missing_incident(self):
-        staff = User.objects.create_user("security", email="security@staff.demo.edu", is_staff=True)
+        staff = User.objects.create_user("security", email="security@st.biruni.edu.tr", is_staff=True)
         found = self.matching_report("found", self.owner)
         record = CustodyRecord.objects.create(
             found_report=found, reference="FM-TEST-001", received_by=staff,

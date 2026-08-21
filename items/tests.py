@@ -57,7 +57,7 @@ class MediaTestCase(TestCase):
 
     def setUp(self):
         self.owner = User.objects.create_user(
-            username="student", email="student@student.demo.edu", password="StrongPass123!"
+            username="student", email="student@st.biruni.edu.tr", password="StrongPass123!"
         )
         UserProfile.objects.create(
             user=self.owner, email_verified_at=timezone.now(),
@@ -97,7 +97,7 @@ class HomepageAndAuthenticationTests(MediaTestCase):
             reverse("register"),
             {
                 "username": "new_student",
-                "email": "new@student.demo.edu",
+                "email": "new@st.biruni.edu.tr",
                 "password1": "A-Strong-Passphrase-135!",
                 "password2": "A-Strong-Passphrase-135!",
             },
@@ -182,7 +182,12 @@ class ReportTests(MediaTestCase):
 
     def test_staff_can_edit_report(self):
         report = self.create_report()
-        staff = User.objects.create_user("staff", password="StrongPass123!", is_staff=True)
+        staff = User.objects.create_user(
+            "staff", email="staff@st.biruni.edu.tr", password="StrongPass123!", is_staff=True
+        )
+        UserProfile.objects.create(
+            user=staff, email_verified_at=timezone.now(), university_eligible=True
+        )
         self.client.force_login(staff)
         self.assertEqual(self.client.get(reverse("report_edit", args=[report.pk])).status_code, 200)
 
@@ -392,7 +397,7 @@ class StructuredReportAndOwnershipTests(MediaTestCase):
 
     def test_claim_answers_are_private_and_finder_can_approve(self):
         report, question = self.found_report()
-        claimant = User.objects.create_user("claimant", email="claimant@student.demo.edu", password="StrongPass123!")
+        claimant = User.objects.create_user("claimant", email="claimant@st.biruni.edu.tr", password="StrongPass123!")
         UserProfile.objects.create(user=claimant, email_verified_at=timezone.now(), university_eligible=True)
         response = self.submit_claim(report, question, claimant)
         claim = ContactRequest.objects.get(requesting_user=claimant)
@@ -411,21 +416,21 @@ class StructuredReportAndOwnershipTests(MediaTestCase):
 
     def test_duplicate_claim_and_resolved_report_are_rejected(self):
         report, question = self.found_report()
-        claimant = User.objects.create_user("duplicate_claimant", email="duplicate@student.demo.edu", password="StrongPass123!")
+        claimant = User.objects.create_user("duplicate_claimant", email="duplicate@st.biruni.edu.tr", password="StrongPass123!")
         UserProfile.objects.create(user=claimant, email_verified_at=timezone.now(), university_eligible=True)
         self.submit_claim(report, question, claimant)
         second = self.submit_claim(report, question, claimant)
         self.assertEqual(ContactRequest.objects.filter(requesting_user=claimant).count(), 1)
         report.status = ItemReport.Status.RESOLVED
         report.save()
-        other = User.objects.create_user("late_claimant", email="late@student.demo.edu", password="StrongPass123!")
+        other = User.objects.create_user("late_claimant", email="late@st.biruni.edu.tr", password="StrongPass123!")
         UserProfile.objects.create(user=other, email_verified_at=timezone.now(), university_eligible=True)
         response = self.submit_claim(report, question, other)
         self.assertEqual(ContactRequest.objects.filter(requesting_user=other).count(), 0)
 
     def test_two_party_handover_resolves_report(self):
         report, question = self.found_report()
-        claimant = User.objects.create_user("handover_claimant", email="handover@student.demo.edu", password="StrongPass123!")
+        claimant = User.objects.create_user("handover_claimant", email="handover@st.biruni.edu.tr", password="StrongPass123!")
         UserProfile.objects.create(user=claimant, email_verified_at=timezone.now(), university_eligible=True)
         self.submit_claim(report, question, claimant)
         claim = ContactRequest.objects.get(requesting_user=claimant)
@@ -458,9 +463,12 @@ class AdministratorDashboardTests(MediaTestCase):
         super().setUp()
         self.staff = User.objects.create_user(
             "dashboard_staff",
-            email="staff@example.invalid",
+            email="dashboard.staff@st.biruni.edu.tr",
             password="StrongPass123!",
             is_staff=True,
+        )
+        UserProfile.objects.create(
+            user=self.staff, email_verified_at=timezone.now(), university_eligible=True
         )
         self.report = self.create_report()
 
@@ -497,6 +505,43 @@ class AdministratorDashboardTests(MediaTestCase):
         self.assertEqual(response.context["total_lost"], 1)
         self.assertEqual(response.context["total_found"], 0)
         self.assertEqual(response.context["total_resolved"], 0)
+
+    def test_every_staff_page_uses_the_shared_independent_scroll_shell(self):
+        self.client.force_login(self.staff)
+        staff_pages = (
+            "management_dashboard", "management_reports", "management_users",
+            "management_claims", "management_moderation", "management_locations",
+            "management_custody", "management_conversations", "management_audit_log",
+        )
+        for page_name in staff_pages:
+            with self.subTest(page=page_name):
+                response = self.client.get(reverse(page_name))
+                self.assertEqual(response.status_code, 200)
+                self.assertContains(response, 'class="admin-body sidebar-layout"')
+                self.assertContains(response, 'class="admin-layout app-shell"')
+                self.assertContains(response, 'class="admin-sidebar sidebar"')
+                self.assertContains(response, 'class="admin-main main-section"')
+                self.assertContains(response, 'class="admin-page main-content"')
+                self.assertContains(response, 'data-admin-sidebar-open')
+                self.assertContains(response, 'data-admin-sidebar-close')
+                self.assertNotContains(response, 'id="mobileAdminMenu"')
+
+    def test_shared_sidebar_assets_define_desktop_mobile_and_rtl_behaviour(self):
+        css = (settings.BASE_DIR / "static/css/management/management-base.css").read_text(encoding="utf-8")
+        javascript = (settings.BASE_DIR / "static/js/management-shell.js").read_text(encoding="utf-8")
+        for rule in (
+            "height: 100dvh", "overflow-y: auto", "overflow-x: hidden",
+            "min-height: 0", "overscroll-behavior: contain", "scrollbar-gutter: stable",
+            'html[dir="rtl"] .admin-sidebar', ".admin-body.admin-sidebar-open .admin-page",
+        ):
+            self.assertIn(rule, css)
+        for behaviour in ("admin-sidebar-open", "Escape", "aria-expanded", "sidebar.inert"):
+            self.assertIn(behaviour, javascript)
+        self.client.force_login(self.staff)
+        with translation.override("en"):
+            arabic = self.client.get("/ar/management/")
+            self.assertContains(arabic, '<html lang="ar" dir="rtl">')
+            self.assertContains(arabic, 'id="adminSidebar"')
 
     def test_staff_can_search_and_filter_reports(self):
         self.create_report(
@@ -649,11 +694,11 @@ class CanonicalSitemapTests(MediaTestCase):
 class SecureContactTests(MediaTestCase):
     def setUp(self):
         super().setUp()
-        self.requester = User.objects.create_user("requester", email="requester@student.demo.edu", password="StrongPass123!")
+        self.requester = User.objects.create_user("requester", email="requester@st.biruni.edu.tr", password="StrongPass123!")
         self.staff = User.objects.create_user(
             "contact_admin", password="StrongPass123!", is_staff=True
         )
-        self.stranger = User.objects.create_user("contact_stranger", email="stranger@student.demo.edu", password="StrongPass123!")
+        self.stranger = User.objects.create_user("contact_stranger", email="stranger@st.biruni.edu.tr", password="StrongPass123!")
         for user in (self.requester, self.stranger):
             UserProfile.objects.create(user=user, email_verified_at=timezone.now(), university_eligible=True)
         self.found_report = self.create_report(
@@ -723,7 +768,7 @@ class SecureContactTests(MediaTestCase):
             reverse("register"),
             {
                 "username": "profile_student",
-                "email": "profile@student.demo.edu",
+                "email": "profile@st.biruni.edu.tr",
                 "phone_number": "+90 555 111 22 33",
                 "consent_to_share_phone": True,
                 "password1": "StrongPass123!",
@@ -1180,7 +1225,7 @@ class InternationalizationTests(TestCase):
 
 class ResponsiveInterfaceTests(MediaTestCase):
     def setUp(self):
-        self.user = User.objects.create_user("responsive-user", email="responsive@student.demo.edu", password="StrongPass123!")
+        self.user = User.objects.create_user("responsive-user", email="responsive@st.biruni.edu.tr", password="StrongPass123!")
         UserProfile.objects.create(user=self.user, email_verified_at=timezone.now(), university_eligible=True)
         self.owner = self.user
         self.report = self.create_report(owner=self.user, title="Blue campus backpack", exact_private_location="Private locker 42")

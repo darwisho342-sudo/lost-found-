@@ -1520,6 +1520,18 @@ msgstr "المطالبات والاستئنافات"
 msgid "Locations"
 msgstr "المواقع"
 
+msgid "Claims"
+msgstr "المطالبات"
+
+msgid "University Mode is available only to verified Biruni University students and authorized staff. You can continue using International Mode."
+msgstr "وضع الجامعة متاح فقط لطلاب جامعة بيروني الذين تم التحقق منهم وللموظفين المصرح لهم. يمكنك متابعة استخدام الوضع الدولي."
+
+msgid "Continue to International Mode"
+msgstr "المتابعة إلى الوضع الدولي"
+
+msgid "Log in with a university account"
+msgstr "تسجيل الدخول باستخدام حساب جامعي"
+
 msgid "University locations"
 msgstr "مواقع الجامعة"
 
@@ -1569,3 +1581,9 @@ msgstr "وضعا الجامعة والدولي"
 
 msgid "Preferred mode"
 msgstr "الوضع المفضّل"
+
+msgid "Choose either University or International Mode."
+msgstr "اختر وضع الجامعة أو الوضع الدولي."
+
+msgid "University Mode requires a verified email address ending exactly with %(domains)s."
+msgstr "يتطلب وضع الجامعة عنوان بريد إلكتروني موثقاً ينتهي تماماً بـ %(domains)s."

@@ -3,12 +3,12 @@ from datetime import date
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
-from django.test import TestCase
+from django.test import Client, TestCase, override_settings
 from django.urls import reverse
-from django.utils import timezone
+from django.utils import timezone, translation
 
 from .alerts import AlertService
-from .forms import ItemReportForm, ReturnArrangementForm
+from .forms import ItemReportForm, RegistrationForm, ReturnArrangementForm
 from .models import (
     ClaimAppeal, ContactRequest, Conversation, CustodyRecord, ItemReport,
     Notification, ReturnArrangement, UserProfile,
@@ -17,6 +17,260 @@ from .return_service import ReturnWorkflowService
 from .security import EmailVerificationService
 from .services import MatchingService
 from .university import UniversityAccessService
+
+
+@override_settings(UNIVERSITY_EMAIL_DOMAINS=("st.biruni.edu.tr",))
+class ScopeSelectorSwitchTests(TestCase):
+    def verified_user(self, username, email, *, cached_eligibility=False, preferred_scope="international", is_staff=False):
+        user = User.objects.create_user(
+            username, email=email, password="StrongPass123!", is_staff=is_staff
+        )
+        UserProfile.objects.create(
+            user=user, email_verified_at=timezone.now(),
+            university_eligible=cached_eligibility, preferred_scope=preferred_scope,
+        )
+        return user
+
+    def csrf_client(self, user):
+        client = Client(enforce_csrf_checks=True)
+        client.force_login(user)
+        client.get(reverse("home"))
+        return client, client.cookies["csrftoken"].value
+
+    def test_selector_renders_real_post_buttons_and_active_mode(self):
+        user = self.verified_user("student", "student@st.biruni.edu.tr")
+        client, token = self.csrf_client(user)
+        session = client.session
+        session["findmatch_scope"] = "university"
+        session.save()
+        response = client.get(reverse("home"))
+        self.assertContains(response, 'type="submit" name="scope" value="university"')
+        self.assertContains(response, 'type="submit" name="scope" value="international"')
+        self.assertContains(response, 'scope-option active')
+        self.assertNotContains(response, "onchange=")
+
+    def test_eligible_button_recalculates_and_saves_university_scope(self):
+        user = self.verified_user("eligible", "eligible@st.biruni.edu.tr")
+        client, token = self.csrf_client(user)
+        response = client.post(
+            reverse("switch_scope"), {"scope": "university", "csrfmiddlewaretoken": token}
+        )
+        self.assertRedirects(response, reverse("user_dashboard"))
+        user.profile.refresh_from_db()
+        self.assertTrue(user.profile.university_eligible)
+        self.assertEqual(user.profile.preferred_scope, "university")
+        self.assertEqual(client.session["findmatch_scope"], "university")
+
+    def test_staff_university_button_redirects_to_management_dashboard(self):
+        user = self.verified_user("staff", "security@biruni.edu.tr", is_staff=True)
+        client, token = self.csrf_client(user)
+        response = client.post(
+            reverse("switch_scope"), {"scope": "university", "csrfmiddlewaretoken": token}
+        )
+        self.assertRedirects(response, reverse("management_dashboard"))
+        self.assertEqual(client.session["findmatch_scope"], "university")
+
+    def test_personal_account_is_recalculated_and_gets_clear_error(self):
+        user = self.verified_user(
+            "personal", "person@example.com", cached_eligibility=True,
+            preferred_scope="university",
+        )
+        client, token = self.csrf_client(user)
+        response = client.post(
+            reverse("switch_scope"), {"scope": "university", "csrfmiddlewaretoken": token}
+        )
+        self.assertContains(
+            response,
+            "University Mode is available only to verified Biruni University students",
+            status_code=403,
+        )
+        user.profile.refresh_from_db()
+        self.assertFalse(user.profile.university_eligible)
+        self.assertEqual(user.profile.preferred_scope, "international")
+
+    def test_international_button_saves_scope_for_personal_account(self):
+        user = self.verified_user("personal", "person@example.com")
+        client, token = self.csrf_client(user)
+        response = client.post(
+            reverse("switch_scope"), {"scope": "international", "csrfmiddlewaretoken": token}
+        )
+        self.assertRedirects(response, reverse("item_list"))
+        user.profile.refresh_from_db()
+        self.assertEqual(user.profile.preferred_scope, "international")
+        self.assertEqual(client.session["findmatch_scope"], "international")
+
+    def test_endpoint_requires_login_post_csrf_and_exact_values(self):
+        user = self.verified_user("eligible", "eligible@st.biruni.edu.tr")
+        client = Client(enforce_csrf_checks=True)
+        client.get(reverse("home"))
+        anonymous_token = client.cookies["csrftoken"].value
+        self.assertRedirects(
+            client.post(
+                reverse("switch_scope"),
+                {"scope": "university", "csrfmiddlewaretoken": anonymous_token},
+            ),
+            reverse("login"),
+        )
+        self.assertEqual(
+            client.session[UniversityAccessService.PENDING_SCOPE_KEY], "university"
+        )
+        client.force_login(user)
+        self.assertEqual(client.get(reverse("switch_scope")).status_code, 405)
+        self.assertEqual(
+            client.post(reverse("switch_scope"), {"scope": "university"}).status_code, 403
+        )
+        client.get(reverse("home"))
+        token = client.cookies["csrftoken"].value
+        self.assertEqual(
+            client.post(
+                reverse("switch_scope"), {"scope": "campus", "csrfmiddlewaretoken": token}
+            ).status_code,
+            400,
+        )
+
+    def test_exact_domain_check_normalizes_case_and_whitespace_and_rejects_deception(self):
+        self.assertTrue(
+            UniversityAccessService.email_is_eligible(
+                "  STUDENT@ST.BIRUNI.EDU.TR  "
+            )
+        )
+        self.assertFalse(
+            UniversityAccessService.email_is_eligible(
+                "student@st.biruni.edu.tr.example.com"
+            )
+        )
+        self.assertFalse(
+            UniversityAccessService.email_is_eligible(
+                "student+st.biruni.edu.tr@gmail.com"
+            )
+        )
+
+    def test_registration_normalizes_university_and_personal_email(self):
+        university_form = RegistrationForm(data={
+            "username": "normalized_student",
+            "email": "  STUDENT@ST.BIRUNI.EDU.TR  ",
+            "password1": "A-Strong-Passphrase-135!",
+            "password2": "A-Strong-Passphrase-135!",
+        })
+        self.assertTrue(university_form.is_valid(), university_form.errors)
+        university_user = university_form.save()
+        self.assertEqual(university_user.email, "student@st.biruni.edu.tr")
+        self.assertTrue(university_user.profile.university_eligible)
+
+        personal_form = RegistrationForm(data={
+            "username": "normalized_personal",
+            "email": "  PERSON@GMAIL.COM  ",
+            "password1": "A-Strong-Passphrase-246!",
+            "password2": "A-Strong-Passphrase-246!",
+        })
+        self.assertTrue(personal_form.is_valid(), personal_form.errors)
+        personal_user = personal_form.save()
+        self.assertEqual(personal_user.email, "person@gmail.com")
+        self.assertFalse(personal_user.profile.university_eligible)
+
+    def test_pending_university_mode_completes_after_student_login(self):
+        user = self.verified_user("pending_student", "student@st.biruni.edu.tr")
+        anonymous = Client(enforce_csrf_checks=True)
+        anonymous.get(reverse("home"))
+        token = anonymous.cookies["csrftoken"].value
+        self.assertRedirects(
+            anonymous.post(
+                reverse("switch_scope"),
+                {"scope": "university", "csrfmiddlewaretoken": token},
+            ),
+            reverse("login"),
+        )
+        response = anonymous.post(reverse("login"), {
+            "username": user.username, "password": "StrongPass123!",
+            "csrfmiddlewaretoken": token,
+        })
+        self.assertRedirects(response, reverse("user_dashboard"))
+        self.assertEqual(anonymous.session["findmatch_scope"], "university")
+        self.assertNotIn(
+            UniversityAccessService.PENDING_SCOPE_KEY, anonymous.session
+        )
+
+    def test_pending_university_mode_gives_personal_account_safe_fallback(self):
+        user = self.verified_user("pending_personal", "student@gmail.com")
+        anonymous = Client(enforce_csrf_checks=True)
+        anonymous.get(reverse("home"))
+        token = anonymous.cookies["csrftoken"].value
+        anonymous.post(
+            reverse("switch_scope"),
+            {"scope": "university", "csrfmiddlewaretoken": token},
+        )
+        response = anonymous.post(reverse("login"), {
+            "username": user.username, "password": "StrongPass123!",
+            "csrfmiddlewaretoken": token,
+        }, follow=True)
+        self.assertRedirects(response, reverse("item_list"))
+        self.assertContains(
+            response,
+            "University Mode is available only to verified Biruni University students",
+        )
+        self.assertEqual(anonymous.session["findmatch_scope"], "international")
+
+    def test_direct_university_urls_cannot_bypass_personal_account_permissions(self):
+        user = self.verified_user("direct_personal", "student@gmail.com")
+        self.client.force_login(user)
+        protected = reverse("report_create", args=("lost",))
+        self.assertEqual(
+            self.client.get(protected, {"scope": "university"}).status_code, 403
+        )
+        response = self.client.get(reverse("home"), {"scope": "university"})
+        self.assertContains(response, "Continue to International Mode", status_code=403)
+
+    def test_scope_selector_uses_valid_localized_post_urls(self):
+        user = self.verified_user("localized_student", "student@st.biruni.edu.tr")
+        self.client.force_login(user)
+        for language in ("en", "tr", "ar"):
+            with self.subTest(language=language), translation.override(language):
+                switch_url = reverse("switch_scope")
+                response = self.client.get(reverse("home"))
+                self.assertEqual(response.status_code, 200)
+                self.assertContains(response, f'method="post" action="{switch_url}"')
+                self.assertContains(
+                    response,
+                    'type="submit" name="scope" value="university"',
+                    count=2,
+                )
+                self.assertEqual(self.client.get(switch_url).status_code, 405)
+                switched = self.client.post(switch_url, {"scope": "university"})
+                self.assertRedirects(switched, reverse("user_dashboard"))
+
+    def test_university_permission_feedback_is_translated_and_arabic_is_rtl(self):
+        user = self.verified_user("translated_personal", "person@gmail.com")
+        self.client.force_login(user)
+        expected = {
+            "en": "Continue to International Mode",
+            "tr": "Uluslararası Moda devam et",
+            "ar": "المتابعة إلى الوضع الدولي",
+        }
+        for language, label in expected.items():
+            with self.subTest(language=language), translation.override(language):
+                response = self.client.get(reverse("home"), {"scope": "university"})
+                self.assertContains(response, label, status_code=403)
+                if language == "ar":
+                    self.assertContains(
+                        response, '<html lang="ar" dir="rtl">', status_code=403
+                    )
+
+    def test_login_safe_next_invalid_login_and_logout_have_no_redirect_loop(self):
+        user = self.verified_user("login_flow", "login@gmail.com")
+        invalid = self.client.post(reverse("login"), {
+            "username": user.username, "password": "wrong-password",
+        })
+        self.assertEqual(invalid.status_code, 200)
+        self.assertContains(invalid, "not recognised")
+        external_next = "https://example.com/phishing"
+        response = self.client.post(
+            f'{reverse("login")}?next={external_next}',
+            {"username": user.username, "password": "StrongPass123!", "next": external_next},
+        )
+        self.assertRedirects(response, reverse("home"))
+        logout = self.client.post(reverse("logout"))
+        self.assertRedirects(logout, reverse("home"))
+        self.assertNotIn("_auth_user_id", self.client.session)
 
 
 class ScopeAuthenticationTests(TestCase):
@@ -47,7 +301,7 @@ class ScopeAuthenticationTests(TestCase):
         self.assertEqual(response.status_code, 403)
 
     def test_university_account_can_open_both_report_modes(self):
-        university = self.verified_user("student", "student@student.demo.edu", university=True)
+        university = self.verified_user("student", "student@st.biruni.edu.tr", university=True)
         self.client.force_login(university)
         self.assertEqual(self.client.get(reverse("report_create", args=("lost",)), {"scope": "university"}).status_code, 200)
         self.assertEqual(self.client.get(reverse("report_create", args=("lost",)), {"scope": "international"}).status_code, 200)

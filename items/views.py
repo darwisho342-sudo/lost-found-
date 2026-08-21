@@ -12,12 +12,13 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.paginator import Paginator
 from django.db import IntegrityError, connection, models, transaction
 from django.db.models import Q
-from django.http import Http404, HttpResponse, HttpResponseNotAllowed, JsonResponse
+from django.http import Http404, HttpResponse, HttpResponseBadRequest, HttpResponseNotAllowed, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils import timezone
 from django.utils.translation import gettext as _
+from django.views.decorators.http import require_POST
 
 from .communications import phone_number_access, record_contact_event
 from .forms import (
@@ -84,13 +85,36 @@ from .security import (
     mark_recent_authentication,
 )
 from .lifecycle import ReportLifecycleService
-from .university import UniversityAccessService, verified_scope_required as verified_university_required
+from .university import (
+    UniversityAccessService,
+    UniversityModePermissionDenied,
+    verified_scope_required as verified_university_required,
+)
 
 
 class RoleAwareLoginView(LoginView):
     template_name = "registration/login.html"
 
     def get_success_url(self):
+        pending_scope = self.request.session.pop(
+            UniversityAccessService.PENDING_SCOPE_KEY, ""
+        )
+        if pending_scope in ItemReport.Scope.values:
+            try:
+                UniversityAccessService.save_scope(self.request, pending_scope)
+            except UniversityModePermissionDenied as exc:
+                messages.error(self.request, str(exc))
+                UniversityAccessService.save_scope(
+                    self.request, ItemReport.Scope.INTERNATIONAL
+                )
+                return reverse("item_list")
+            if pending_scope == ItemReport.Scope.UNIVERSITY:
+                return reverse(
+                    "management_dashboard"
+                    if self.request.user.is_staff
+                    else "user_dashboard"
+                )
+            return reverse("item_list")
         requested_url = self.get_redirect_url()
         if requested_url:
             return requested_url
@@ -163,23 +187,18 @@ def register(request):
     return render(request, "registration/register.html", {"form": form})
 
 
+@require_POST
 def switch_scope(request):
-    if request.method != "POST":
-        return HttpResponseNotAllowed(["POST"])
     scope = request.POST.get("scope", "")
     if scope not in ItemReport.Scope.values:
-        raise Http404
-    if request.user.is_authenticated and UniversityAccessService.has_verified_email(request.user):
-        UniversityAccessService.require_scope(request.user, scope)
-    request.session["findmatch_scope"] = scope
-    if request.user.is_authenticated:
-        profile = UniversityAccessService.profile_for(request.user)
-        profile.preferred_scope = scope
-        profile.save(update_fields=("preferred_scope", "updated_at"))
-    next_url = request.POST.get("next", "")
-    if not url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
-        next_url = reverse("item_list")
-    return redirect(next_url)
+        return HttpResponseBadRequest(_("Choose either University or International Mode."))
+    if not request.user.is_authenticated:
+        request.session[UniversityAccessService.PENDING_SCOPE_KEY] = scope
+        return redirect("login")
+    UniversityAccessService.save_scope(request, scope)
+    if scope == ItemReport.Scope.UNIVERSITY:
+        return redirect("management_dashboard" if request.user.is_staff else "user_dashboard")
+    return redirect("item_list")
 
 
 @login_required
@@ -2026,7 +2045,10 @@ def health_check(request):
 
 
 def permission_denied(request, exception=None):
-    return render(request, "403.html", status=403)
+    return render(request, "403.html", {
+        "permission_error": str(exception or ""),
+        "university_access_denied": isinstance(exception, UniversityModePermissionDenied),
+    }, status=403)
 
 
 def page_not_found(request, exception=None):

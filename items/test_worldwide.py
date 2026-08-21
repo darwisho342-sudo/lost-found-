@@ -167,7 +167,7 @@ class ReturnAlertAndPlatformTests(TestCase):
         self.assertNotContains(response, "delivery_address")
 
     def test_email_verification_gates_claims_and_signed_link_verifies(self):
-        unverified = User.objects.create_user("unverified", email="unverified@student.demo.edu", password="StrongPass123!")
+        unverified = User.objects.create_user("unverified", email="unverified@st.biruni.edu.tr", password="StrongPass123!")
         UserProfile.objects.create(user=unverified)
         self.report.status = ItemReport.Status.ACTIVE
         self.report.save(update_fields=("status", "updated_at"))

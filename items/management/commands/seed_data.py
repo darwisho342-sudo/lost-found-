@@ -13,16 +13,17 @@ from items.models import (
     Notification, StorageIncident, UserProfile,
     UniversityLocation,
 )
+from items.university import UniversityAccessService
 
 
 class Command(BaseCommand):
     help = "Create fictional, repeatable FindMatch demonstration data."
 
     users = (
-        ("demo_student", "student@student.demo.edu", False, False, "FindMatchDemo123!"),
-        ("demo_helper", "helper@student.demo.edu", False, False, "FindMatchDemo123!"),
-        ("security_staff", "security@staff.demo.edu", True, False, "SecurityDemo123!"),
-        ("campus_admin", "admin@staff.demo.edu", True, True, "AdminDemo123!"),
+        ("demo_student", "demo.student@st.biruni.edu.tr", False, False, "FindMatchDemo123!"),
+        ("demo_helper", "demo.helper@st.biruni.edu.tr", False, False, "FindMatchDemo123!"),
+        ("security_staff", "security@st.biruni.edu.tr", True, False, "SecurityDemo123!"),
+        ("campus_admin", "admin@st.biruni.edu.tr", True, True, "AdminDemo123!"),
         ("international_owner", "owner.personal@example.com", False, False, "FindMatchDemo123!"),
         ("international_finder", "finder.personal@example.com", False, False, "FindMatchDemo123!"),
     )
@@ -70,7 +71,7 @@ class Command(BaseCommand):
             profile, _ = UserProfile.objects.get_or_create(user=user)
             if not profile.email_verified_at:
                 profile.email_verified_at = timezone.now()
-            profile.university_eligible = email.rsplit("@", 1)[-1] in {"student.demo.edu", "staff.demo.edu"}
+            profile.university_eligible = UniversityAccessService.email_is_eligible(email)
             profile.preferred_scope = "university" if profile.university_eligible else "international"
             profile.university_eligibility_lost_at = None
             profile.save(update_fields=(

@@ -155,7 +155,7 @@ UNIVERSITY_NAME = os.environ.get("UNIVERSITY_NAME", "Demo University").strip()
 UNIVERSITY_EMAIL_DOMAINS = tuple(
     domain.strip().casefold().lstrip("@")
     for domain in os.environ.get(
-        "UNIVERSITY_EMAIL_DOMAINS", "student.demo.edu,staff.demo.edu"
+        "UNIVERSITY_EMAIL_DOMAINS", "st.biruni.edu.tr"
     ).split(",")
     if domain.strip()
 )

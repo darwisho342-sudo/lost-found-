@@ -1500,6 +1500,18 @@ msgstr "Talepler ve itirazlar"
 msgid "Locations"
 msgstr "Konumlar"
 
+msgid "Claims"
+msgstr "Talepler"
+
+msgid "University Mode is available only to verified Biruni University students and authorized staff. You can continue using International Mode."
+msgstr "Üniversite Modu yalnızca doğrulanmış Biruni Üniversitesi öğrencileri ve yetkili personel tarafından kullanılabilir. Uluslararası Modu kullanmaya devam edebilirsiniz."
+
+msgid "Continue to International Mode"
+msgstr "Uluslararası Moda devam et"
+
+msgid "Log in with a university account"
+msgstr "Üniversite hesabıyla giriş yap"
+
 msgid "University locations"
 msgstr "Üniversite konumları"
 
@@ -1549,3 +1561,9 @@ msgstr "Üniversite ve Uluslararası modlar"
 
 msgid "Preferred mode"
 msgstr "Tercih edilen mod"
+
+msgid "Choose either University or International Mode."
+msgstr "Üniversite veya Uluslararası Modu seçin."
+
+msgid "University Mode requires a verified email address ending exactly with %(domains)s."
+msgstr "Üniversite Modu, tam olarak %(domains)s ile biten doğrulanmış bir e-posta adresi gerektirir."

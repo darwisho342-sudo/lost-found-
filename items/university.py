@@ -4,15 +4,27 @@ from functools import wraps
 
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
+from django.utils import timezone
 from django.utils.translation import gettext as _
+
+
+class UniversityModePermissionDenied(PermissionDenied):
+    """Permission error that lets the 403 page offer safe mode-recovery actions."""
 
 
 class UniversityAccessService:
     """Keep University access decisions in one server-side service."""
 
+    SESSION_SCOPE_KEY = "findmatch_scope"
+    PENDING_SCOPE_KEY = "findmatch_pending_scope"
+
     @staticmethod
-    def email_domain(email):
-        value = (email or "").strip().casefold()
+    def normalize_email(email):
+        return (email or "").strip().casefold()
+
+    @classmethod
+    def email_domain(cls, email):
+        value = cls.normalize_email(email)
         return value.rsplit("@", 1)[1] if value.count("@") == 1 else ""
 
     @classmethod
@@ -26,13 +38,48 @@ class UniversityAccessService:
         profile, _ = UserProfile.objects.get_or_create(user=user)
         return profile
 
+    @staticmethod
+    def is_authorized_staff(user):
+        """Django staff status remains the source of truth for University staff access."""
+        return bool(user.is_authenticated and user.is_active and (user.is_staff or user.is_superuser))
+
+    @classmethod
+    def synchronize_eligibility(cls, user, profile=None):
+        """Refresh cached profile eligibility from the configured exact domains."""
+        if not user.is_authenticated:
+            return profile
+        profile = profile or cls.profile_for(user)
+        eligible = bool(user.is_active and cls.email_is_eligible(user.email))
+        changed = []
+        if profile.university_eligible != eligible:
+            profile.university_eligible = eligible
+            changed.append("university_eligible")
+        if eligible and profile.university_eligibility_lost_at is not None:
+            profile.university_eligibility_lost_at = None
+            changed.append("university_eligibility_lost_at")
+        elif not eligible and profile.university_eligibility_lost_at is None:
+            profile.university_eligibility_lost_at = timezone.now()
+            changed.append("university_eligibility_lost_at")
+        if (
+            not eligible
+            and not cls.is_authorized_staff(user)
+            and profile.preferred_scope == "university"
+        ):
+            profile.preferred_scope = "international"
+            changed.append("preferred_scope")
+        if changed:
+            changed.append("updated_at")
+            profile.save(update_fields=changed)
+        return profile
+
     @classmethod
     def is_verified(cls, user):
         if not user.is_authenticated or not user.is_active:
             return False
-        if user.is_staff:
+        if cls.is_authorized_staff(user):
+            cls.synchronize_eligibility(user)
             return True
-        profile = cls.profile_for(user)
+        profile = cls.synchronize_eligibility(user)
         return bool(profile.email_verified_at and profile.university_eligible
                     and not profile.university_eligibility_lost_at
                     and cls.email_is_eligible(user.email))
@@ -43,7 +90,7 @@ class UniversityAccessService:
             return False
         if user.is_staff:
             return True
-        return bool(cls.profile_for(user).email_verified_at)
+        return bool(cls.synchronize_eligibility(user).email_verified_at)
 
     @classmethod
     def can_access_scope(cls, user, scope):
@@ -71,8 +118,31 @@ class UniversityAccessService:
 
         if not cls.can_access_scope(user, scope):
             if scope == ItemReport.Scope.UNIVERSITY:
-                raise PermissionDenied(_("A verified University account is required for University Mode."))
+                raise UniversityModePermissionDenied(
+                    _(
+                        "University Mode is available only to verified Biruni University "
+                        "students and authorized staff. You can continue using International Mode."
+                    )
+                )
             raise PermissionDenied(_("Verify your email address before using International Mode."))
+
+    @classmethod
+    def save_scope(cls, request, scope):
+        """Validate and persist a selected scope for an authenticated account."""
+        from .models import ItemReport
+
+        if scope not in ItemReport.Scope.values:
+            raise ValueError("Unsupported FindMatch scope")
+        cls.synchronize_eligibility(request.user)
+        cls.require_scope(request.user, scope)
+        request.session[cls.SESSION_SCOPE_KEY] = scope
+        request.session.pop(cls.PENDING_SCOPE_KEY, None)
+        profile = cls.profile_for(request.user)
+        if profile.preferred_scope != scope:
+            profile.preferred_scope = scope
+            profile.save(update_fields=("preferred_scope", "updated_at"))
+        request.findmatch_scope = scope
+        return scope
 
     @classmethod
     def active_scope(cls, request, *, allow_public=True):
@@ -82,7 +152,7 @@ class UniversityAccessService:
         allowed = set(ItemReport.Scope.values)
         requested = request.GET.get("scope") or request.POST.get("scope")
         session = getattr(request, "session", {})
-        scope = requested or session.get("findmatch_scope")
+        scope = requested or session.get(cls.SESSION_SCOPE_KEY)
         if not scope and request.user.is_authenticated:
             scope = cls.profile_for(request.user).preferred_scope
         if scope not in allowed:
@@ -90,13 +160,18 @@ class UniversityAccessService:
         if request.user.is_authenticated and cls.has_verified_email(request.user):
             if scope == ItemReport.Scope.UNIVERSITY and not cls.is_verified(request.user):
                 if requested == ItemReport.Scope.UNIVERSITY:
-                    raise PermissionDenied(_("Your verified account has International access only."))
+                    raise UniversityModePermissionDenied(
+                        _(
+                            "University Mode is available only to verified Biruni University "
+                            "students and authorized staff. You can continue using International Mode."
+                        )
+                    )
                 scope = ItemReport.Scope.INTERNATIONAL
         elif not allow_public:
             cls.require_scope(request.user, scope)
         if requested in allowed:
             if hasattr(request, "session"):
-                request.session["findmatch_scope"] = scope
+                request.session[cls.SESSION_SCOPE_KEY] = scope
             if request.user.is_authenticated:
                 profile = cls.profile_for(request.user)
                 if profile.preferred_scope != scope:

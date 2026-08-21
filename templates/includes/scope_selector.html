@@ -2,12 +2,10 @@
 {% if international_mode_enabled %}
 <form class="scope-selector" method="post" action="{% url 'switch_scope' %}" aria-label="{% translate 'Report location mode' %}">
   {% csrf_token %}
-  <input type="hidden" name="next" value="{{ request.get_full_path }}">
-  <label for="{{ scope_selector_id|default:'scopeSelector' }}">{% translate "Mode" %}</label>
-  <select id="{{ scope_selector_id|default:'scopeSelector' }}" name="scope" onchange="this.form.submit()">
-    {% if not user.is_authenticated or has_university_access %}<option value="university"{% if active_scope == 'university' %} selected{% endif %}>{% translate "University" %}</option>{% endif %}
-    <option value="international"{% if active_scope == 'international' %} selected{% endif %}>{% translate "International" %}</option>
-  </select>
-  <noscript><button class="btn btn-sm btn-outline-light" type="submit">{% translate "Switch" %}</button></noscript>
+  <span class="scope-selector-label">{% translate "Mode" %}</span>
+  <span class="scope-selector-buttons">
+    <button class="scope-option{% if active_scope == 'university' %} active{% endif %}" type="submit" name="scope" value="university" aria-pressed="{% if active_scope == 'university' %}true{% else %}false{% endif %}">{% translate "University" %}</button>
+    <button class="scope-option{% if active_scope == 'international' %} active{% endif %}" type="submit" name="scope" value="international" aria-pressed="{% if active_scope == 'international' %}true{% else %}false{% endif %}">{% translate "International" %}</button>
+  </span>
 </form>
 {% endif %}
