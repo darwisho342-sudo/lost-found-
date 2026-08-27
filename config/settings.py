@@ -159,6 +159,9 @@ UNIVERSITY_EMAIL_DOMAINS = tuple(
     ).split(",")
     if domain.strip()
 )
+OPEN_UNIVERSITY_ACCESS = os.environ.get(
+    "OPEN_UNIVERSITY_ACCESS", "True"
+).strip().casefold() in {"1", "true", "yes", "on"}
 UNIVERSITY_CAMPUSES = tuple(
     campus.strip()
     for campus in os.environ.get("UNIVERSITY_CAMPUSES", "Main Campus").split(",")

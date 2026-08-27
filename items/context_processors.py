@@ -11,6 +11,7 @@ def notification_center(request):
         "university_name": settings.UNIVERSITY_NAME,
         "university_security_office": settings.UNIVERSITY_SECURITY_OFFICE,
         "international_mode_enabled": settings.INTERNATIONAL_MODE_ENABLED,
+        "open_university_access": settings.OPEN_UNIVERSITY_ACCESS,
         "session_cookie_age": settings.SESSION_COOKIE_AGE,
     }
     try:

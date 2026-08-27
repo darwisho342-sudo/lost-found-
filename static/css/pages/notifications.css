@@ -1,10 +1,10 @@
 .page-heading-row { align-items: center; display: flex; gap: 1rem; justify-content: space-between; margin-bottom: 1.5rem; }
 .notification-list { display: grid; gap: .75rem; }
 .notification-card { border: 1px solid var(--color-border); border-radius: var(--radius-medium); overflow: hidden; }
-.notification-card button { align-items: flex-start; background: var(--color-white); border: 0; display: flex; gap: 1rem; padding: 1rem; text-align: start; width: 100%; }
-.notification-card.unread button { background: #F0FDFA; }
+.notification-card button { align-items:flex-start; background:var(--color-surface); border:0; color:var(--color-text); display:flex; gap:1rem; padding:1rem; text-align:start; width:100%; }
+.notification-card.unread button { background:var(--color-cyan-soft); }
 .notification-card span span, .notification-card small { color: var(--color-text-muted); display: block; }
-.notification-icon { background: #CCFBF1; border-radius: 50%; color: var(--color-primary-dark); display: grid; flex: none; height: 2.5rem; place-items: center; width: 2.5rem; }
-.unread-label { color:var(--color-primary-dark) !important; font-size:.7rem; font-weight:700; text-transform:uppercase; }
+.notification-icon { background:var(--color-cyan-soft); border-radius:50%; color:var(--color-cyan); display:grid; flex:none; height:2.5rem; place-items:center; width:2.5rem; }
+.unread-label { color:var(--color-cyan) !important; font-size:.7rem; font-weight:700; text-transform:uppercase; }
 .unread-label i { font-size:.45rem; }
 @media (max-width: 575.98px) { .page-heading-row { align-items: flex-start; flex-direction: column; } }

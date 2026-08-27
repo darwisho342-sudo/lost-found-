@@ -17,6 +17,8 @@ html[dir="rtl"] .search-field > i { left: auto; right: 1rem; }
 html[dir="rtl"] .search-field input { padding-left: .75rem !important; padding-right: 2.65rem !important; }
 html[dir="rtl"] .message-bubble, html[dir="rtl"] table, html[dir="rtl"] .form-control, html[dir="rtl"] .form-select { text-align: start; }
 html[dir="rtl"] input[type="email"], html[dir="rtl"] input[type="tel"], html[dir="rtl"] [dir="ltr"] { direction: ltr; text-align: left; }
+html[dir="rtl"] input[type="date"] { direction:ltr; text-align:left; }
+html[dir="rtl"] input[type="file"] { unicode-bidi:plaintext; }
 html[dir="rtl"] .pagination { padding-right: 0; }
 html[dir="rtl"] canvas, html[dir="rtl"] img { direction: ltr; }
 @media (max-width: 1199.98px) { html[dir="rtl"] .language-switcher { padding-block: .5rem; padding-inline: 0; } }

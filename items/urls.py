@@ -9,6 +9,7 @@ urlpatterns = [
     path("create/lost/", views.report_create, {"report_type": "lost"}, name="item_create_lost"),
     path("create/found/", views.report_create, {"report_type": "found"}, name="item_create_found"),
     path("<int:pk>/", views.report_detail, name="item_detail"),
+    path("<int:pk>/private-image/", views.private_report_image_download, name="private_report_image"),
     path("<int:pk>/edit/", views.report_edit, name="item_edit"),
     path("<int:pk>/delete/", views.report_delete, name="item_delete"),
     path("<int:pk>/matches/", views.possible_matches, name="item_matches"),

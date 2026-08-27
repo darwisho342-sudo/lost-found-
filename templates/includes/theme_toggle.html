@@ -1,0 +1,6 @@
+{% load i18n %}
+<button class="theme-toggle {{ theme_toggle_class|default:'' }}" type="button" data-theme-toggle aria-pressed="false" aria-label="{% translate 'Switch to dark theme' %}" data-label-light="{% translate 'Switch to light theme' %}" data-label-dark="{% translate 'Switch to dark theme' %}" data-status-light="{% translate 'Light theme active' %}" data-status-dark="{% translate 'Dark theme active' %}" title="{% translate 'Change colour theme' %}">
+  <span class="theme-toggle-icon theme-toggle-icon-sun" aria-hidden="true"><i class="bi bi-sun-fill"></i></span>
+  <span class="theme-toggle-icon theme-toggle-icon-moon" aria-hidden="true"><i class="bi bi-moon-stars-fill"></i></span>
+  <span class="visually-hidden" data-theme-status>{% translate "Light theme active" %}</span>
+</button>

@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
 {% load static i18n %}
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/management/management-base.css' %}?v=20260821">
+<link rel="stylesheet" href="{% static 'css/management/management-base.css' %}?v=20260826a">
 {% with page=request.resolver_match.url_name %}
-  {% if page == 'management_dashboard' or page == 'dashboard_home' %}<link rel="stylesheet" href="{% static 'css/management/dashboard.css' %}">{% endif %}
-  {% if page == 'management_reports' or page == 'dashboard_reports' or page == 'management_report_bulk_action' or page == 'management_report_bulk_confirm' or page == 'management_report_visibility' or page == 'dashboard_report_visibility' %}<link rel="stylesheet" href="{% static 'css/management/reports.css' %}">{% endif %}
-  {% if page == 'management_users' or page == 'dashboard_users' or page == 'management_user_detail' or page == 'dashboard_user_detail' or page == 'management_user_toggle_active' or page == 'dashboard_user_toggle_active' %}<link rel="stylesheet" href="{% static 'css/management/users.css' %}">{% endif %}
-  {% if page == 'management_conversations' or page == 'management_conversation_deactivate' or page == 'management_conversation_complete' or page == 'management_conversation_reopen' %}<link rel="stylesheet" href="{% static 'css/management/conversations.css' %}">{% endif %}
-  {% if page == 'management_audit_log' %}<link rel="stylesheet" href="{% static 'css/management/audit-log.css' %}">{% endif %}
+  {% if page == 'management_dashboard' or page == 'dashboard_home' %}<link rel="stylesheet" href="{% static 'css/management/dashboard.css' %}?v=20260826a">{% endif %}
+  {% if page == 'management_reports' or page == 'dashboard_reports' or page == 'management_report_bulk_action' or page == 'management_report_bulk_confirm' or page == 'management_report_visibility' or page == 'dashboard_report_visibility' %}<link rel="stylesheet" href="{% static 'css/management/reports.css' %}?v=20260826a">{% endif %}
+  {% if page == 'management_users' or page == 'dashboard_users' or page == 'management_user_detail' or page == 'dashboard_user_detail' or page == 'management_user_toggle_active' or page == 'dashboard_user_toggle_active' %}<link rel="stylesheet" href="{% static 'css/management/users.css' %}?v=20260826a">{% endif %}
+  {% if page == 'management_conversations' or page == 'management_conversation_deactivate' or page == 'management_conversation_complete' or page == 'management_conversation_reopen' %}<link rel="stylesheet" href="{% static 'css/management/conversations.css' %}?v=20260826a">{% endif %}
+  {% if page == 'management_audit_log' %}<link rel="stylesheet" href="{% static 'css/management/audit-log.css' %}?v=20260826a">{% endif %}
 {% endwith %}
 {% block dashboard_extra_css %}{% endblock %}
 {% endblock %}
@@ -39,7 +39,7 @@
   </aside>
   <button class="admin-sidebar-backdrop" type="button" data-admin-sidebar-backdrop aria-label="{% translate 'Close navigation' %}" tabindex="-1"></button>
   <main class="admin-main main-section">
-    <header class="admin-topbar main-header"><button class="admin-menu-toggle" type="button" data-admin-sidebar-open aria-expanded="false" aria-controls="adminSidebar"><i class="bi bi-list"></i><span>{% translate "Menu" %}</span></button><div class="admin-topbar-tools">{% include 'includes/language_switcher.html' with language_menu_id='adminDesktopLanguageMenu' %}<ul class="navbar-nav">{% include 'includes/notification_center.html' %}</ul><div class="admin-user"><i class="bi bi-person-circle"></i><span dir="auto">{{ user.username }}<small>{% translate "Staff account" %}</small></span></div></div></header>
+    <header class="admin-topbar main-header"><button class="admin-menu-toggle" type="button" data-admin-sidebar-open aria-expanded="false" aria-controls="adminSidebar"><i class="bi bi-list"></i><span>{% translate "Menu" %}</span></button><div class="admin-topbar-tools">{% include 'includes/theme_toggle.html' with theme_toggle_class='admin-theme-toggle' %}{% include 'includes/language_switcher.html' with language_menu_id='adminDesktopLanguageMenu' %}<ul class="navbar-nav">{% include 'includes/notification_center.html' %}</ul><div class="admin-user"><i class="bi bi-person-circle"></i><span dir="auto">{{ user.username }}<small>{% translate "Staff account" %}</small></span></div></div></header>
     <div class="admin-page main-content" id="main-content" data-admin-main-content tabindex="-1">{% include 'includes/messages.html' %}{% block dashboard_content %}{% endblock %}</div>
   </main>
 </div>

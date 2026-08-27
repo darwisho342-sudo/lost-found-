@@ -1,5 +1,6 @@
-.skip-link { background: var(--color-white); color: #000; left: 1rem; padding: .75rem; position: fixed; top: -100px; z-index: 2000; }
+.skip-link { background: var(--color-surface-elevated); border: 1px solid var(--color-border); border-radius: var(--radius-sm); color: var(--color-text); left: 1rem; padding: .75rem; position: fixed; top: -100px; z-index: 2000; }
 .skip-link:focus { top: 1rem; }
-.btn:focus-visible, .nav-link:focus-visible, a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 3px solid var(--color-orange); outline-offset: 3px; }
-@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; } }
-
+.btn:focus-visible, .nav-link:focus-visible, a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { box-shadow: var(--focus-ring); outline: 2px solid var(--color-warning); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-delay: 0s !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
+}

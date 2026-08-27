@@ -1,17 +1,16 @@
 .type-badge, .status-badge, .contact-status { border-radius: 999px; font-size: .75rem; font-weight: 700; padding: .35rem .65rem; }
-.type-lost { background: #FEE2E2; color: #991B1B; }
-.type-found { background: #DCFCE7; color: #166534; }
-.status-active { background: #DBEAFE; color: #1E40AF; }
-.status-possible_match { background: #FEF3C7; color: #92400E; }
-.status-resolved, .status-completed, .status-visible { background: #DCFCE7; color: #166534; }
-.status-deactivated { background: var(--color-orange-soft); color: #92400E; }
-.status-closed { background: #FEE2E2; color: #991B1B; }
-.status-hidden { background: #FEF3C7; color: #92400E; }
+.type-lost { background:var(--color-danger-soft); color:var(--color-danger); }
+.type-found { background:var(--color-success-soft); color:var(--color-success); }
+.status-active { background:var(--color-info-soft); color:var(--color-info); }
+.status-possible_match { background:var(--color-warning-soft); color:var(--color-warning); }
+.status-resolved,.status-completed,.status-visible { background:var(--color-success-soft); color:var(--color-success); }
+.status-deactivated { background:var(--color-warning-soft); color:var(--color-warning); }
+.status-closed { background:var(--color-danger-soft); color:var(--color-danger); }
+.status-hidden { background:var(--color-warning-soft); color:var(--color-warning); }
 .contact-status { display: inline-flex; flex-shrink: 0; font-size: .72rem; }
-.contact-status-pending { background: #FEF3C7; color: #92400E; }
-.contact-status-more_information { background:#DBEAFE; color:#1E40AF; }
-.contact-status-rejected, .contact-status-disputed { background:#FEE2E2; color:#991B1B; }
-.contact-status-completed { background:#DCFCE7; color:#166534; }
-.contact-status-approved { background: #DCFCE7; color: #166534; }
-.contact-status-denied, .contact-status-revoked { background: #FEE2E2; color: #991B1B; }
-.contact-status-cancelled { background: var(--color-border); color: #334155; }
+.contact-status-pending { background:var(--color-warning-soft); color:var(--color-warning); }
+.contact-status-more_information { background:var(--color-info-soft); color:var(--color-info); }
+.contact-status-rejected,.contact-status-disputed { background:var(--color-danger-soft); color:var(--color-danger); }
+.contact-status-completed,.contact-status-approved { background:var(--color-success-soft); color:var(--color-success); }
+.contact-status-denied,.contact-status-revoked { background:var(--color-danger-soft); color:var(--color-danger); }
+.contact-status-cancelled { background:var(--color-surface-muted); color:var(--color-text-muted); }

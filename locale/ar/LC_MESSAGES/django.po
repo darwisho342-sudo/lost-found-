@@ -1532,6 +1532,9 @@ msgstr "المتابعة إلى الوضع الدولي"
 msgid "Log in with a university account"
 msgstr "تسجيل الدخول باستخدام حساب جامعي"
 
+msgid "University access is temporarily open for local demonstration. University-domain verification will be enabled when institutional access becomes available."
+msgstr "الوصول إلى وضع الجامعة مفتوح مؤقتًا للعرض المحلي. سيتم تفعيل التحقق من نطاق الجامعة عند توفر الوصول المؤسسي."
+
 msgid "University locations"
 msgstr "مواقع الجامعة"
 
@@ -1587,3 +1590,304 @@ msgstr "اختر وضع الجامعة أو الوضع الدولي."
 
 msgid "University Mode requires a verified email address ending exactly with %(domains)s."
 msgstr "يتطلب وضع الجامعة عنوان بريد إلكتروني موثقاً ينتهي تماماً بـ %(domains)s."
+
+# Day 2 reporting workflow
+msgid "Continue your draft"
+msgstr "تابع مسودتك"
+
+msgid "Continue Draft"
+msgstr "متابعة المسودة"
+
+msgid "Campus and building"
+msgstr "الحرم الجامعي والمبنى"
+
+msgid "Floor"
+msgstr "الطابق"
+
+msgid "Room or area"
+msgstr "الغرفة أو المنطقة"
+
+msgid "Region / State / Governorate"
+msgstr "المنطقة / الولاية / المحافظة"
+
+msgid "Safe public location"
+msgstr "الموقع العام الآمن"
+
+msgid "Exact private location"
+msgstr "الموقع الخاص الدقيق"
+
+msgid "Country name"
+msgstr "اسم الدولة"
+
+msgid "Private. Visible only to the report owner and authorized staff."
+msgstr "خاص. لا يراه إلا صاحب البلاغ والموظفون المخولون."
+
+msgid "Private. Do not put room-level details in the safe public location."
+msgstr "خاص. لا تضع تفاصيل الغرفة ضمن الموقع العام الآمن."
+
+msgid "Use a safe general location. An exact street address is not required."
+msgstr "استخدم موقعًا عامًا وآمنًا. لا يلزم إدخال عنوان شارع دقيق."
+
+msgid "Enter the country name when Other country is selected."
+msgstr "أدخل اسم الدولة عند اختيار دولة أخرى."
+
+msgid "Enter a place name when Other is selected."
+msgstr "أدخل اسم المكان عند اختيار «أخرى»."
+
+msgid "Move serial numbers, hidden marks, exact contents, ownership evidence, and contact details to the private verification fields."
+msgstr "انقل الأرقام التسلسلية والعلامات المخفية والمحتويات الدقيقة وأدلة الملكية ومعلومات الاتصال إلى حقول التحقق الخاصة."
+
+msgid "Private report information"
+msgstr "معلومات البلاغ الخاصة"
+
+msgid "Visible only to the report owner and authorized staff."
+msgstr "لا يراه إلا صاحب البلاغ والموظفون المخولون."
+
+msgid "Use a JPG, JPEG, PNG, or WebP image file."
+msgstr "استخدم ملف صورة بصيغة JPG أو JPEG أو PNG أو WebP."
+
+msgid "The uploaded file does not have an allowed image content type."
+msgstr "لا يملك الملف المرفوع نوع محتوى صورة مسموحًا."
+
+msgid "The image contents, filename extension, and content type do not match."
+msgstr "لا تتطابق محتويات الصورة وامتداد اسم الملف ونوع المحتوى."
+
+msgid "Download protected report image"
+msgstr "تنزيل صورة البلاغ المحمية"
+
+msgid "Remove selected image"
+msgstr "إزالة الصورة المحددة"
+
+msgid "Location is unavailable. Enter the fields manually."
+msgstr "الموقع غير متاح. أدخل الحقول يدويًا."
+
+msgid "Requesting location permission…"
+msgstr "جارٍ طلب إذن الموقع…"
+
+msgid "Coordinates added privately. Country and city must still be entered manually."
+msgstr "أُضيفت الإحداثيات بشكل خاص. يجب إدخال الدولة والمدينة يدويًا أيضًا."
+
+msgid "Location was not shared. Manual fields remain available."
+msgstr "لم تتم مشاركة الموقع. ما زالت الحقول اليدوية متاحة."
+
+msgid "in"
+msgstr "في"
+
+msgid "Add one primary image and up to two optional additional images. A photograph never proves ownership."
+msgstr "أضف صورة رئيسية وصورتين إضافيتين اختياريتين بحد أقصى. الصورة لا تثبت الملكية أبدًا."
+
+msgid "Add opaque cover"
+msgstr "إضافة غطاء معتم"
+
+msgid "Add useful information not covered above. Do not include passwords, complete card numbers, identification numbers, security codes, phone numbers, addresses, or other private information."
+msgstr "أضف معلومات مفيدة لم تذكر أعلاه. لا تضف كلمات مرور أو أرقام بطاقات كاملة أو أرقام هوية أو رموز أمان أو أرقام هواتف أو عناوين أو معلومات خاصة أخرى."
+
+msgid "Appearance"
+msgstr "المظهر"
+
+msgid "Back"
+msgstr "رجوع"
+
+msgid "Category and item type are required."
+msgstr "الفئة ونوع الغرض مطلوبان."
+
+msgid "Choose clear details to improve safe possible matches."
+msgstr "اختر تفاصيل واضحة لتحسين المطابقات المحتملة الآمنة."
+
+msgid "Continue"
+msgstr "متابعة"
+
+msgid "Crop edges"
+msgstr "اقتصاص الحواف"
+
+msgid "Enter up to three details only the real owner is likely to know. They will never be shown publicly."
+msgstr "أدخل ثلاثة تفاصيل بحد أقصى يرجح أن يعرفها المالك الحقيقي فقط. لن تظهر للعامة أبدًا."
+
+msgid "Exact location or time, expected verification answers, claimant evidence, contact details, and University storage information."
+msgstr "الموقع أو الوقت الدقيق، وإجابات التحقق المتوقعة، ودليل المطالب، وبيانات الاتصال، ومعلومات التخزين بالجامعة."
+
+msgid "Final public-image preview"
+msgstr "المعاينة النهائية للصورة العامة"
+
+msgid "Hide unrelated faces, addresses, document or card numbers, QR codes, private messages, complete serial numbers, passwords, and authentication codes. FindMatch does not automatically detect private details."
+msgstr "أخفِ الوجوه غير ذات الصلة والعناوين وأرقام المستندات أو البطاقات ورموز QR والرسائل الخاصة والأرقام التسلسلية الكاملة وكلمات المرور ورموز المصادقة. لا يكتشف FindMatch التفاصيل الخاصة تلقائيًا."
+
+msgid "Location and date"
+msgstr "الموقع والتاريخ"
+
+msgid "Photo and details"
+msgstr "الصورة والتفاصيل"
+
+msgid "Preview and submit report"
+msgstr "معاينة البلاغ وإرساله"
+
+msgid "Privacy review"
+msgstr "مراجعة الخصوصية"
+
+msgid "Private"
+msgstr "خاص"
+
+msgid "Private verification"
+msgstr "التحقق الخاص"
+
+msgid "Public"
+msgstr "عام"
+
+msgid "Report completion"
+msgstr "اكتمال البلاغ"
+
+msgid "Report progress"
+msgstr "تقدم البلاغ"
+
+msgid "Rotate"
+msgstr "تدوير"
+
+msgid "Save as Draft"
+msgstr "حفظ كمسودة"
+
+msgid "Size is approximate. Optional fields may be left blank."
+msgstr "الحجم تقريبي. يمكن ترك الحقول الاختيارية فارغة."
+
+msgid "Step"
+msgstr "الخطوة"
+
+msgid "Submit"
+msgstr "إرسال"
+
+msgid "Tell us what happened"
+msgstr "أخبرنا ماذا حدث"
+
+msgid "Title, structured item details, safe general location, approximate date, public description, and prepared report images."
+msgstr "العنوان، وتفاصيل الغرض المنظمة، والموقع العام الآمن، والتاريخ التقريبي، والوصف العام، وصور البلاغ المعدة."
+
+msgid "Use only a safe general public location. Keep exact details private."
+msgstr "استخدم موقعًا عامًا آمنًا فقط. احتفظ بالتفاصيل الدقيقة بشكل خاص."
+
+msgid "of"
+msgstr "من"
+
+msgid "Title"
+msgstr "العنوان"
+
+msgid "Custom item type"
+msgstr "نوع غرض مخصص"
+
+msgid "Material"
+msgstr "المادة"
+
+msgid "Approximate size"
+msgstr "الحجم التقريبي"
+
+msgid "Pattern"
+msgstr "النقش"
+
+msgid "Condition"
+msgstr "الحالة"
+
+msgid "Brand"
+msgstr "العلامة التجارية"
+
+msgid "Custom brand"
+msgstr "علامة تجارية مخصصة"
+
+msgid "Model"
+msgstr "الطراز"
+
+msgid "Custom location"
+msgstr "موقع مخصص"
+
+msgid "District"
+msgstr "الحي"
+
+msgid "Place type"
+msgstr "نوع المكان"
+
+msgid "Primary image"
+msgstr "الصورة الرئيسية"
+
+msgid "Additional images"
+msgstr "صور إضافية"
+
+msgid "Official handover required"
+msgstr "يلزم تسليم رسمي"
+
+msgid "Verification question type"
+msgstr "نوع سؤال التحقق"
+
+msgid "Custom verification question"
+msgstr "سؤال تحقق مخصص"
+
+msgid "Private expected answer"
+msgstr "الإجابة الخاصة المتوقعة"
+
+msgid "Maximum 5 MB. Do not upload images showing private numbers, PINs, addresses, messages, or unrelated people's faces."
+msgstr "الحد الأقصى 5 ميغابايت. لا ترفع صورًا تظهر أرقامًا خاصة أو رموز PIN أو عناوين أو رسائل أو وجوه أشخاص غير ذوي صلة."
+
+msgid "Optional. Add up to two more images, for three images total."
+msgstr "اختياري. أضف صورتين إضافيتين بحد أقصى، ليصبح المجموع ثلاث صور."
+
+msgid "Upload a genuine JPG, PNG, or WebP image."
+msgstr "ارفع صورة صالحة بصيغة JPG أو PNG أو WebP."
+
+msgid "Use an image no larger than 12,000×12,000 pixels."
+msgstr "استخدم صورة لا تتجاوز 12,000×12,000 بكسل."
+
+msgid "Select an item type."
+msgstr "اختر نوع الغرض."
+
+msgid "Specify the item type when Other is selected."
+msgstr "حدد نوع الغرض عند اختيار «أخرى»."
+
+msgid "Specify the brand when Other is selected."
+msgstr "حدد العلامة التجارية عند اختيار «أخرى»."
+
+msgid "Specify a general location when Other is selected."
+msgstr "حدد موقعًا عامًا عند اختيار «أخرى»."
+
+msgid "Choose a University location or a general campus area."
+msgstr "اختر موقعًا جامعيًا أو منطقة عامة في الحرم."
+
+msgid "Sensitive documents cannot have public additional images."
+msgstr "لا يمكن أن تحتوي المستندات الحساسة على صور إضافية عامة."
+
+msgid "Enter the private expected answer."
+msgstr "أدخل الإجابة الخاصة المتوقعة."
+
+msgid "A report may contain no more than three images total."
+msgstr "يمكن أن يحتوي البلاغ على ثلاث صور كحد أقصى."
+
+msgid "This looks similar to one of your recent reports. Review it, then confirm if this is a separate item."
+msgstr "يبدو هذا مشابهًا لأحد بلاغاتك الأخيرة. راجعه، ثم أكد إذا كان غرضًا منفصلًا."
+
+msgid "Choose the closest approximate size."
+msgstr "اختر أقرب حجم تقريبي."
+
+msgid "Do not include passwords, complete card numbers, identification numbers, security codes, phone numbers, addresses, or other private information."
+msgstr "لا تضف كلمات مرور أو أرقام بطاقات كاملة أو أرقام هوية أو رموز أمان أو أرقام هواتف أو عناوين أو معلومات خاصة أخرى."
+
+msgid "Strictly private. Never used in matching, search, notifications, analytics, or public pages."
+msgstr "خاص تمامًا. لا يستخدم أبدًا في المطابقة أو البحث أو الإشعارات أو التحليلات أو الصفحات العامة."
+
+msgid "Additional private location details"
+msgstr "تفاصيل إضافية للموقع الخاص"
+
+msgid "Choose a Campus and building location."
+msgstr "اختر موقع الحرم الجامعي والمبنى."
+
+msgid "Switch to dark theme"
+msgstr "التبديل إلى المظهر الداكن"
+
+msgid "Switch to light theme"
+msgstr "التبديل إلى المظهر الفاتح"
+
+msgid "Change colour theme"
+msgstr "تغيير مظهر الألوان"
+
+msgid "Light theme active"
+msgstr "المظهر الفاتح مفعّل"
+
+msgid "Dark theme active"
+msgstr "المظهر الداكن مفعّل"
+
+msgid "Choose a campus and building to preview the public location."
+msgstr "اختر الحرم الجامعي والمبنى لمعاينة الموقع العام."

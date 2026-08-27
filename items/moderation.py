@@ -17,6 +17,14 @@ class SensitiveContentModerationService:
     CARD_NUMBER = re.compile(r"(?<!\d)(?:\d[ -]?){13,19}(?!\d)")
     SECURITY_CODE = re.compile(r"(?i)\b(?:cvv|cvc|security\s*code|pin|password|passcode|otp|authentication\s*code)\b\s*[:=#-]?\s*\S+")
     NATIONAL_ID = re.compile(r"(?i)\b(?:national\s*id|identity\s*number|kimlik\s*no|tc\s*no)\b\s*[:=#-]?\s*[A-Z0-9-]{5,}")
+    PRIVATE_CONTACT = re.compile(
+        r"(?ix)(?:\b[\w.+-]+@[\w.-]+\.[A-Z]{2,}\b|(?<!\w)(?:\+?\d[\d\s().-]{6,}\d)(?!\w))"
+    )
+    PRIVATE_OWNERSHIP_DETAIL = re.compile(
+        r"(?i)\b(?:serial\s*(?:number|no\.?|#)|hidden\s+mark|exact\s+contents?|"
+        r"contents?\s+(?:are|include|inside)|ownership\s+(?:proof|detail)|"
+        r"full\s+(?:id|card|identity)\s*(?:number|no\.?|#))\b"
+    )
 
     @classmethod
     def reject_public_sensitive_content(cls, value):
@@ -30,6 +38,16 @@ class SensitiveContentModerationService:
         text = cls.clean(value)
         if cls.CARD_NUMBER.search(text) or cls.SECURITY_CODE.search(text) or cls.NATIONAL_ID.search(text):
             raise ValidationError(_("Do not include complete passwords, PINs, card numbers, security codes, or identification numbers."))
+        return text
+
+    @classmethod
+    def reject_found_public_identifying_content(cls, value):
+        """Keep ownership evidence and contact details out of public Found text."""
+        text = cls.reject_public_sensitive_content(value)
+        if cls.PRIVATE_CONTACT.search(text) or cls.PRIVATE_OWNERSHIP_DETAIL.search(text):
+            raise ValidationError(_(
+                "Move serial numbers, hidden marks, exact contents, ownership evidence, and contact details to the private verification fields."
+            ))
         return text
 
 

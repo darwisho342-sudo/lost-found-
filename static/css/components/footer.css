@@ -1,2 +1,1 @@
-footer { background: var(--color-white); }
-
+footer { background:var(--color-surface); color:var(--color-text-muted); }

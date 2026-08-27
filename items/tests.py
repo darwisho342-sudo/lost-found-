@@ -30,6 +30,7 @@ from .models import (
     PrivateVerificationQuestion,
     UserBlock,
     UserProfile,
+    UniversityLocation,
     validate_image_size,
 )
 from .services import MatchingService
@@ -63,6 +64,12 @@ class MediaTestCase(TestCase):
             user=self.owner, email_verified_at=timezone.now(),
             university_eligible=True, preferred_scope=ItemReport.Scope.UNIVERSITY,
         )
+        self.university_location = UniversityLocation.objects.create(
+            campus="Main Campus",
+            building="Library",
+            general_area="Library",
+            location_type=ItemReport.CampusLocation.LIBRARY,
+        )
 
     def force_login_recently(self, user):
         self.client.force_login(user)
@@ -71,6 +78,24 @@ class MediaTestCase(TestCase):
         session.save()
 
     def create_report(self, **overrides):
+        requested_campus_location = overrides.get(
+            "campus_location", ItemReport.CampusLocation.LIBRARY
+        )
+        university_location = overrides.pop("university_location", None)
+        if university_location is None:
+            default_location = getattr(self, "university_location", None)
+            if (
+                default_location is not None
+                and default_location.location_type == requested_campus_location
+            ):
+                university_location = default_location
+            else:
+                location_label = ItemReport.CampusLocation(requested_campus_location).label
+                university_location, _ = UniversityLocation.objects.get_or_create(
+                    campus="Main Campus",
+                    location_type=requested_campus_location,
+                    defaults={"general_area": location_label},
+                )
         data = {
             "owner": self.owner,
             "report_type": ItemReport.ReportType.LOST,
@@ -79,6 +104,7 @@ class MediaTestCase(TestCase):
             "category": ItemReport.Category.ELECTRONICS,
             "colour": "Black",
             "campus_location": ItemReport.CampusLocation.LIBRARY,
+            "university_location": university_location,
             "item_date": date.today(),
             "image": test_image(),
         }
@@ -131,7 +157,7 @@ class ReportTests(MediaTestCase):
             "description": "Blue canvas backpack with two pockets",
             "category": ItemReport.Category.BAGS,
             "colour": " Blue  Navy ",
-            "campus_location": ItemReport.CampusLocation.CAFETERIA,
+            "university_location": str(self.university_location.pk),
             "item_date": date.today().isoformat(),
             "image": test_image("backpack.jpg"),
         }
@@ -321,8 +347,9 @@ class StructuredReportAndOwnershipTests(MediaTestCase):
             "item_type": "mobile_phone", "primary_colour": "black",
             "secondary_colour": "", "material": "", "approximate_size": "",
             "pattern": "", "item_condition": "", "brand": "samsung",
-            "custom_brand": "", "model": "Galaxy S", "campus_location": "library",
-            "custom_location": "", "item_date": date.today().isoformat(),
+            "custom_brand": "", "model": "Galaxy S",
+            "university_location": str(self.university_location.pk),
+            "item_date": date.today().isoformat(),
             "country": "Türkiye", "region": "Marmara", "city": "Istanbul",
             "district": "Fatih", "place_type": "university_school", "place_name": "Central Library",
             "public_location": "Central district", "public_location_precision_km": "5",

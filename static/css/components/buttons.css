@@ -1,8 +1,13 @@
-.btn { border-radius: .6rem; font-weight: 600; }
-.btn-primary { --bs-btn-bg: var(--color-primary-dark); --bs-btn-border-color: var(--color-primary-dark); --bs-btn-hover-bg: #115E59; --bs-btn-hover-border-color: #115E59; }
-.btn-outline-primary { --bs-btn-color: var(--color-primary-dark); --bs-btn-border-color: var(--color-primary); --bs-btn-hover-bg: var(--color-primary-dark); --bs-btn-hover-border-color: var(--color-primary-dark); }
-.btn-lost, .btn-found { color: var(--color-white); }
-.btn-lost { background: #DC2626; border-color: #DC2626; }
-.btn-found { background: #15803D; border-color: #15803D; }
-.btn-lost:hover, .btn-found:hover { color: var(--color-white); filter: brightness(.9); }
-
+.btn { align-items:center; border-radius:var(--radius-sm); display:inline-flex; font-weight:600; gap:.5rem; justify-content:center; min-height:42px; transition:background-color .18s ease,border-color .18s ease,box-shadow .18s ease,color .18s ease,transform .18s ease; white-space:nowrap; }
+.btn > i,.btn > svg { flex:0 0 auto; position:static; }
+.btn:hover { box-shadow:var(--shadow-sm); transform:translateY(-2px); }
+.btn:active { box-shadow:none; transform:translateY(0); }
+.btn-primary { --bs-btn-bg:var(--color-primary); --bs-btn-border-color:var(--color-primary); --bs-btn-hover-bg:var(--color-primary-hover); --bs-btn-hover-border-color:var(--color-primary-hover); --bs-btn-active-bg:var(--color-primary-hover); --bs-btn-active-border-color:var(--color-primary-hover); --bs-btn-color:var(--color-on-brand); }
+.btn-outline-primary { --bs-btn-color:var(--color-primary); --bs-btn-border-color:var(--color-primary); --bs-btn-hover-bg:var(--color-primary); --bs-btn-hover-border-color:var(--color-primary); --bs-btn-hover-color:var(--color-on-brand); }
+.btn-lost,.btn-found { color:var(--color-on-brand); }
+.btn-lost { background:var(--color-coral); border-color:var(--color-coral); }
+.btn-found { background:var(--color-success); border-color:var(--color-success); }
+.btn-lost:hover,.btn-found:hover { color:var(--color-on-brand); filter:brightness(.94); }
+.hero-btn-primary,.wizard-actions [data-step-next] { animation:fm-button-highlight 4.5s ease-in-out infinite; }
+@keyframes fm-button-highlight { 0%,100% { box-shadow:0 0 0 0 transparent; } 50% { box-shadow:0 8px 24px color-mix(in srgb,var(--color-cyan) 22%,transparent); } }
+@media (prefers-reduced-motion:reduce) { .btn:hover,.btn:active { transform:none; } .hero-btn-primary,.wizard-actions [data-step-next] { animation:none; } }

@@ -1,6 +1,5 @@
 .my-summary { margin-bottom: 2rem; }
-.my-summary-card { background: var(--color-white); border: 1px solid var(--color-border); border-radius: .8rem; min-height: 110px; padding: 1.1rem; }
+.my-summary-card { background:var(--color-surface); border:1px solid var(--color-border); border-radius:.8rem; box-shadow:var(--shadow-sm); min-height:110px; padding:1.1rem; }
 .my-summary-card span { color: var(--color-text-muted); display: block; font-size: .75rem; }
 .my-summary-card strong { display: block; font-size: 1.6rem; margin-top: .45rem; }
-.my-summary > div:nth-child(1) .my-summary-card { background: #EDE9FE; border-color: #DDD6FE; } .my-summary > div:nth-child(2) .my-summary-card { background: #CCFBF1; border-color: #99F6E4; } .my-summary > div:nth-child(3) .my-summary-card { background: #FEE2E2; border-color: #FECACA; } .my-summary > div:nth-child(4) .my-summary-card { background: #FEF3C7; border-color: #FDE68A; }
-
+.my-summary > div:nth-child(1) .my-summary-card { background:var(--color-primary-soft); } .my-summary > div:nth-child(2) .my-summary-card { background:var(--color-cyan-soft); } .my-summary > div:nth-child(3) .my-summary-card { background:var(--color-danger-soft); } .my-summary > div:nth-child(4) .my-summary-card { background:var(--color-warning-soft); }

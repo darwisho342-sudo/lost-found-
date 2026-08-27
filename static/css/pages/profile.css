@@ -1,3 +1,2 @@
-.contact-panel { border: 0; border-top: 5px solid #7C3AED; box-shadow: var(--shadow-raised); }
+.contact-panel { background:var(--color-surface); border:1px solid var(--color-border); border-top:5px solid var(--color-primary); box-shadow:var(--shadow-lg); }
 @media (max-width: 575.98px) { .contact-panel > .d-flex { align-items: flex-start !important; flex-direction: column; } }
-

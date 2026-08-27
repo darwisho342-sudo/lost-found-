@@ -85,10 +85,14 @@ class Command(BaseCommand):
         for value, label in ItemReport.CampusLocation.choices:
             if value in (ItemReport.CampusLocation.OTHER, ItemReport.CampusLocation.NOT_SURE):
                 continue
-            location, _ = UniversityLocation.objects.get_or_create(
-                campus="Main Campus", building=str(label), general_area=str(label),
-                defaults={"location_type": value if value in dict(ItemReport.CampusLocation.choices) else "not_sure"},
-            )
+            location = UniversityLocation.objects.filter(
+                campus="Main Campus", location_type=value,
+            ).order_by("pk").first()
+            if location is None:
+                location = UniversityLocation.objects.create(
+                    campus="Main Campus", building="", general_area=str(label),
+                    location_type=value if value in dict(ItemReport.CampusLocation.choices) else "not_sure",
+                )
             campus_locations[value] = location
         created_count = 0
         for index, (username, report_type, title, description, category, colour, location, days_ago, rgb) in enumerate(self.reports, start=1):

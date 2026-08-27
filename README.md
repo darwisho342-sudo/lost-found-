@@ -38,6 +38,7 @@ SITE_URL=http://127.0.0.1:8000
 SQLITE_PATH=db.sqlite3
 UNIVERSITY_NAME=Demo University
 UNIVERSITY_EMAIL_DOMAINS=st.biruni.edu.tr
+OPEN_UNIVERSITY_ACCESS=True
 UNIVERSITY_CAMPUSES=Main Campus
 UNIVERSITY_SECURITY_OFFICE=University Lost and Found Office
 INTERNATIONAL_MODE_ENABLED=True
@@ -46,11 +47,16 @@ ITEM_RETENTION_DAYS=90
 EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
 ```
 
+`OPEN_UNIVERSITY_ACCESS=True` temporarily allows every authenticated local user
+to use both modes. Set it to `False` to restore verified University-domain access
+for University Mode; staff and superuser authorization remains role-based in
+either configuration.
+
 Do not put a real secret in `.env.example`.
 
 ## Accounts, verification, and modes
 
-Registration accepts University and personal email addresses. It sends a signed, expiring verification link through Django's console email backend; during a local demo, the link appears in the server terminal. There is no universal verification bypass.
+Registration accepts University and personal email addresses. It sends a signed, expiring verification link through Django's console email backend; during a local demo, the link appears in the server terminal. The temporary mode-access bypass is controlled only by `OPEN_UNIVERSITY_ACCESS` and does not mark personal email addresses as University-verified.
 
 Email verification and University eligibility are stored separately:
 

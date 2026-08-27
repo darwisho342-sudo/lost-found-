@@ -10,6 +10,8 @@ from .services import MatchingService
 class DuplicateReportService:
     @classmethod
     def candidates(cls, report):
+        if not report.item_date:
+            return []
         queryset = ItemReport.objects.filter(
             owner=report.owner, scope=report.scope, report_type=report.report_type, category=report.category,
             item_type=report.item_type, is_deleted=False,

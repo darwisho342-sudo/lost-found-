@@ -1,0 +1,102 @@
+.theme-toggle {
+  align-items: center;
+  background: rgba(255, 255, 255, .1);
+  border: 1px solid rgba(255, 255, 255, .2);
+  border-radius: 999px;
+  color: var(--color-on-brand);
+  cursor: pointer;
+  display: inline-grid;
+  flex: 0 0 auto;
+  grid-template-columns: repeat(2, 1.75rem);
+  height: 2.5rem;
+  justify-content: center;
+  padding: .18rem;
+  position: relative;
+  transition: background-color .2s ease, border-color .2s ease, box-shadow .2s ease;
+  width: 4rem;
+}
+
+.theme-toggle::before {
+  background: var(--color-surface-elevated);
+  border-radius: 50%;
+  box-shadow: var(--shadow-sm);
+  content: "";
+  height: 1.7rem;
+  inset-block-start: .35rem;
+  inset-inline-start: .35rem;
+  position: absolute;
+  transition: transform .25s ease, background-color .2s ease;
+  width: 1.7rem;
+}
+
+html[data-theme="dark"] .theme-toggle::before {
+  transform: translateX(1.48rem);
+}
+
+html[dir="rtl"][data-theme="dark"] .theme-toggle::before {
+  transform: translateX(-1.48rem);
+}
+
+.theme-toggle:hover {
+  background: rgba(255, 255, 255, .18);
+  border-color: rgba(255, 255, 255, .34);
+}
+
+.theme-toggle:focus-visible {
+  box-shadow: var(--focus-ring);
+  outline: 2px solid var(--color-warning);
+  outline-offset: 2px;
+}
+
+.theme-toggle-icon {
+  align-items: center;
+  display: inline-flex;
+  font-size: .9rem;
+  justify-content: center;
+  opacity: .55;
+  position: relative;
+  transform: rotate(0deg) scale(.88);
+  transition: color .2s ease, opacity .2s ease, transform .25s ease;
+  z-index: 1;
+}
+
+.theme-toggle-icon-sun {
+  color: var(--color-warning);
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+}
+
+.theme-toggle-icon-moon { color:var(--color-sidebar-text); }
+
+html[data-theme="dark"] .theme-toggle-icon-sun {
+  opacity: .55;
+  transform: rotate(-70deg) scale(.82);
+}
+
+html[data-theme="dark"] .theme-toggle-icon-moon {
+  color: var(--color-primary-hover);
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+}
+
+.admin-theme-toggle {
+  background: var(--color-surface-muted);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+.admin-theme-toggle:hover {
+  background: var(--color-primary-soft);
+  border-color: var(--color-primary);
+}
+
+@media (max-width: 359.98px) {
+  .nav-theme-toggle { grid-template-columns: repeat(2, 1.55rem); width: 3.6rem; }
+  html[data-theme="dark"] .nav-theme-toggle::before { transform: translateX(1.27rem); }
+  html[dir="rtl"][data-theme="dark"] .nav-theme-toggle::before { transform: translateX(-1.27rem); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-toggle::before,
+  .theme-toggle-icon { transition-duration: .01ms; }
+}

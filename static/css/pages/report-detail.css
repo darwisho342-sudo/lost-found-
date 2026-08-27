@@ -1,15 +1,15 @@
-.detail-shell { background: var(--color-white); border: 0; border-radius: 1.25rem; box-shadow: var(--shadow-raised); overflow: hidden; }
-.detail-shell > .row > .col-lg-6:first-child { background: #EDE9FE; padding: clamp(1rem,3vw,2rem); }
-.detail-media, .detail-image { border-radius: .9rem; box-shadow: 0 14px 30px rgba(15,23,42,.12); height: 100%; min-height: 580px; object-fit: cover; width: 100%; }
-.detail-copy { background: var(--color-white); padding: clamp(1.5rem,5vw,3.5rem); }
+.detail-shell { background:var(--color-surface); border:1px solid var(--color-border); border-radius:1.25rem; box-shadow:var(--shadow-lg); overflow:hidden; }
+.detail-shell > .row > .col-lg-6:first-child { background:var(--color-primary-soft); padding:clamp(1rem,3vw,2rem); }
+.detail-media,.detail-image { border-radius:.9rem; box-shadow:var(--shadow-md); height:100%; min-height:580px; object-fit:cover; width:100%; }
+.detail-copy { background:var(--color-surface); padding:clamp(1.5rem,5vw,3.5rem); }
 .detail-meta-grid { display: grid; gap: .8rem; grid-template-columns: 1fr 1fr; margin: 2rem 0; }
 .detail-meta { background: var(--color-background); border-radius: .7rem; padding: 1rem; }
-.detail-meta:nth-child(1) { background: #EDE9FE; } .detail-meta:nth-child(2) { background: #CCFBF1; } .detail-meta:nth-child(3) { background: #FEF3C7; } .detail-meta:nth-child(4) { background: #E0F2FE; }
+.detail-meta:nth-child(1) { background:var(--color-primary-soft); } .detail-meta:nth-child(2) { background:var(--color-cyan-soft); } .detail-meta:nth-child(3) { background:var(--color-warning-soft); } .detail-meta:nth-child(4) { background:var(--color-info-soft); }
 .detail-meta i { color: var(--color-purple-bright); margin-right: .4rem; }
 .detail-meta span { color: var(--color-text-muted); display: block; font-size: .72rem; margin-bottom: .25rem; text-transform: uppercase; }
 .detail-meta strong { font-size: .9rem; }
-.contact-cta { align-items: center; background: linear-gradient(135deg,#F5F3FF,#ECFEFF); border: 1px solid #DDD6FE; border-radius: .9rem; display: flex; gap: 1.2rem; justify-content: space-between; padding: 1.25rem; }
+.contact-cta { align-items:center; background:linear-gradient(135deg,var(--color-primary-soft),var(--color-cyan-soft)); border:1px solid var(--color-border); border-radius:.9rem; display:flex; gap:1.2rem; justify-content:space-between; padding:1.25rem; }
 .contact-cta .btn { flex-shrink: 0; }
 @media (max-width: 991.98px) { .detail-media, .detail-image { min-height: 420px; } }
 @media (max-width: 767.98px) { .detail-shell > .row > .col-lg-6:first-child { padding: .8rem; } }
-@media (max-width: 575.98px) { .report-detail-page { padding-bottom:6rem !important; } .detail-copy { padding:1.15rem; } .detail-copy h1 { font-size:clamp(1.6rem,8vw,2.2rem); } .detail-meta-grid { grid-template-columns: 1fr; margin:1.25rem 0; } .detail-media, .detail-image { aspect-ratio:4 / 3; height:auto; min-height:0; } .contact-cta { align-items:flex-start; bottom:calc(70px + env(safe-area-inset-bottom)); box-shadow:0 -8px 24px rgba(15,23,42,.12); flex-direction:column; inset-inline:0; padding:1rem; position:fixed; z-index:1025; } .contact-cta div { display:none; } .contact-cta .btn { min-height:48px; width:100%; } .action-panel .btn:first-child { position:sticky; bottom:calc(76px + env(safe-area-inset-bottom)); z-index:10; } }
+@media (max-width: 575.98px) { .report-detail-page { padding-bottom:6rem !important; } .detail-copy { padding:1.15rem; } .detail-copy h1 { font-size:clamp(1.6rem,8vw,2.2rem); } .detail-meta-grid { grid-template-columns:1fr; margin:1.25rem 0; } .detail-media,.detail-image { aspect-ratio:4 / 3; height:auto; min-height:0; } .contact-cta { align-items:flex-start; bottom:calc(70px + env(safe-area-inset-bottom)); box-shadow:var(--shadow-md); flex-direction:column; inset-inline:0; padding:1rem; position:fixed; z-index:1025; } .contact-cta div { display:none; } .contact-cta .btn { min-height:48px; width:100%; } .action-panel .btn:first-child { position:sticky; bottom:calc(76px + env(safe-area-inset-bottom)); z-index:10; } }

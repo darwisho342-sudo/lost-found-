@@ -1,5 +1,6 @@
 from pathlib import Path
 import hashlib
+from uuid import uuid4
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -27,7 +28,11 @@ class PrivateMediaStorage(FileSystemStorage):
 
     def __init__(self, *args, **kwargs):
         kwargs.setdefault("location", settings.PRIVATE_MEDIA_ROOT)
+        kwargs.setdefault("base_url", None)
         super().__init__(*args, **kwargs)
+
+    def url(self, name):
+        raise ValueError("Private media does not have a public URL.")
 
 
 private_evidence_storage = PrivateMediaStorage()
@@ -62,18 +67,18 @@ def validate_image_size(image):
 
 def report_image_path(instance, filename):
     suffix = Path(filename).suffix.lower()
-    return f"reports/user_{instance.owner_id}/{instance.report_type}_{instance.pk or 'new'}{suffix}"
+    return f"reports/user_{instance.owner_id}/{uuid4().hex}{suffix}"
 
 
 def additional_report_image_path(instance, filename):
     suffix = Path(filename).suffix.lower()
     report = instance.report
-    return f"reports/user_{report.owner_id}/{report.report_type}_{report.pk}_extra_{instance.position}{suffix}"
+    return f"reports/user_{report.owner_id}/{uuid4().hex}{suffix}"
 
 
 def sensitive_report_image_path(instance, filename):
     suffix = Path(filename).suffix.lower()
-    return f"private_sensitive_reports/report_{instance.pk or 'new'}{suffix}"
+    return f"private_sensitive_reports/{uuid4().hex}{suffix}"
 
 
 def claim_evidence_path(instance, filename):
@@ -117,8 +122,33 @@ class UniversityLocation(models.Model):
             fields=("campus", "building", "general_area"), name="unique_university_location"
         )]
 
+    @staticmethod
+    def _unique_parts(*parts):
+        unique = []
+        seen = set()
+        for part in parts:
+            value = " ".join((part or "").split())
+            identity = value.casefold()
+            if value and identity not in seen:
+                unique.append(value)
+                seen.add(identity)
+        return unique
+
+    @property
+    def area_label(self):
+        """Return the building/area label without repeated words."""
+        return " — ".join(self._unique_parts(self.building, self.general_area))
+
+    def choice_label(self, *, include_campus=True):
+        parts = self._unique_parts(self.campus if include_campus else "", self.area_label)
+        return " — ".join(parts)
+
+    @property
+    def choice_identity(self):
+        return tuple(part.casefold() for part in self._unique_parts(self.campus, self.area_label))
+
     def __str__(self):
-        return " · ".join(part for part in (self.campus, self.building, self.general_area) if part)
+        return self.choice_label(include_campus=True)
 
 
 class ItemReport(models.Model):
@@ -196,7 +226,10 @@ class ItemReport(models.Model):
     custom_brand = models.CharField(max_length=80, blank=True)
     model = models.CharField(max_length=80, blank=True)
     custom_location = models.CharField(max_length=100, blank=True)
+    university_floor = models.CharField(max_length=60, blank=True)
+    university_room_or_area = models.CharField(max_length=120, blank=True)
     country = models.CharField(max_length=100, blank=True, db_index=True)
+    custom_country = models.CharField(max_length=100, blank=True)
     region = models.CharField(max_length=100, blank=True, db_index=True)
     city = models.CharField(max_length=100, blank=True, db_index=True)
     district = models.CharField(max_length=100, blank=True, db_index=True)
@@ -220,7 +253,7 @@ class ItemReport(models.Model):
         UniversityLocation, null=True, blank=True, on_delete=models.PROTECT,
         related_name="reports",
     )
-    item_date = models.DateField(_("date lost or found"), db_index=True)
+    item_date = models.DateField(_("date lost or found"), null=True, blank=True, db_index=True)
     image = models.ImageField(upload_to=report_image_path, validators=[validate_image_size], blank=True)
     image_is_hidden = models.BooleanField(
         default=False,
@@ -281,22 +314,31 @@ class ItemReport(models.Model):
 
     def clean(self):
         super().clean()
+        # Drafts deliberately accept incomplete data. Choice fields and any values
+        # that are present are still validated by the form/model field layer; the
+        # complete cross-field rules below apply when the report is submitted.
+        if self.status == self.Status.DRAFT:
+            if (self.latitude is None) != (self.longitude is None):
+                raise ValidationError(_("Latitude and longitude must be supplied together."))
+            return
         if self.item_type and self.item_type not in {value for value, label in ITEM_TYPE_CHOICES.get(self.category, ())}:
             raise ValidationError({"item_type": _("Select an item type that belongs to the selected category.")})
         if self.item_type == "other" and not self.custom_item_type.strip():
             raise ValidationError({"custom_item_type": _("Specify the item type when Other is selected.")})
         if self.brand == "other" and not self.custom_brand.strip():
             raise ValidationError({"custom_brand": _("Specify the brand when Other is selected.")})
-        if self.scope == self.Scope.UNIVERSITY and self.campus_location == "other" and not self.custom_location.strip():
-            raise ValidationError({"custom_location": _("Specify a general location when Other is selected.")})
         if self.scope == self.Scope.UNIVERSITY:
-            if not self.university_location_id and not self.campus_location:
-                raise ValidationError({"university_location": _("Choose a University location or a general campus area.")})
+            if not self.university_location_id:
+                raise ValidationError({"university_location": _("Choose a Campus and building location.")})
         elif self.scope == self.Scope.INTERNATIONAL:
             if not self.country.strip():
                 raise ValidationError({"country": _("Country is required for International reports.")})
+            if self.country == "OTHER" and not self.custom_country.strip():
+                raise ValidationError({"custom_country": _("Enter the country name when Other country is selected.")})
             if not self.city.strip():
                 raise ValidationError({"city": _("City is required for International reports.")})
+        if self.place_type == "other" and not self.place_name.strip():
+            raise ValidationError({"place_name": _("Enter a place name when Other is selected.")})
         if (self.latitude is None) != (self.longitude is None):
             raise ValidationError(_("Latitude and longitude must be supplied together."))
         if self.latitude is not None and not -90 <= self.latitude <= 90:
@@ -305,8 +347,11 @@ class ItemReport(models.Model):
             raise ValidationError({"longitude": _("Longitude must be between -180 and 180.")})
 
     def save(self, *args, **kwargs):
+        if self.scope == self.Scope.UNIVERSITY and self.university_location_id:
+            self.sync_university_location_fields()
         for field_name in (
-            "custom_item_type", "custom_brand", "model", "custom_location", "country",
+            "custom_item_type", "custom_brand", "model", "custom_location",
+            "university_floor", "university_room_or_area", "country", "custom_country",
             "region", "city", "district", "place_name", "public_location", "exact_private_location",
         ):
             setattr(self, field_name, " ".join((getattr(self, field_name, "") or "").split()))
@@ -343,6 +388,20 @@ class ItemReport(models.Model):
                 self.image_sha256 = digest.hexdigest()
         super().save(*args, **kwargs)
 
+    def sync_university_location_fields(self):
+        """Derive public University metadata from the protected structured choice."""
+        location = self.university_location
+        valid_location_types = {value for value, _label in self.CampusLocation.choices}
+        self.campus_location = (
+            location.location_type
+            if location.location_type in valid_location_types
+            else self.CampusLocation.NOT_SURE
+        )
+        self.custom_location = ""
+        self.place_type = "university_school"
+        self.place_name = " ".join(location.campus.split())
+        self.public_location = str(location)
+
     def hide_public_image(self):
         """Move a public image into protected local storage for staff review."""
         if self.image:
@@ -373,22 +432,21 @@ class ItemReport(models.Model):
     def public_location_display(self):
         if self.scope == self.Scope.UNIVERSITY:
             if self.university_location_id:
-                return str(self.university_location)
-            return self.custom_location or self.get_campus_location_display()
-        country = str(dict(COUNTRY_CHOICES).get(self.country, self.country))
-        parts = [self.place_name, self.district, self.city, self.region, country]
-        value = ", ".join(part for part in parts if part)
+                structured_location = str(self.university_location)
+            else:
+                structured_location = self.custom_location or self.get_campus_location_display()
+            return ", ".join(dict.fromkeys(
+                part for part in (self.public_location, structured_location) if part
+            ))
+        country = self.custom_country if self.country == "OTHER" else str(
+            dict(COUNTRY_CHOICES).get(self.country, self.country)
+        )
+        parts = [self.public_location, self.place_name, self.district, self.city, self.region, country]
+        value = ", ".join(dict.fromkeys(part for part in parts if part))
         return value or self.public_location or self.custom_location or self.get_campus_location_display()
 
     def can_view_private_location(self, user):
-        if not user.is_authenticated:
-            return False
-        if user.is_staff or user.pk == self.owner_id:
-            return True
-        return self.contact_requests.filter(
-            status__in=(ContactRequest.Status.APPROVED, ContactRequest.Status.RETURN_IN_PROGRESS),
-            requesting_user=user,
-        ).exists()
+        return bool(user.is_authenticated and (user.is_staff or user.pk == self.owner_id))
 
 
 class ReportImage(models.Model):

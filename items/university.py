@@ -62,6 +62,7 @@ class UniversityAccessService:
             changed.append("university_eligibility_lost_at")
         if (
             not eligible
+            and not settings.OPEN_UNIVERSITY_ACCESS
             and not cls.is_authorized_staff(user)
             and profile.preferred_scope == "university"
         ):
@@ -76,6 +77,9 @@ class UniversityAccessService:
     def is_verified(cls, user):
         if not user.is_authenticated or not user.is_active:
             return False
+        if settings.OPEN_UNIVERSITY_ACCESS:
+            cls.synchronize_eligibility(user)
+            return True
         if cls.is_authorized_staff(user):
             cls.synchronize_eligibility(user)
             return True
@@ -96,6 +100,13 @@ class UniversityAccessService:
     def can_access_scope(cls, user, scope):
         from .models import ItemReport
 
+        if (
+            settings.OPEN_UNIVERSITY_ACCESS
+            and user.is_authenticated
+            and user.is_active
+            and scope in ItemReport.Scope.values
+        ):
+            return True
         if scope == ItemReport.Scope.UNIVERSITY:
             return cls.is_verified(user)
         if scope == ItemReport.Scope.INTERNATIONAL:
@@ -106,6 +117,8 @@ class UniversityAccessService:
     def accessible_scopes(cls, user):
         from .models import ItemReport
 
+        if settings.OPEN_UNIVERSITY_ACCESS and user.is_authenticated and user.is_active:
+            return tuple(ItemReport.Scope.values)
         if cls.is_verified(user):
             return tuple(ItemReport.Scope.values)
         if cls.has_verified_email(user):

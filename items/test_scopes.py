@@ -19,7 +19,10 @@ from .services import MatchingService
 from .university import UniversityAccessService
 
 
-@override_settings(UNIVERSITY_EMAIL_DOMAINS=("st.biruni.edu.tr",))
+@override_settings(
+    UNIVERSITY_EMAIL_DOMAINS=("st.biruni.edu.tr",),
+    OPEN_UNIVERSITY_ACCESS=False,
+)
 class ScopeSelectorSwitchTests(TestCase):
     def verified_user(self, username, email, *, cached_eligibility=False, preferred_scope="international", is_staff=False):
         user = User.objects.create_user(
@@ -273,6 +276,7 @@ class ScopeSelectorSwitchTests(TestCase):
         self.assertNotIn("_auth_user_id", self.client.session)
 
 
+@override_settings(OPEN_UNIVERSITY_ACCESS=False)
 class ScopeAuthenticationTests(TestCase):
     def verified_user(self, username, email, university=False):
         user = User.objects.create_user(username, email=email, password="StrongPass123!")
@@ -305,6 +309,144 @@ class ScopeAuthenticationTests(TestCase):
         self.client.force_login(university)
         self.assertEqual(self.client.get(reverse("report_create", args=("lost",)), {"scope": "university"}).status_code, 200)
         self.assertEqual(self.client.get(reverse("report_create", args=("lost",)), {"scope": "international"}).status_code, 200)
+
+
+@override_settings(
+    UNIVERSITY_EMAIL_DOMAINS=("st.biruni.edu.tr",),
+    OPEN_UNIVERSITY_ACCESS=True,
+)
+class OpenUniversityAccessTests(TestCase):
+    password = "StrongPass123!"
+
+    def user(self, username, email, *, verified=False):
+        user = User.objects.create_user(
+            username, email=email, password=self.password
+        )
+        UserProfile.objects.create(
+            user=user,
+            email_verified_at=timezone.now() if verified else None,
+            preferred_scope=ItemReport.Scope.INTERNATIONAL,
+        )
+        return user
+
+    def test_gmail_user_can_switch_freely_and_session_tracks_each_mode(self):
+        gmail = self.user("open_gmail", "open@gmail.com")
+        self.client.force_login(gmail)
+
+        university = self.client.post(
+            reverse("switch_scope"), {"scope": ItemReport.Scope.UNIVERSITY}
+        )
+        self.assertRedirects(university, reverse("user_dashboard"))
+        self.assertEqual(
+            self.client.session[UniversityAccessService.SESSION_SCOPE_KEY],
+            ItemReport.Scope.UNIVERSITY,
+        )
+        self.assertEqual(
+            self.client.get(
+                reverse("report_create", args=("lost",)),
+                {"scope": ItemReport.Scope.UNIVERSITY},
+            ).status_code,
+            200,
+        )
+
+        international = self.client.post(
+            reverse("switch_scope"), {"scope": ItemReport.Scope.INTERNATIONAL}
+        )
+        self.assertRedirects(international, reverse("item_list"))
+        self.assertEqual(
+            self.client.session[UniversityAccessService.SESSION_SCOPE_KEY],
+            ItemReport.Scope.INTERNATIONAL,
+        )
+
+    def test_university_email_user_can_enter_both_modes(self):
+        student = self.user(
+            "open_student", "student@st.biruni.edu.tr", verified=True
+        )
+        self.client.force_login(student)
+        for scope, destination in (
+            (ItemReport.Scope.UNIVERSITY, "user_dashboard"),
+            (ItemReport.Scope.INTERNATIONAL, "item_list"),
+        ):
+            with self.subTest(scope=scope):
+                response = self.client.post(reverse("switch_scope"), {"scope": scope})
+                self.assertRedirects(response, reverse(destination))
+
+    def test_open_switch_works_with_all_localized_urls(self):
+        gmail = self.user("localized_open", "localized@gmail.com")
+        self.client.force_login(gmail)
+        for language in ("en", "tr", "ar"):
+            with self.subTest(language=language), translation.override(language):
+                response = self.client.post(
+                    reverse("switch_scope"), {"scope": ItemReport.Scope.UNIVERSITY}
+                )
+                self.assertRedirects(response, reverse("user_dashboard"))
+
+    def test_open_access_does_not_grant_staff_or_admin_permissions(self):
+        gmail = self.user("normal_open_user", "normal@gmail.com")
+        self.client.force_login(gmail)
+        for page in (
+            "management_dashboard",
+            "management_custody",
+            "management_audit_log",
+            "management_users",
+            "management_moderation",
+        ):
+            with self.subTest(page=page):
+                self.assertEqual(self.client.get(reverse(page)).status_code, 403)
+        self.assertNotEqual(self.client.get("/admin/").status_code, 200)
+
+    def test_restricted_setting_restores_exact_domain_rule(self):
+        gmail = self.user("restricted_again", "restricted@gmail.com", verified=True)
+        self.client.force_login(gmail)
+        with self.settings(OPEN_UNIVERSITY_ACCESS=False):
+            response = self.client.post(
+                reverse("switch_scope"), {"scope": ItemReport.Scope.UNIVERSITY}
+            )
+            self.assertEqual(response.status_code, 403)
+            self.assertFalse(
+                UniversityAccessService.can_access_scope(
+                    gmail, ItemReport.Scope.UNIVERSITY
+                )
+            )
+            self.assertTrue(
+                UniversityAccessService.can_access_scope(
+                    gmail, ItemReport.Scope.INTERNATIONAL
+                )
+            )
+
+    def test_anonymous_selection_finishes_after_login_without_loop(self):
+        gmail = self.user("pending_open", "pending@gmail.com")
+        anonymous = Client()
+        selected = anonymous.post(
+            reverse("switch_scope"), {"scope": ItemReport.Scope.UNIVERSITY}
+        )
+        self.assertRedirects(selected, reverse("login"))
+        logged_in = anonymous.post(reverse("login"), {
+            "username": gmail.username, "password": self.password,
+        })
+        self.assertRedirects(logged_in, reverse("user_dashboard"))
+        self.assertEqual(
+            anonymous.session[UniversityAccessService.SESSION_SCOPE_KEY],
+            ItemReport.Scope.UNIVERSITY,
+        )
+
+    def test_temporary_notice_follows_setting_and_arabic_remains_rtl(self):
+        with translation.override("en"):
+            open_page = self.client.get(reverse("home"))
+            self.assertContains(
+                open_page,
+                "University access is temporarily open for local demonstration.",
+            )
+            with self.settings(OPEN_UNIVERSITY_ACCESS=False):
+                restricted_page = self.client.get(reverse("home"))
+                self.assertNotContains(
+                    restricted_page,
+                    "University access is temporarily open for local demonstration.",
+                )
+        with translation.override("ar"):
+            arabic = self.client.get(reverse("home"))
+            self.assertContains(arabic, '<html lang="ar" dir="rtl">')
+            self.assertContains(arabic, "الوصول إلى وضع الجامعة مفتوح مؤقتًا")
 
 
 class ScopeReportAndMatchingTests(TestCase):

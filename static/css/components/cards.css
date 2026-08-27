@@ -1,5 +1,5 @@
-.report-card { background: var(--color-white); border: 1px solid #E8EDF4; border-radius: var(--radius-medium); box-shadow: var(--shadow-card); overflow: hidden; transition: transform .2s, box-shadow .2s; }
-.report-card:hover { box-shadow: 0 14px 32px rgba(15,23,42,.13); transform: translateY(-3px); }
+.report-card { background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-md); box-shadow:var(--shadow-md); overflow:hidden; transition:border-color .2s ease,box-shadow .2s ease,transform .2s ease; }
+.report-card:hover { border-color:var(--color-primary); box-shadow:var(--shadow-lg); transform:translateY(-3px); }
 .report-image-wrap { background: var(--color-border); overflow: hidden; position: relative; }
 .report-image { aspect-ratio: 4 / 3; height: auto; object-fit: cover; transition: transform .35s ease; width: 100%; }
 .report-card:hover .report-image { transform: scale(1.035); }
@@ -13,8 +13,8 @@
 .owner-actions { border-top: 1px solid var(--color-border); display: flex; flex-wrap: wrap; gap: .45rem; margin-top: 1rem; padding-top: 1rem; }
 .owner-actions .btn { font-size: .75rem; }
 .request-list { display: grid; gap: .85rem; }
-.request-row { align-items: center; background: var(--color-white); border: 1px solid var(--color-border); border-radius: .9rem; box-shadow: 0 8px 24px rgba(15,23,42,.05); color: inherit; display: flex; gap: 1rem; justify-content: space-between; padding: 1.25rem; text-decoration: none; }
-.request-row:hover { border-color: #C4B5FD; color: inherit; transform: translateY(-2px); }
+.request-row { align-items:center; background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-md); box-shadow:var(--shadow-sm); color:inherit; display:flex; gap:1rem; justify-content:space-between; padding:1.25rem; text-decoration:none; transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease; }
+.request-row:hover { border-color:var(--color-primary); box-shadow:var(--shadow-md); color:inherit; transform:translateY(-2px); }
 @media (max-width: 575.98px) { .report-card .card-body { padding: 1.1rem; } .report-card .btn { min-height: 44px; width: 100%; } }
 @media (max-width: 575.98px) { .request-row { align-items: flex-start; flex-direction: column; } }
 @media (prefers-reduced-motion: reduce) { .report-card:hover, .report-card:hover .report-image { transform: none; } }

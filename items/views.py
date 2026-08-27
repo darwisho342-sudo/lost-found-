@@ -12,7 +12,7 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.paginator import Paginator
 from django.db import IntegrityError, connection, models, transaction
 from django.db.models import Q
-from django.http import Http404, HttpResponse, HttpResponseBadRequest, HttpResponseNotAllowed, JsonResponse
+from django.http import FileResponse, Http404, HttpResponse, HttpResponseBadRequest, HttpResponseNotAllowed, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -295,15 +295,40 @@ def report_list(request, report_type=None):
 
 def report_detail(request, pk):
     report = get_object_or_404(ItemReport.objects.select_related("owner"), pk=pk)
+    if report.status == ItemReport.Status.DRAFT and not can_manage(request.user, report):
+        raise Http404
     if report.is_deleted and not request.user.is_staff:
         raise Http404
     if report.is_hidden and not request.user.is_staff and request.user != report.owner:
         raise Http404
-    return render(request, "items/report_detail.html", {"report": report})
+    return render(request, "items/report_detail.html", {
+        "report": report,
+        "can_view_private_report": can_manage(request.user, report),
+    })
 
 
 def can_manage(user, report):
     return user.is_authenticated and (user == report.owner or user.is_staff)
+
+
+@verified_university_required
+def private_report_image_download(request, pk):
+    """Serve protected report imagery only after an ownership/staff check."""
+    if request.method != "GET":
+        return HttpResponseNotAllowed(["GET"])
+    report = get_object_or_404(
+        ItemReport.objects.select_related("owner"), pk=pk,
+        private_sensitive_image__gt="",
+    )
+    if report.is_deleted and not request.user.is_staff:
+        raise Http404
+    _require_report_scope(request.user, report)
+    if not can_manage(request.user, report):
+        raise PermissionDenied
+    return FileResponse(
+        report.private_sensitive_image.open("rb"), as_attachment=True,
+        filename=f"protected-report-image-{report.pk}{Path(report.private_sensitive_image.name).suffix}",
+    )
 
 
 def _save_verification_questions(report, form):
@@ -325,8 +350,10 @@ def report_create(request, report_type):
     if report_type not in ItemReport.ReportType.values:
         raise PermissionDenied(_("Unknown report type."))
     active_scope = getattr(request, "findmatch_scope", UniversityAccessService.active_scope(request, allow_public=False))
+    save_as_draft = request.method == "POST" and request.POST.get("submission_action") == "draft"
     form = ItemReportForm(
-        request.POST or None, request.FILES or None, report_type=report_type, scope=active_scope
+        request.POST or None, request.FILES or None, report_type=report_type,
+        scope=active_scope, draft_mode=save_as_draft,
     )
     if request.method == "POST":
         try:
@@ -338,17 +365,17 @@ def report_create(request, report_type):
         report.owner = request.user
         report.report_type = report_type
         report.scope = active_scope
-        report.status = ItemReport.Status.DRAFT if request.POST.get("submission_action") == "draft" else ItemReport.Status.ACTIVE
-        duplicates = DuplicateReportService.candidates(report)
+        report.status = ItemReport.Status.DRAFT if save_as_draft else ItemReport.Status.ACTIVE
+        duplicates = [] if save_as_draft else DuplicateReportService.candidates(report)
         if duplicates and not form.cleaned_data.get("duplicate_confirmed"):
             form.add_error(None, _("This looks similar to one of your recent reports. Review it, then confirm if this is a separate item."))
             form.data = form.data.copy()
             form.data["duplicate_confirmed"] = "1"
             return render(request, "items/report_form.html", {"form": form, "report_type": report_type, "editing": False, "possible_duplicates": duplicates, "active_scope": active_scope})
         report.save()
-        for position, upload in enumerate(form.cleaned_data.get("additional_images", []), start=2):
-            report.additional_images.create(image=upload, position=position)
-        ReportLifecycleService.initialize_expiration(report)
+        form.save_additional_images(report)
+        if report.status == ItemReport.Status.ACTIVE:
+            ReportLifecycleService.initialize_expiration(report)
         _save_verification_questions(report, form)
         if report.status == ItemReport.Status.ACTIVE:
             AlertService.notify_saved_searches(report)
@@ -376,22 +403,50 @@ def report_edit(request, pk):
     ):
         messages.error(request, _("Resolved or closed reports cannot be edited."))
         return redirect(report)
+    was_draft = report.status == ItemReport.Status.DRAFT
+    save_as_draft = (
+        was_draft and request.method == "POST"
+        and request.POST.get("submission_action") == "draft"
+    )
     form = ItemReportForm(
         request.POST or None, request.FILES or None, instance=report,
-        report_type=report.report_type, scope=report.scope,
+        report_type=report.report_type, scope=report.scope, draft_mode=save_as_draft,
     )
     if request.method == "POST" and form.is_valid():
-        saved_report = form.save()
+        saved_report = form.save(commit=False)
+        saved_report.owner = report.owner
+        saved_report.report_type = report.report_type
+        saved_report.scope = report.scope
+        saved_report.status = ItemReport.Status.DRAFT if save_as_draft else (
+            ItemReport.Status.ACTIVE if was_draft else report.status
+        )
+        duplicates = [] if save_as_draft else DuplicateReportService.candidates(saved_report)
+        if duplicates and not form.cleaned_data.get("duplicate_confirmed"):
+            form.add_error(None, _("This looks similar to one of your recent reports. Review it, then confirm if this is a separate item."))
+            form.data = form.data.copy()
+            form.data["duplicate_confirmed"] = "1"
+            return render(request, "items/report_form.html", {
+                "form": form, "report_type": report.report_type, "editing": True,
+                "is_draft": was_draft, "possible_duplicates": duplicates,
+                "active_scope": report.scope,
+            })
+        saved_report.save()
+        form.save_additional_images(saved_report)
         _save_verification_questions(saved_report, form)
         if saved_report.status == ItemReport.Status.ACTIVE:
+            if was_draft:
+                ReportLifecycleService.initialize_expiration(saved_report)
             AlertService.notify_saved_searches(saved_report)
             AlertService.notify_strong_matches(saved_report)
-        messages.success(request, _("Your report was updated."))
-        return redirect(report)
+        if saved_report.status == ItemReport.Status.DRAFT:
+            messages.success(request, _("Your private draft was saved."))
+            return redirect("my_reports")
+        messages.success(request, _("Your report was submitted successfully.") if was_draft else _("Your report was updated."))
+        return redirect("item_matches", pk=saved_report.pk) if was_draft else redirect(saved_report)
     return render(
         request,
         "items/report_form.html",
-        {"form": form, "report_type": report.report_type, "editing": True, "active_scope": report.scope},
+        {"form": form, "report_type": report.report_type, "editing": True, "is_draft": was_draft, "active_scope": report.scope},
     )
 
 

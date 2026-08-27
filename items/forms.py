@@ -31,6 +31,7 @@ from .models import (
     UserProfile,
     UniversityLocation,
     normalize_phone_number,
+    validate_image_size,
     validate_evidence_size,
     validate_evidence_content,
     validate_phone_number,
@@ -233,17 +234,54 @@ class MultipleImageField(forms.FileField):
         if not data:
             return []
         items = data if isinstance(data, (list, tuple)) else [data]
-        return [super(MultipleImageField, self).clean(item, initial) for item in items]
+        cleaned_items = []
+        for item in items:
+            submitted_content_type = getattr(item, "content_type", "")
+            cleaned = super(MultipleImageField, self).clean(item, initial)
+            cleaned._submitted_content_type = submitted_content_type
+            cleaned_items.append(cleaned)
+        return cleaned_items
+
+
+class StrictImageField(forms.ImageField):
+    """Retain the client MIME value before Django/Pillow normalizes it."""
+
+    def clean(self, data, initial=None):
+        submitted_content_type = getattr(data, "content_type", "") if data else ""
+        if data:
+            validate_image_size(data)
+        cleaned = super().clean(data, initial)
+        if isinstance(cleaned, UploadedFile):
+            cleaned._submitted_content_type = submitted_content_type
+        return cleaned
 
 
 def prepare_report_image(upload):
     """Validate real image bytes, resize locally, and strip embedded metadata."""
     if not upload or not isinstance(upload, UploadedFile):
         return upload
+    validate_image_size(upload)
+    extension = Path(upload.name).suffix.casefold()
+    allowed_extensions = {
+        ".jpg": "JPEG", ".jpeg": "JPEG", ".png": "PNG", ".webp": "WEBP",
+    }
+    allowed_mime_types = {
+        "image/jpeg": "JPEG", "image/png": "PNG", "image/webp": "WEBP",
+    }
+    expected_format = allowed_extensions.get(extension)
+    submitted_content_type = getattr(upload, "_submitted_content_type", upload.content_type)
+    mime_format = allowed_mime_types.get((submitted_content_type or "").casefold())
+    if expected_format is None:
+        raise forms.ValidationError(_("Use a JPG, JPEG, PNG, or WebP image file."))
+    if mime_format is None:
+        raise forms.ValidationError(_("The uploaded file does not have an allowed image content type."))
     try:
         upload.seek(0)
         with Image.open(upload) as source:
+            detected_format = (source.format or "").upper()
             source.verify()
+        if detected_format != expected_format or detected_format != mime_format:
+            raise forms.ValidationError(_("The image contents, filename extension, and content type do not match."))
         upload.seek(0)
         with Image.open(upload) as source:
             if source.width < 1 or source.height < 1 or source.width > 12000 or source.height > 12000:
@@ -251,12 +289,13 @@ def prepare_report_image(upload):
             image = source.convert("RGB") if source.mode not in ("RGB", "RGBA") else source.copy()
             image.thumbnail((2400, 2400))
             output = BytesIO()
-            suffix = Path(upload.name).suffix.lower()
-            image_format = "PNG" if suffix == ".png" else "WEBP" if suffix == ".webp" else "JPEG"
+            image_format = detected_format
             if image_format == "JPEG" and image.mode != "RGB":
                 image = image.convert("RGB")
             image.save(output, format=image_format, quality=88, optimize=True)
-    except (UnidentifiedImageError, OSError, ValueError):
+    except forms.ValidationError:
+        raise
+    except (UnidentifiedImageError, OSError, ValueError, Image.DecompressionBombError):
         raise forms.ValidationError(_("Upload a genuine JPG, PNG, or WebP image."))
     output.seek(0)
     extension = {"JPEG": ".jpg", "PNG": ".png", "WEBP": ".webp"}[image_format]
@@ -266,8 +305,18 @@ def prepare_report_image(upload):
     )
 
 
+class UniversityLocationChoiceField(forms.ModelChoiceField):
+    """A structured location selector with context-aware, de-duplicated labels."""
+
+    include_campus = True
+
+    def label_from_instance(self, location):
+        return location.choice_label(include_campus=self.include_campus)
+
+
 class ItemReportForm(forms.ModelForm):
     country = forms.ChoiceField(required=False, choices=(("", _("Select a country")), *COUNTRY_CHOICES))
+    image = StrictImageField(required=False)
     additional_images = MultipleImageField(
         required=False,
         help_text=_("Optional. Add up to two more images, for three images total."),
@@ -292,8 +341,8 @@ class ItemReportForm(forms.ModelForm):
             "brand", "custom_brand", "model",
             "campus_location",
             "university_location",
-            "custom_location",
-            "country", "region", "city", "district", "place_type", "place_name",
+            "custom_location", "university_floor", "university_room_or_area",
+            "country", "custom_country", "region", "city", "district", "place_type", "place_name",
             "public_location", "exact_private_location",
             "item_date",
             "additional_details",
@@ -308,11 +357,45 @@ class ItemReportForm(forms.ModelForm):
             "longitude": forms.NumberInput(attrs={"step": "0.000001"}),
         }
 
-    def __init__(self, *args, report_type=None, scope=None, **kwargs):
+    def __init__(self, *args, report_type=None, scope=None, draft_mode=False, **kwargs):
         super().__init__(*args, **kwargs)
+        self.draft_mode = draft_mode
         self.report_type = report_type or getattr(self.instance, "report_type", "")
         self.scope = scope or getattr(self.instance, "scope", ItemReport.Scope.UNIVERSITY)
         self.instance.scope = self.scope
+        translated_labels = {
+            "title": _("Title"),
+            "category": _("Category"),
+            "item_type": _("Item type"),
+            "custom_item_type": _("Custom item type"),
+            "primary_colour": _("Primary colour"),
+            "secondary_colour": _("Secondary colour"),
+            "material": _("Material"),
+            "approximate_size": _("Approximate size"),
+            "pattern": _("Pattern"),
+            "item_condition": _("Condition"),
+            "brand": _("Brand"),
+            "custom_brand": _("Custom brand"),
+            "model": _("Model"),
+            "country": _("Country"),
+            "region": _("Region / State / Governorate"),
+            "city": _("City"),
+            "district": _("District"),
+            "place_type": _("Place type"),
+            "place_name": _("Place name"),
+            "additional_details": _("Additional details"),
+            "image": _("Primary image"),
+            "additional_images": _("Additional images"),
+            "require_official_handover": _("Official handover required"),
+        }
+        for field_name, translated_label in translated_labels.items():
+            self.fields[field_name].label = translated_label
+        for index in range(1, 4):
+            self.fields[f"verification_question_{index}_type"].label = _("Verification question type")
+            self.fields[f"verification_question_{index}_text"].label = _("Custom verification question")
+            self.fields[f"verification_question_{index}_answer"].label = _("Private expected answer")
+        if self.draft_mode:
+            self.instance.status = ItemReport.Status.DRAFT
         self.fields["category"].choices = (("", _("Select a category")), *ItemReport.Category.choices)
         self.fields["title"].required = False
         self.fields["item_type"].choices = (("", _("Select an item type")), *ALL_ITEM_TYPE_CHOICES)
@@ -320,11 +403,40 @@ class ItemReportForm(forms.ModelForm):
         self.fields["primary_colour"].choices = (("", _("Select a primary colour")), *COLOUR_CHOICES)
         for field_name in ("secondary_colour", "material", "approximate_size", "pattern", "item_condition", "brand"):
             self.fields[field_name].choices = (("", _("Not specified")), *self.fields[field_name].choices)
-        self.fields["campus_location"].choices = (("", _("Select a general location")), *ItemReport.CampusLocation.choices)
-        self.fields["campus_location"].required = False
-        self.fields["university_location"].queryset = self.fields["university_location"].queryset.filter(is_active=True)
-        self.fields["university_location"].required = False
-        self.fields["university_location"].label = _("Campus, building, and general area")
+        current_location = self.instance.university_location if self.instance.pk else None
+        available_locations = list(UniversityLocation.objects.filter(is_active=True))
+        if current_location and all(location.pk != current_location.pk for location in available_locations):
+            available_locations.append(current_location)
+        preferred_ids = []
+        identities = {}
+        for location in available_locations:
+            identity = location.choice_identity
+            if identity not in identities or (current_location and location.pk == current_location.pk):
+                if identity in identities:
+                    preferred_ids.remove(identities[identity])
+                identities[identity] = location.pk
+                preferred_ids.append(location.pk)
+        location_queryset = UniversityLocation.objects.filter(pk__in=preferred_ids)
+        campus_count = len({location.campus.casefold().strip() for location in available_locations})
+        self.fields["university_location"] = UniversityLocationChoiceField(
+            queryset=location_queryset,
+            required=self.scope == ItemReport.Scope.UNIVERSITY and not self.draft_mode,
+            label=_("Campus and building"),
+            initial=current_location.pk if current_location else None,
+            error_messages={"required": _("Choose a Campus and building location.")},
+        )
+        self.fields["university_location"].include_campus = campus_count > 1
+        self.fields["university_location"].widget.attrs["class"] = "form-select"
+        self.fields["university_floor"].label = _("Floor")
+        self.fields["university_room_or_area"].label = _("Room or area")
+        self.fields["region"].label = _("Region / State / Governorate")
+        self.fields["public_location"].label = _("Safe public location")
+        self.fields["exact_private_location"].label = (
+            _("Additional private location details")
+            if self.scope == ItemReport.Scope.UNIVERSITY
+            else _("Exact private location")
+        )
+        self.fields["custom_country"].label = _("Country name")
         submitted_country = self.data.get("country") if self.is_bound else ""
         legacy_country = self.instance.country if self.instance.pk else submitted_country
         if legacy_country and legacy_country not in dict(COUNTRY_CHOICES):
@@ -335,12 +447,27 @@ class ItemReportForm(forms.ModelForm):
         self.fields["exact_private_location"].help_text = _(
             "Strictly private. Never used in matching, search, notifications, analytics, or public pages."
         )
+        self.fields["university_floor"].help_text = _("Private. Visible only to the report owner and authorized staff.")
+        self.fields["university_room_or_area"].help_text = _("Private. Do not put room-level details in the safe public location.")
+        self.fields["public_location"].help_text = _("Use a safe general location. An exact street address is not required.")
+        if self.scope == ItemReport.Scope.UNIVERSITY:
+            for field_name in ("campus_location", "custom_location", "place_type", "place_name", "public_location"):
+                self.fields.pop(field_name)
         legacy_post = bool(self.data.get("colour"))
         self.fields["duplicate_confirmed"].widget = forms.HiddenInput()
         self.fields["item_date"].label = _("Date found") if self.report_type == ItemReport.ReportType.FOUND else _("Date lost")
+        self.fields["item_date"].required = not self.draft_mode
         self.fields["approximate_size"].help_text = _("Choose the closest approximate size.")
         self.fields["additional_details"].help_text = _("Do not include passwords, complete card numbers, identification numbers, security codes, phone numbers, addresses, or other private information.")
         self.fields["image"].help_text = _("Maximum 5 MB. Do not upload images showing private numbers, PINs, addresses, messages, or unrelated people's faces.")
+        allowed_image_types = ".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+        self.fields["image"].widget.attrs["accept"] = allowed_image_types
+        self.fields["additional_images"].widget.attrs["accept"] = allowed_image_types
+        if self.draft_mode:
+            # A draft may be saved from any wizard step. Submitted values still go
+            # through their normal choice, length, file, date, and safety validators.
+            for field in self.fields.values():
+                field.required = False
         for field in self.fields.values():
             if isinstance(field.widget, (forms.Select, forms.SelectMultiple)):
                 field.widget.attrs.setdefault("class", "form-select")
@@ -361,39 +488,63 @@ class ItemReportForm(forms.ModelForm):
         allowed = {value for value, label in ITEM_TYPE_CHOICES.get(category, ())}
         if item_type and item_type not in allowed:
             self.add_error("item_type", _("Select an item type that belongs to the selected category."))
-        if not item_type:
+        if not item_type and not self.draft_mode:
             self.add_error("item_type", _("Select an item type."))
-        if item_type == "other" and not cleaned.get("custom_item_type"):
+        if item_type == "other" and not cleaned.get("custom_item_type") and not self.draft_mode:
             self.add_error("custom_item_type", _("Specify the item type when Other is selected."))
-        if cleaned.get("brand") == "other" and not cleaned.get("custom_brand"):
+        if cleaned.get("brand") == "other" and not cleaned.get("custom_brand") and not self.draft_mode:
             self.add_error("custom_brand", _("Specify the brand when Other is selected."))
         if self.scope == ItemReport.Scope.UNIVERSITY:
-            if cleaned.get("campus_location") == "other" and not cleaned.get("custom_location"):
-                self.add_error("custom_location", _("Specify a general location when Other is selected."))
-            if not cleaned.get("university_location") and not cleaned.get("campus_location"):
-                self.add_error("university_location", _("Choose a University location or a general campus area."))
-            for name in ("country", "region", "city", "district", "place_type", "place_name", "public_location", "exact_private_location"):
+            location = cleaned.get("university_location")
+            if location:
+                self.instance.university_location = location
+                self.instance.sync_university_location_fields()
+            elif self.draft_mode:
+                self.instance.campus_location = ""
+                self.instance.custom_location = ""
+                self.instance.place_type = ""
+                self.instance.place_name = ""
+                self.instance.public_location = ""
+            for name in ("country", "custom_country", "region", "city", "district"):
                 cleaned[name] = ""
         else:
             country_aliases = {"turkey": "TR", "türkiye": "TR"}
             cleaned["country"] = country_aliases.get((cleaned.get("country") or "").casefold(), cleaned.get("country"))
-            if not cleaned.get("country"):
+            if not cleaned.get("country") and not self.draft_mode:
                 self.add_error("country", _("Country is required for International reports."))
-            if not (cleaned.get("city") or "").strip():
+            if cleaned.get("country") == "OTHER" and not (cleaned.get("custom_country") or "").strip() and not self.draft_mode:
+                self.add_error("custom_country", _("Enter the country name when Other country is selected."))
+            if not (cleaned.get("city") or "").strip() and not self.draft_mode:
                 self.add_error("city", _("City is required for International reports."))
             cleaned["university_location"] = None
             cleaned["campus_location"] = ""
             cleaned["custom_location"] = ""
+            cleaned["university_floor"] = ""
+            cleaned["university_room_or_area"] = ""
+        if self.scope == ItemReport.Scope.INTERNATIONAL and cleaned.get("place_type") == "other" and not (cleaned.get("place_name") or "").strip() and not self.draft_mode:
+            self.add_error("place_name", _("Enter a place name when Other is selected."))
         if item_type in {"student_id", "bank_card", "driver_licence", "national_id", "passport"} and cleaned.get("additional_images"):
             self.add_error("additional_images", _("Sensitive documents cannot have public additional images."))
         if not cleaned.get("primary_colour") and legacy_post:
             raw = " ".join(self.data.get("colour", "").split()).casefold().replace(" ", "_")
             cleaned["primary_colour"] = raw if raw in dict(COLOUR_CHOICES) else "not_sure"
-        for field_name in ("additional_details", "title"):
+        public_text_fields = (
+            "additional_details", "title", "custom_item_type", "custom_brand",
+            "model", "custom_location", "custom_country", "place_name", "public_location",
+        )
+        for field_name in public_text_fields:
             try:
                 cleaned[field_name] = SensitiveContentModerationService.reject_public_sensitive_content(cleaned.get(field_name, ""))
             except forms.ValidationError as exc:
                 self.add_error(field_name, exc)
+        if self.report_type == ItemReport.ReportType.FOUND:
+            for field_name in public_text_fields:
+                if field_name in self.errors:
+                    continue
+                try:
+                    cleaned[field_name] = SensitiveContentModerationService.reject_found_public_identifying_content(cleaned.get(field_name, ""))
+                except forms.ValidationError as exc:
+                    self.add_error(field_name, exc)
         for index in range(1, 4):
             question_type = cleaned.get(f"verification_question_{index}_type")
             answer = cleaned.get(f"verification_question_{index}_answer", "")
@@ -407,8 +558,8 @@ class ItemReportForm(forms.ModelForm):
         return cleaned
 
     def clean_item_date(self):
-        item_date = self.cleaned_data["item_date"]
-        if item_date > timezone.localdate():
+        item_date = self.cleaned_data.get("item_date")
+        if item_date and item_date > timezone.localdate():
             raise forms.ValidationError(_("The date cannot be in the future."))
         return item_date
 
@@ -417,28 +568,30 @@ class ItemReportForm(forms.ModelForm):
 
     def clean_additional_images(self):
         uploads = self.cleaned_data.get("additional_images") or []
-        existing_count = self.instance.additional_images.filter(is_hidden=False).count() if self.instance.pk else 0
+        existing_count = self.instance.additional_images.count() if self.instance.pk else 0
         if existing_count + len(uploads) > 2:
             raise forms.ValidationError(_("A report may contain no more than three images total."))
         return [prepare_report_image(upload) for upload in uploads]
+
+    def save_additional_images(self, report):
+        """Store validated extras in the next free slots without edit-time collisions."""
+        used = set(report.additional_images.values_list("position", flat=True))
+        for upload in self.cleaned_data.get("additional_images", []):
+            next_position = next(position for position in (2, 3) if position not in used)
+            ReportImage.objects.create(report=report, image=upload, position=next_position)
+            used.add(next_position)
 
     def save(self, commit=True):
         report = super().save(commit=False)
         report.scope = self.scope
         report.colour = (" ".join(self.data.get("colour", "").split()) if self.data.get("colour") else (report.get_primary_colour_display() or report.primary_colour))
         report.description = self.cleaned_data.get("additional_details", "")
-        if not report.title:
+        if not report.title and not self.draft_mode:
             report.title = self.suggested_title()
         if commit:
             report.save()
             self.save_m2m()
-            next_position = 2
-            used = set(report.additional_images.values_list("position", flat=True))
-            for upload in self.cleaned_data.get("additional_images", []):
-                while next_position in used:
-                    next_position += 1
-                ReportImage.objects.create(report=report, image=upload, position=next_position)
-                used.add(next_position)
+            self.save_additional_images(report)
         return report
 
     def suggested_title(self):
@@ -590,7 +743,7 @@ class ReportFilterForm(forms.Form):
         required=False, queryset=None, label=_("Campus or building")
     )
     country = forms.ChoiceField(required=False, choices=(("", _("All countries")), *COUNTRY_CHOICES))
-    region = forms.CharField(required=False, label=_("State, province, or region"))
+    region = forms.CharField(required=False, label=_("Region / State / Governorate"))
     city = forms.CharField(required=False, label=_("City"))
     district = forms.CharField(required=False, label=_("District or area"))
     place_type = forms.ChoiceField(required=False, choices=(("", _("All place types")), *PLACE_TYPE_CHOICES))

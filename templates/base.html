@@ -7,41 +7,55 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="{% translate 'FindMatch University and International lost-and-found service' %}">
+  <meta name="color-scheme" content="light dark">
   <title>{% block title %}FindMatch{% endblock %}</title>
+  <script>
+    (() => {
+      const key = "findmatch-theme";
+      let theme;
+      try { theme = localStorage.getItem(key); } catch (error) { theme = null; }
+      if (theme !== "light" && theme !== "dark") {
+        theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      }
+      document.documentElement.dataset.theme = theme;
+      document.documentElement.dataset.bsTheme = theme;
+    })();
+  </script>
   <link rel="stylesheet" href="{% static 'vendor/bootstrap.min.css' %}">
   <link rel="stylesheet" href="{% static 'vendor/bootstrap-icons.min.css' %}">
-  <link rel="stylesheet" href="{% static 'css/core/variables.css' %}">
-  <link rel="stylesheet" href="{% static 'css/core/reset.css' %}">
-  <link rel="stylesheet" href="{% static 'css/core/base.css' %}?v=20260814">
-  <link rel="stylesheet" href="{% static 'css/core/typography.css' %}">
-  <link rel="stylesheet" href="{% static 'css/core/utilities.css' %}">
-  <link rel="stylesheet" href="{% static 'css/components/navigation.css' %}?v=20260814d">
-  <link rel="stylesheet" href="{% static 'css/components/footer.css' %}">
-  <link rel="stylesheet" href="{% static 'css/components/buttons.css' %}">
-  <link rel="stylesheet" href="{% static 'css/components/forms.css' %}?v=20260814">
-  <link rel="stylesheet" href="{% static 'css/components/cards.css' %}?v=20260814">
-  <link rel="stylesheet" href="{% static 'css/components/badges.css' %}">
-  <link rel="stylesheet" href="{% static 'css/components/messages.css' %}">
-  <link rel="stylesheet" href="{% static 'css/components/pagination.css' %}">
-  <link rel="stylesheet" href="{% static 'css/components/notification-bell.css' %}">
-  <link rel="stylesheet" href="{% static 'css/components/mobile-shell.css' %}?v=20260814b">
-  <link rel="stylesheet" href="{% static 'css/core/accessibility.css' %}">
+  <link rel="stylesheet" href="{% static 'css/core/variables.css' %}?v=20260826a">
+  <link rel="stylesheet" href="{% static 'css/core/reset.css' %}?v=20260826a">
+  <link rel="stylesheet" href="{% static 'css/core/base.css' %}?v=20260826a">
+  <link rel="stylesheet" href="{% static 'css/core/typography.css' %}?v=20260826a">
+  <link rel="stylesheet" href="{% static 'css/core/utilities.css' %}?v=20260826a">
+  <link rel="stylesheet" href="{% static 'css/components/navigation.css' %}?v=20260827b">
+  <link rel="stylesheet" href="{% static 'css/components/theme-toggle.css' %}?v=20260826a">
+  <link rel="stylesheet" href="{% static 'css/components/footer.css' %}?v=20260826a">
+  <link rel="stylesheet" href="{% static 'css/components/buttons.css' %}?v=20260826b">
+  <link rel="stylesheet" href="{% static 'css/components/forms.css' %}?v=20260826a">
+  <link rel="stylesheet" href="{% static 'css/components/cards.css' %}?v=20260826a">
+  <link rel="stylesheet" href="{% static 'css/components/badges.css' %}?v=20260826a">
+  <link rel="stylesheet" href="{% static 'css/components/messages.css' %}?v=20260826a">
+  <link rel="stylesheet" href="{% static 'css/components/pagination.css' %}?v=20260826a">
+  <link rel="stylesheet" href="{% static 'css/components/notification-bell.css' %}?v=20260826a">
+  <link rel="stylesheet" href="{% static 'css/components/mobile-shell.css' %}?v=20260827a">
+  <link rel="stylesheet" href="{% static 'css/core/accessibility.css' %}?v=20260826a">
   {% if LANGUAGE_BIDI %}<link rel="stylesheet" href="{% static 'css/core/rtl.css' %}?v=i18n2">{% endif %}
   {% block extra_css %}
     {% with page=request.resolver_match.url_name %}
-      {% if page == 'home' %}<link rel="stylesheet" href="{% static 'css/pages/home.css' %}?v=i18n2">{% endif %}
-      {% if page == 'login' or page == 'register' %}<link rel="stylesheet" href="{% static 'css/pages/authentication.css' %}">{% endif %}
-      {% if page == 'item_list' or page == 'lost_item_list' or page == 'found_item_list' or page == 'report_list' %}<link rel="stylesheet" href="{% static 'css/pages/reports-list.css' %}?v=20260814">{% endif %}
-      {% if page == 'item_detail' or page == 'report_detail' %}<link rel="stylesheet" href="{% static 'css/pages/report-detail.css' %}?v=20260814">{% endif %}
-      {% if page == 'item_create_lost' or page == 'item_create_found' or page == 'report_create' or page == 'item_edit' or page == 'report_edit' or page == 'item_delete' or page == 'report_delete' or page == 'item_resolve' or page == 'item_close' or page == 'change_status' %}<link rel="stylesheet" href="{% static 'css/pages/report-form.css' %}?v=20260814">{% endif %}
-      {% if page == 'my_reports' %}<link rel="stylesheet" href="{% static 'css/pages/my-reports.css' %}">{% endif %}
-      {% if page == 'item_matches' or page == 'possible_matches' or page == 'my_possible_matches' %}<link rel="stylesheet" href="{% static 'css/pages/matches.css' %}">{% endif %}
-      {% if page == 'contact_request_create' or page == 'contact_requests_sent' or page == 'contact_requests_received' or page == 'contact_request_detail' or page == 'contact_request_cancel' %}<link rel="stylesheet" href="{% static 'css/pages/contact-requests.css' %}?v=20260814">{% endif %}
-      {% if page == 'conversation_list' or page == 'conversation_detail' or page == 'conversation_complete' %}<link rel="stylesheet" href="{% static 'css/pages/conversations.css' %}?v=20260814">{% endif %}
-      {% if page == 'notification_list' %}<link rel="stylesheet" href="{% static 'css/pages/notifications.css' %}?v=20260814">{% endif %}
-      {% if page == 'profile' or page == 'profile_edit' or page == 'privacy_centre' %}<link rel="stylesheet" href="{% static 'css/pages/profile.css' %}">{% endif %}
-      {% if page == 'user_dashboard' %}<link rel="stylesheet" href="{% static 'css/pages/user-dashboard.css' %}?v=20260814">{% endif %}
-      {% if page == 'permission_denied_page' or page == 'page_not_found_page' %}<link rel="stylesheet" href="{% static 'css/pages/errors.css' %}">{% endif %}
+      {% if page == 'home' %}<link rel="stylesheet" href="{% static 'css/pages/home.css' %}?v=20260826a">{% endif %}
+      {% if page == 'login' or page == 'register' or page == 'reauthenticate' or page == 'password_reset' or page == 'password_reset_done' or page == 'password_reset_confirm' or page == 'password_reset_complete' %}<link rel="stylesheet" href="{% static 'css/pages/authentication.css' %}?v=20260826a">{% endif %}
+      {% if page == 'item_list' or page == 'lost_item_list' or page == 'found_item_list' or page == 'report_list' %}<link rel="stylesheet" href="{% static 'css/pages/reports-list.css' %}?v=20260826b">{% endif %}
+      {% if page == 'item_detail' or page == 'report_detail' %}<link rel="stylesheet" href="{% static 'css/pages/report-detail.css' %}?v=20260826a">{% endif %}
+      {% if page == 'item_create_lost' or page == 'item_create_found' or page == 'report_create' or page == 'item_edit' or page == 'report_edit' or page == 'item_delete' or page == 'report_delete' or page == 'item_resolve' or page == 'item_close' or page == 'change_status' %}<link rel="stylesheet" href="{% static 'css/pages/report-form.css' %}?v=20260826a">{% endif %}
+      {% if page == 'my_reports' %}<link rel="stylesheet" href="{% static 'css/pages/my-reports.css' %}?v=20260826a">{% endif %}
+      {% if page == 'item_matches' or page == 'possible_matches' or page == 'my_possible_matches' %}<link rel="stylesheet" href="{% static 'css/pages/matches.css' %}?v=20260826a">{% endif %}
+      {% if page == 'contact_request_create' or page == 'contact_requests_sent' or page == 'contact_requests_received' or page == 'contact_request_detail' or page == 'contact_request_cancel' %}<link rel="stylesheet" href="{% static 'css/pages/contact-requests.css' %}?v=20260826a">{% endif %}
+      {% if page == 'conversation_list' or page == 'conversation_detail' or page == 'conversation_complete' %}<link rel="stylesheet" href="{% static 'css/pages/conversations.css' %}?v=20260826a">{% endif %}
+      {% if page == 'notification_list' %}<link rel="stylesheet" href="{% static 'css/pages/notifications.css' %}?v=20260826a">{% endif %}
+      {% if page == 'profile' or page == 'profile_edit' or page == 'privacy_centre' %}<link rel="stylesheet" href="{% static 'css/pages/profile.css' %}?v=20260826a">{% endif %}
+      {% if page == 'user_dashboard' %}<link rel="stylesheet" href="{% static 'css/pages/user-dashboard.css' %}?v=20260826a">{% endif %}
+      {% if page == 'permission_denied_page' or page == 'page_not_found_page' %}<link rel="stylesheet" href="{% static 'css/pages/errors.css' %}?v=20260826a">{% endif %}
     {% endwith %}
   {% endblock %}
 </head>
@@ -52,7 +66,7 @@
   {% block footer %}{% include 'includes/footer.html' %}{% endblock %}
   {% include 'includes/mobile_bottom_navigation.html' %}
   <script src="{% static 'vendor/bootstrap.bundle.min.js' %}"></script>
-  <script src="{% static 'js/findmatch.js' %}?v=20260814c"></script>
+  <script src="{% static 'js/findmatch.js' %}?v=20260826a"></script>
   <script src="{% static 'js/admin_report_actions.js' %}"></script>
   <script src="{% static 'js/conversation_notifications.js' %}?v=20260814b"></script>
   {% block extra_js %}{% endblock %}

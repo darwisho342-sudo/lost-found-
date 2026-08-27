@@ -1,3 +1,57 @@
+(() => {
+  const storageKey = "findmatch-theme";
+  const root = document.documentElement;
+  const systemTheme = window.matchMedia("(prefers-color-scheme: dark)");
+  const toggles = [...document.querySelectorAll("[data-theme-toggle]")];
+
+  const savedTheme = () => {
+    try {
+      const value = localStorage.getItem(storageKey);
+      return value === "light" || value === "dark" ? value : null;
+    } catch (error) {
+      return null;
+    }
+  };
+
+  const updateControls = (theme) => {
+    toggles.forEach((toggle) => {
+      const dark = theme === "dark";
+      const label = dark ? toggle.dataset.labelLight : toggle.dataset.labelDark;
+      toggle.setAttribute("aria-pressed", String(dark));
+      toggle.setAttribute("aria-label", label);
+      toggle.title = label;
+      const status = toggle.querySelector("[data-theme-status]");
+      if (status) status.textContent = dark ? toggle.dataset.statusDark : toggle.dataset.statusLight;
+    });
+  };
+
+  const applyTheme = (theme, persist = false) => {
+    const selected = theme === "dark" ? "dark" : "light";
+    root.dataset.theme = selected;
+    root.dataset.bsTheme = selected;
+    if (persist) {
+      try { localStorage.setItem(storageKey, selected); } catch (error) { /* Preference remains active for this page. */ }
+    }
+    updateControls(selected);
+  };
+
+  toggles.forEach((toggle) => {
+    toggle.addEventListener("click", () => {
+      applyTheme(root.dataset.theme === "dark" ? "light" : "dark", true);
+    });
+  });
+
+  systemTheme.addEventListener?.("change", (event) => {
+    if (!savedTheme()) applyTheme(event.matches ? "dark" : "light");
+  });
+  window.addEventListener("storage", (event) => {
+    if (event.key === storageKey && (event.newValue === "light" || event.newValue === "dark")) {
+      applyTheme(event.newValue);
+    }
+  });
+  updateControls(root.dataset.theme || (systemTheme.matches ? "dark" : "light"));
+})();
+
 document.querySelectorAll(".fm-desktop-navigation .nav-link.active").forEach((item) => {
   item.setAttribute("aria-current", "page");
 });
@@ -23,13 +77,23 @@ if (reportForm) {
   const category = reportForm.querySelector("[name=category]"); const itemType = reportForm.querySelector("[name=item_type]"); const title = reportForm.querySelector("[name=title]");
   let titleWasEdited = Boolean(title && title.value.trim()); if (title) title.addEventListener("input", () => { titleWasEdited = true; });
   const selectedText = (name) => { const control = reportForm.querySelector(`[name=${name}]`); return control && control.selectedOptions && control.value && !["not_sure","no_visible_brand"].includes(control.value) ? control.selectedOptions[0].text : ""; };
-  const updateTitle = () => { if (!title || titleWasEdited) return; const city = reportForm.querySelector("[name=city]")?.value.trim(); const parts = [reportForm.dataset.reportType === "found" ? "Found" : "Lost", selectedText("primary_colour"), selectedText("brand"), selectedText("item_type")]; title.value = `${parts.filter(Boolean).join(" ")}${city ? ` in ${city}` : ""}`; };
+  const updateTitle = () => { if (!title || titleWasEdited) return; const city = reportForm.querySelector("[name=city]")?.value.trim(); const parts = [reportForm.dataset.reportType === "found" ? reportForm.dataset.foundLabel : reportForm.dataset.lostLabel, selectedText("primary_colour"), selectedText("brand"), selectedText("item_type")]; title.value = `${parts.filter(Boolean).join(" ")}${city ? ` ${reportForm.dataset.inLabel} ${city}` : ""}`; };
   const updateTypes = () => { if (!category || !itemType) return; const allowed = new Set(types[category.value] || []); [...itemType.options].forEach((option) => { option.hidden = Boolean(option.value) && !allowed.has(option.value); }); if (itemType.value && !allowed.has(itemType.value)) itemType.value = ""; updateTitle(); };
   const updateConditionals = () => reportForm.querySelectorAll("[data-show-when]").forEach((wrapper) => { const [name, value] = wrapper.dataset.showWhen.split(":"); const control = reportForm.querySelector(`[name=${name}]`); wrapper.hidden = !control || control.value !== value; });
+  const universityLocation = reportForm.querySelector("[name=university_location]");
+  const publicLocationPreview = reportForm.querySelector("[data-public-location-preview]");
+  const updatePublicLocationPreview = () => {
+    if (!publicLocationPreview || !universityLocation) return;
+    const selected = universityLocation.selectedOptions[0];
+    publicLocationPreview.textContent = universityLocation.value && selected
+      ? selected.textContent.trim()
+      : reportForm.dataset.publicLocationEmpty;
+  };
   reportForm.addEventListener("change", (event) => { if (event.target === category) updateTypes(); updateConditionals(); updateTitle(); });
+  universityLocation?.addEventListener("change", updatePublicLocationPreview);
   const details = reportForm.querySelector("[name=additional_details]"); const counter = reportForm.querySelector("[data-character-count]"); const updateCounter = () => { if (counter && details) counter.textContent = details.value.length; }; if (details) details.addEventListener("input", updateCounter);
   const date = reportForm.querySelector("[name=item_date]"); if (date) date.max = new Date().toISOString().slice(0, 10);
-  reportForm.querySelector("[data-use-current-location]")?.addEventListener("click", () => { const status = reportForm.querySelector("[data-location-status]"); if (!navigator.geolocation) { status.textContent = "Location is unavailable. Enter the fields manually."; return; } status.textContent = "Requesting location permission…"; navigator.geolocation.getCurrentPosition((position) => { reportForm.querySelector("[name=latitude]").value = position.coords.latitude.toFixed(6); reportForm.querySelector("[name=longitude]").value = position.coords.longitude.toFixed(6); status.textContent = "Coordinates added privately. Country and city must still be entered manually."; }, () => { status.textContent = "Location was not shared. Manual fields remain available."; }, {enableHighAccuracy: false, timeout: 10000, maximumAge: 60000}); });
+  reportForm.querySelector("[data-use-current-location]")?.addEventListener("click", () => { const status = reportForm.querySelector("[data-location-status]"); if (!navigator.geolocation) { status.textContent = reportForm.dataset.locationUnavailable; return; } status.textContent = reportForm.dataset.locationRequesting; navigator.geolocation.getCurrentPosition((position) => { reportForm.querySelector("[name=latitude]").value = position.coords.latitude.toFixed(6); reportForm.querySelector("[name=longitude]").value = position.coords.longitude.toFixed(6); status.textContent = reportForm.dataset.locationAdded; }, () => { status.textContent = reportForm.dataset.locationDenied; }, {enableHighAccuracy: false, timeout: 10000, maximumAge: 60000}); });
   const input = reportForm.querySelector("[name=image]"); const editor = reportForm.querySelector("[data-image-editor]"); const canvas = reportForm.querySelector("[data-image-canvas]");
   if (input && editor && canvas) {
     const context = canvas.getContext("2d"); let coverStart = null;
@@ -42,7 +106,34 @@ if (reportForm) {
     canvas.addEventListener("pointerup", (event) => { if (!coverStart) return; const box = canvas.getBoundingClientRect(); const x=(event.clientX-box.left)*canvas.width/box.width,y=(event.clientY-box.top)*canvas.height/box.height; context.fillStyle="#111827"; context.fillRect(Math.min(x,coverStart.x),Math.min(y,coverStart.y),Math.abs(x-coverStart.x),Math.abs(y-coverStart.y)); coverStart=null; replaceUpload(); });
     reportForm.querySelector("[data-image-remove]")?.addEventListener("click", () => { input.value=""; context.clearRect(0,0,canvas.width,canvas.height); editor.hidden=true; });
   }
-  updateTypes(); updateConditionals(); updateCounter();
+  const additionalInput = reportForm.querySelector("[name=additional_images]");
+  const additionalPreviews = reportForm.querySelector("[data-additional-image-previews]");
+  if (additionalInput && additionalPreviews) {
+    let previewUrls = [];
+    const renderAdditionalPreviews = () => {
+      previewUrls.forEach((url) => URL.revokeObjectURL(url));
+      previewUrls = [];
+      additionalPreviews.replaceChildren();
+      [...additionalInput.files].forEach((file, index) => {
+        const column = document.createElement("div"); column.className = "col-sm-6";
+        const card = document.createElement("div"); card.className = "card h-100 p-2";
+        const preview = document.createElement("img");
+        const previewUrl = URL.createObjectURL(file); previewUrls.push(previewUrl);
+        preview.src = previewUrl; preview.alt = file.name; preview.className = "img-fluid rounded mb-2";
+        const remove = document.createElement("button");
+        remove.type = "button"; remove.className = "btn btn-sm btn-outline-danger"; remove.textContent = reportForm.dataset.removeImageLabel;
+        remove.addEventListener("click", () => {
+          const transfer = new DataTransfer();
+          [...additionalInput.files].forEach((selected, selectedIndex) => { if (selectedIndex !== index) transfer.items.add(selected); });
+          additionalInput.files = transfer.files;
+          renderAdditionalPreviews();
+        });
+        card.append(preview, remove); column.appendChild(card); additionalPreviews.appendChild(column);
+      });
+    };
+    additionalInput.addEventListener("change", renderAdditionalPreviews);
+  }
+  updateTypes(); updateConditionals(); updateCounter(); updatePublicLocationPreview();
 
   const formElement = reportForm.querySelector("[data-report-form-fields]");
   const wizardActions = reportForm.querySelector("[data-wizard-actions]");
@@ -107,7 +198,11 @@ if (reportForm) {
     let submitting = false;
     formElement.addEventListener("submit", (event) => {
       if (submitting) { event.preventDefault(); return; }
-      if (event.submitter?.value === "draft") return;
+      if (event.submitter?.value === "draft") {
+        submitting = true;
+        event.submitter.setAttribute("aria-disabled", "true");
+        return;
+      }
       if (!formElement.checkValidity()) {
         event.preventDefault();
         const invalid = formElement.querySelector(":invalid");
