@@ -79,3 +79,24 @@ body:not(.admin-body) :target { scroll-margin-top:var(--fm-sticky-header-offset)
 }
 .drawer-notification-count { align-items:center; background:var(--color-coral); border-radius:999px; color:var(--color-on-brand); display:inline-flex; font-size:.7rem; font-weight:700; justify-content:center; margin-inline-start:.35rem; min-height:1.25rem; min-width:1.25rem; padding-inline:.3rem; }
 @media (max-width:359.98px) { .fm-brand { font-size:1rem; } .brand-mark { flex-basis:1.95rem; height:1.95rem; width:1.95rem; } }
+
+/* Light Mode uses an opaque surface navbar; Dark Mode retains the original navy treatment. */
+html[data-theme="light"] .fm-navbar { background:var(--color-surface); border-bottom-color:var(--color-border); box-shadow:0 6px 18px rgba(55,85,115,.1); }
+html[data-theme="light"] .fm-navbar .fm-brand { color:var(--color-text); }
+html[data-theme="light"] .fm-navbar .fm-brand:hover,
+html[data-theme="light"] .fm-navbar .fm-brand:focus-visible { color:var(--color-text); }
+html[data-theme="light"] .fm-navbar .nav-link,
+html[data-theme="light"] .fm-navbar .language-trigger { color:var(--color-text-muted); }
+html[data-theme="light"] .fm-navbar .nav-link:hover,
+html[data-theme="light"] .fm-navbar .nav-link:focus-visible,
+html[data-theme="light"] .fm-navbar .language-trigger:hover,
+html[data-theme="light"] .fm-navbar .language-trigger:focus-visible,
+html[data-theme="light"] .fm-navbar .nav-link.active { background:var(--color-surface-muted); color:var(--color-text); }
+html[data-theme="light"] .fm-navbar .language-trigger { border-color:var(--color-border); }
+html[data-theme="light"] .fm-navbar .scope-selector { color:var(--color-text); }
+html[data-theme="light"] .fm-navbar .scope-selector-buttons { background:var(--color-surface-muted); border-color:var(--color-border); }
+html[data-theme="light"] .fm-navbar .scope-option { color:var(--color-text-muted); }
+html[data-theme="light"] .fm-navbar .scope-option:hover,
+html[data-theme="light"] .fm-navbar .scope-option:focus-visible { background:var(--color-surface); color:var(--color-text); }
+html[data-theme="light"] .fm-navbar .fm-menu-button { border-color:var(--color-border); }
+html[data-theme="light"] .fm-navbar .navbar-toggler-icon { filter:invert(1); }

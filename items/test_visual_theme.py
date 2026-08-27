@@ -59,7 +59,10 @@ class VisualThemeTests(TestCase):
             "--color-danger", "--shadow-sm", "--shadow-md", "--shadow-lg", "--focus-ring",
         ):
             self.assertGreaterEqual(css.count(token), 2, token)
-        for color in ("#F4F7FC", "#5B5FF5", "#071225", "#0F1B31", "#6D70FF", "#25C3D0"):
+        for color in (
+            "#EEF6FF", "#FFFFFF", "#F5FAFF", "#D6E6F5", "#5B5FF5",
+            "#071225", "#0F1B31", "#6D70FF", "#25C3D0",
+        ):
             self.assertIn(color, css)
 
     def test_theme_labels_are_translated_and_arabic_remains_rtl(self):

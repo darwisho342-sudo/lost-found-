@@ -23,13 +23,13 @@
   </script>
   <link rel="stylesheet" href="{% static 'vendor/bootstrap.min.css' %}">
   <link rel="stylesheet" href="{% static 'vendor/bootstrap-icons.min.css' %}">
-  <link rel="stylesheet" href="{% static 'css/core/variables.css' %}?v=20260826a">
+  <link rel="stylesheet" href="{% static 'css/core/variables.css' %}?v=20260827c">
   <link rel="stylesheet" href="{% static 'css/core/reset.css' %}?v=20260826a">
   <link rel="stylesheet" href="{% static 'css/core/base.css' %}?v=20260826a">
   <link rel="stylesheet" href="{% static 'css/core/typography.css' %}?v=20260826a">
-  <link rel="stylesheet" href="{% static 'css/core/utilities.css' %}?v=20260826a">
-  <link rel="stylesheet" href="{% static 'css/components/navigation.css' %}?v=20260827b">
-  <link rel="stylesheet" href="{% static 'css/components/theme-toggle.css' %}?v=20260826a">
+  <link rel="stylesheet" href="{% static 'css/core/utilities.css' %}?v=20260827c">
+  <link rel="stylesheet" href="{% static 'css/components/navigation.css' %}?v=20260827c">
+  <link rel="stylesheet" href="{% static 'css/components/theme-toggle.css' %}?v=20260827c">
   <link rel="stylesheet" href="{% static 'css/components/footer.css' %}?v=20260826a">
   <link rel="stylesheet" href="{% static 'css/components/buttons.css' %}?v=20260826b">
   <link rel="stylesheet" href="{% static 'css/components/forms.css' %}?v=20260826a">
@@ -37,13 +37,13 @@
   <link rel="stylesheet" href="{% static 'css/components/badges.css' %}?v=20260826a">
   <link rel="stylesheet" href="{% static 'css/components/messages.css' %}?v=20260826a">
   <link rel="stylesheet" href="{% static 'css/components/pagination.css' %}?v=20260826a">
-  <link rel="stylesheet" href="{% static 'css/components/notification-bell.css' %}?v=20260826a">
+  <link rel="stylesheet" href="{% static 'css/components/notification-bell.css' %}?v=20260827c">
   <link rel="stylesheet" href="{% static 'css/components/mobile-shell.css' %}?v=20260827a">
   <link rel="stylesheet" href="{% static 'css/core/accessibility.css' %}?v=20260826a">
   {% if LANGUAGE_BIDI %}<link rel="stylesheet" href="{% static 'css/core/rtl.css' %}?v=i18n2">{% endif %}
   {% block extra_css %}
     {% with page=request.resolver_match.url_name %}
-      {% if page == 'home' %}<link rel="stylesheet" href="{% static 'css/pages/home.css' %}?v=20260826a">{% endif %}
+      {% if page == 'home' %}<link rel="stylesheet" href="{% static 'css/pages/home.css' %}?v=20260827c">{% endif %}
       {% if page == 'login' or page == 'register' or page == 'reauthenticate' or page == 'password_reset' or page == 'password_reset_done' or page == 'password_reset_confirm' or page == 'password_reset_complete' %}<link rel="stylesheet" href="{% static 'css/pages/authentication.css' %}?v=20260826a">{% endif %}
       {% if page == 'item_list' or page == 'lost_item_list' or page == 'found_item_list' or page == 'report_list' %}<link rel="stylesheet" href="{% static 'css/pages/reports-list.css' %}?v=20260826b">{% endif %}
       {% if page == 'item_detail' or page == 'report_detail' %}<link rel="stylesheet" href="{% static 'css/pages/report-detail.css' %}?v=20260826a">{% endif %}

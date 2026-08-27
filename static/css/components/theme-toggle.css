@@ -90,6 +90,19 @@ html[data-theme="dark"] .theme-toggle-icon-moon {
   border-color: var(--color-primary);
 }
 
+html[data-theme="light"] .fm-navbar .theme-toggle {
+  background: var(--color-surface-muted);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+html[data-theme="light"] .fm-navbar .theme-toggle:hover {
+  background: var(--color-primary-soft);
+  border-color: var(--color-primary);
+}
+
+html[data-theme="light"] .fm-navbar .theme-toggle-icon-moon { color:var(--color-text-muted); }
+
 @media (max-width: 359.98px) {
   .nav-theme-toggle { grid-template-columns: repeat(2, 1.55rem); width: 3.6rem; }
   html[data-theme="dark"] .nav-theme-toggle::before { transform: translateX(1.27rem); }

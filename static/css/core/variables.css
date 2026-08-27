@@ -1,14 +1,14 @@
 :root {
   color-scheme: light;
 
-  --color-background: #F4F7FC;
+  --color-background: #EEF6FF;
   --color-surface: #FFFFFF;
-  --color-surface-elevated: #FFFFFF;
-  --color-surface-muted: #F8FAFC;
+  --color-surface-elevated: #F5FAFF;
+  --color-surface-muted: #F5FAFF;
   --color-text: #0F172A;
   --color-text-muted: #64748B;
   --color-text-subtle: #475569;
-  --color-border: #D8E1EE;
+  --color-border: #D6E6F5;
   --color-border-strong: #A8B6CA;
 
   --color-primary: #5B5FF5;

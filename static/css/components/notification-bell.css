@@ -13,3 +13,7 @@ button.notification-bell-button:focus-visible { box-shadow:var(--focus-ring); ou
 .notification-empty { color: var(--color-text-muted); margin: 0; padding: 1rem; }
 .admin-topbar .notification-bell-button { background:var(--color-surface-muted); border-color:var(--color-border); color:var(--color-text) !important; -webkit-text-fill-color:var(--color-text); }
 .admin-topbar .notification-bell-button:hover,.admin-topbar .notification-bell-button:focus-visible { color:var(--color-cyan) !important; -webkit-text-fill-color:var(--color-cyan); }
+html[data-theme="light"] .fm-navbar button.notification-bell-button { background:var(--color-surface-muted); border-color:var(--color-border); color:var(--color-text) !important; -webkit-text-fill-color:var(--color-text); }
+html[data-theme="light"] .fm-navbar button.notification-bell-button:hover,
+html[data-theme="light"] .fm-navbar button.notification-bell-button:focus-visible { background:var(--color-primary-soft); border-color:var(--color-primary); color:var(--color-cyan) !important; -webkit-text-fill-color:var(--color-cyan); }
+html[data-theme="light"] .fm-navbar .notification-count { border-color:var(--color-surface); }
