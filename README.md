@@ -73,7 +73,7 @@ The visible mode selector remembers the latest valid selection in the session/pr
 - **Visitor:** landing/legal pages and privacy-safe public report details.
 - **Verified personal-email user:** International reports, matches, claims, private conversations, notifications, and two-participant return confirmation.
 - **Verified University user:** both modes plus University-private workflows.
-- **Security/Lost and Found staff:** University intake, private storage, claim review for officially held items, movements, incidents, and handover.
+- **Security/Lost and Found staff:** University intake, private storage, claim review for officially held items, movements, incidents, and handover when the existing `items.manage_custody` permission is assigned.
 - **Administrator:** users, both report scopes, claims/appeals, moderation, conversations, locations, custody, audit events, and safe statistics.
 
 The custom staff dashboard is `/en/management/`; Django's technical admin is `/admin/`.
@@ -91,7 +91,7 @@ The custom staff dashboard is `/en/management/`; Django's technical admin is `/a
 | Personal user A | `international_owner` | `owner.personal@example.com` | `FindMatchDemo123!` |
 | Personal user B | `international_finder` | `finder.personal@example.com` | `FindMatchDemo123!` |
 
-The command creates campus locations, University reports/match/claim/conversation/custody, International Lost/Found phone reports, a deterministic strong match, and safe in-app notifications. It never runs automatically.
+The command creates campus locations, ten varied University reports, an active University match, two active International phone reports, a private pending University claim, a custody record, a separate completed International return, and safe in-app notifications. The current deterministic seed scores are **92%** for the University headphones pair and **98%** for the International phone pair. It never runs automatically.
 
 To reset only documented demo workflow records while retaining the six demo accounts:
 
@@ -163,26 +163,30 @@ python manage.py process_retention --dry-run
 
 ## Local demonstration
 
-University workflow:
+### Local email verification
 
-1. Use `demo_student` to review/create a Lost phone report in University Mode.
-2. Use `demo_helper` to create the compatible Found report.
-3. Use `security_staff` → Management → Custody to record intake/storage.
-4. Verify an 85+ match and the student's safe in-app notification.
-5. Submit private answers/evidence; review without exposing expected answers.
-6. Approve the claim and use the private conversation.
-7. Record participant receipt and staff official handover (including second staff when required).
-8. Verify Returned/Resolved leaves active results and the conversation is read-only.
+Normal registration and email-link verification remain the application workflow. With the local console email backend, verification links are printed in the development server terminal.
 
-International workflow:
+For an offline classroom demonstration, a **superuser only** may also open `/admin/items/userprofile/`, select one or more fictional demo profiles, and choose **Mark selected email addresses as verified**. The inverse action restores the normal unverified restrictions. Both actions update the existing `UserProfile.email_verified_at` timestamp; they do not introduce a second source of truth, automatically verify new registrations, or grant staff/custody permissions.
 
-1. Use `international_owner`, select International Mode, and review/create the Lost phone with Country/City.
-2. Use `international_finder` to review/create the matching Found phone.
-3. Verify deterministic matching and a deduplicated 85+ notification.
-4. Submit and approve a private claim; open the conversation.
-5. Select a descriptive safe return method and confirm as finder, then owner.
-6. Verify completion removes the report from active results without any map/courier/payment call.
-7. While signed in as either personal user, manually request a University private create/claim URL and verify a safe 403.
+Do not use manual administrator verification as a production identity check. Before deployment, remove or explicitly disable this local operational shortcut and configure a real email provider, verified sending domain, expiry/rate-limit monitoring, and an auditable support process.
+
+Prepared University workflow:
+
+1. Sign in as `demo_student`, choose University Mode, and open **Black wireless headphones**.
+2. Open its match suggestions to show the **92%** breakdown against **Black headphones in case**.
+3. Show the deduplicated Strong Possible Match notification.
+4. Open the prepared pending claim as `demo_student`, then review it as `demo_helper`; no conversation exists before approval and private answers never appear on public pages.
+5. Sign in as `security_staff` and open Management → Custody to show the permission-protected fictional intake record.
+
+Prepared International workflow:
+
+1. Sign in as `international_owner`, select International Mode, and open the Lost **Black Samsung phone**.
+2. Show its **98%** breakdown against the corresponding Found phone and its safe notification.
+3. Open **Returned red carry-on suitcase** to show a separate completed claim, completed conversation, two confirmations, read-only return record, and final Returned/Resolved status.
+4. Switch the same normal personal account between International and University Mode while `OPEN_UNIVERSITY_ACCESS=True`; confirm that this does not expose staff or administrator pages.
+
+The complete rehearsal, screenshot checklist, roles, expected states, and recovery steps are in [`docs/demo_guide.md`](docs/demo_guide.md).
 
 ## Current limitations and future extensions
 

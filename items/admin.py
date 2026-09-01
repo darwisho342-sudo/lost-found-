@@ -1,4 +1,8 @@
 from django.contrib import admin
+from django.conf import settings
+from django.core.exceptions import PermissionDenied
+from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 from .models import (
     ContactAuditLog,
@@ -48,13 +52,85 @@ class ItemReportAdmin(admin.ModelAdmin):
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
     list_display = (
-        "user",
+        "username",
+        "email",
+        "email_is_verified",
+        "is_staff",
+        "is_active",
         "consent_to_share_phone",
         "mask_phone_number",
         "updated_at",
     )
+    list_filter = (
+        ("email_verified_at", admin.EmptyFieldListFilter),
+        "user__is_staff",
+        "user__is_active",
+    )
     search_fields = ("user__username", "user__email")
+    list_select_related = ("user",)
+    readonly_fields = ("email_verified_at",)
     exclude = ("phone_number",)
+    actions = ("mark_email_verified", "mark_email_unverified")
+
+    @admin.display(ordering="user__username", description=_("Username"))
+    def username(self, profile):
+        return profile.user.username
+
+    @admin.display(ordering="user__email", description=_("Email"))
+    def email(self, profile):
+        return profile.user.email
+
+    @admin.display(boolean=True, ordering="email_verified_at", description=_("Email verified"))
+    def email_is_verified(self, profile):
+        return profile.email_verified_at is not None
+
+    @admin.display(boolean=True, ordering="user__is_staff", description=_("Staff"))
+    def is_staff(self, profile):
+        return profile.user.is_staff
+
+    @admin.display(boolean=True, ordering="user__is_active", description=_("Active"))
+    def is_active(self, profile):
+        return profile.user.is_active
+
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        # PRODUCTION TODO: keep automatic email verification configured with a
+        # real delivery provider. Manual verification is intentionally available
+        # only to superusers while this local demonstration runs with DEBUG.
+        if not settings.DEBUG or not request.user.is_superuser:
+            actions.pop("mark_email_verified", None)
+            actions.pop("mark_email_unverified", None)
+        return actions
+
+    def _require_superuser(self, request):
+        if not settings.DEBUG or not request.user.is_superuser:
+            raise PermissionDenied
+
+    @admin.action(description=_("Mark selected email addresses as verified"))
+    def mark_email_verified(self, request, queryset):
+        self._require_superuser(request)
+        now = timezone.now()
+        count = queryset.filter(email_verified_at__isnull=True).update(
+            email_verified_at=now,
+            updated_at=now,
+        )
+        self.message_user(
+            request,
+            _("%(count)s account(s) marked as email verified.") % {"count": count},
+        )
+
+    @admin.action(description=_("Mark selected email addresses as unverified"))
+    def mark_email_unverified(self, request, queryset):
+        self._require_superuser(request)
+        now = timezone.now()
+        count = queryset.filter(email_verified_at__isnull=False).update(
+            email_verified_at=None,
+            updated_at=now,
+        )
+        self.message_user(
+            request,
+            _("%(count)s account(s) marked as email unverified.") % {"count": count},
+        )
 
 
 @admin.register(ContactRequest)

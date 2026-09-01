@@ -20,11 +20,21 @@ class ReturnWorkflowService:
     }
 
     @classmethod
-    def get_or_create(cls, *, claim, user):
+    def validate_access(cls, *, claim, user):
         if user.pk not in (claim.requesting_user_id, claim.receiving_user_id) and not user.is_staff:
             raise PermissionDenied
-        if claim.status not in (ContactRequest.Status.APPROVED, ContactRequest.Status.RETURN_IN_PROGRESS):
+        if claim.status not in (
+            ContactRequest.Status.APPROVED,
+            ContactRequest.Status.RETURN_IN_PROGRESS,
+            ContactRequest.Status.COMPLETED,
+        ):
             raise ValidationError(_("A return can be arranged only after a claim is approved."))
+
+    @classmethod
+    def get_or_create(cls, *, claim, user):
+        cls.validate_access(claim=claim, user=user)
+        if claim.status == ContactRequest.Status.COMPLETED:
+            raise PermissionDenied(_("A completed return is read-only."))
         arrangement, _ = ReturnArrangement.objects.get_or_create(contact_request=claim)
         return arrangement
 

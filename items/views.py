@@ -1,6 +1,7 @@
 from pathlib import Path
 from datetime import timedelta
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.forms import AuthenticationForm
@@ -588,6 +589,11 @@ def contact_request_create(request, pk):
         raise PermissionDenied(_("You cannot contact yourself about your own report."))
     profile, profile_created = UserProfile.objects.get_or_create(user=request.user)
     if is_ownership_claim and not profile.email_verified_at:
+        if settings.DEBUG:
+            raise PermissionDenied(_(
+                "Email verification is required before submitting an ownership claim. "
+                "For this local demonstration, a superuser can verify the account in Django administration."
+            ))
         raise PermissionDenied(_("Verify your email address before submitting an ownership claim."))
     if item_report.status == ItemReport.Status.CLOSED:
         raise PermissionDenied(_("This report is closed and is not available for contact."))
@@ -750,9 +756,14 @@ def claim_evidence_download(request, pk):
     claim = evidence.contact_request
     _require_report_scope(request.user, claim.item_report)
     if request.user.pk not in (claim.requesting_user_id, claim.receiving_user_id) and not request.user.is_staff:
-        raise PermissionDenied
-    from django.http import FileResponse
-    return FileResponse(evidence.file.open("rb"), as_attachment=True, filename=f"private-evidence-{evidence.pk}{Path(evidence.file.name).suffix}")
+        raise Http404
+    response = FileResponse(
+        evidence.file.open("rb"), as_attachment=True,
+        filename=f"private-evidence-{evidence.pk}{Path(evidence.file.name).suffix}",
+    )
+    response["Cache-Control"] = "private, no-store"
+    response["X-Content-Type-Options"] = "nosniff"
+    return response
 
 
 @verified_university_required
@@ -1195,6 +1206,15 @@ def require_staff(request):
         return redirect(f'{reverse("login")}?next={request.get_full_path()}')
     if not request.user.is_staff:
         raise PermissionDenied(_("This area is available only to staff accounts."))
+    return None
+
+
+def require_staff_permission(request, permission):
+    denied = require_staff(request)
+    if denied:
+        return denied
+    if not request.user.has_perm(permission):
+        raise PermissionDenied(_("Your staff account is not authorized for this function."))
     return None
 
 
@@ -1749,7 +1769,7 @@ def management_location_toggle(request, pk):
 
 
 def management_custody(request):
-    denied = require_staff(request)
+    denied = require_staff_permission(request, "items.manage_custody")
     if denied:
         return denied
     form = CustodyRecordForm(request.POST or None)
@@ -1776,7 +1796,7 @@ def management_custody(request):
 
 
 def management_custody_incident(request, pk):
-    denied = require_staff(request)
+    denied = require_staff_permission(request, "items.manage_custody")
     if denied:
         return denied
     if request.method != "POST":
@@ -1801,7 +1821,7 @@ def management_custody_incident(request, pk):
 
 
 def management_custody_action(request, pk, action):
-    denied = require_staff(request)
+    denied = require_staff_permission(request, "items.manage_custody")
     if denied:
         return denied
     if request.method != "POST":
@@ -1919,7 +1939,7 @@ def management_custody_action(request, pk, action):
 
 
 def management_incident_resolve(request, pk):
-    denied = require_staff(request)
+    denied = require_staff_permission(request, "items.manage_custody")
     if denied:
         return denied
     if request.method != "POST":
@@ -1971,21 +1991,37 @@ def resend_verification(request):
 
 @verified_university_required
 def return_arrangement(request, pk):
+    if request.method not in ("GET", "POST"):
+        return HttpResponseNotAllowed(["GET", "POST"])
     claim = get_object_or_404(
         ContactRequest.objects.select_related("item_report", "requesting_user", "receiving_user"), pk=pk
     )
     _require_report_scope(request.user, claim.item_report)
     try:
-        arrangement = ReturnWorkflowService.get_or_create(claim=claim, user=request.user)
+        ReturnWorkflowService.validate_access(claim=claim, user=request.user)
     except ValidationError as exc:
         messages.error(request, "; ".join(exc.messages))
         return redirect("contact_request_detail", pk=claim.pk)
+    return_completed = claim.status == ContactRequest.Status.COMPLETED
+    if request.method == "POST" and return_completed:
+        raise PermissionDenied(_("A completed return is read-only."))
+    if request.method == "POST":
+        arrangement = ReturnWorkflowService.get_or_create(claim=claim, user=request.user)
+    else:
+        arrangement = getattr(claim, "return_arrangement", None) or ReturnArrangement(
+            contact_request=claim
+        )
     form = ReturnArrangementForm(request.POST or None, instance=arrangement, user=request.user)
     if request.method == "POST" and form.is_valid():
         ReturnWorkflowService.update(arrangement=arrangement, user=request.user, form=form)
         messages.success(request, _("The private return arrangement was updated."))
         return redirect("return_arrangement", pk=claim.pk)
-    return render(request, "returns/arrangement.html", {"claim": claim, "arrangement": arrangement, "form": form})
+    return render(request, "returns/arrangement.html", {
+        "claim": claim,
+        "arrangement": arrangement,
+        "form": form,
+        "return_completed": return_completed,
+    })
 
 
 @verified_university_required
@@ -1994,6 +2030,8 @@ def return_confirmation(request, pk, role):
         return HttpResponseNotAllowed(["POST"])
     arrangement = get_object_or_404(ReturnArrangement, contact_request_id=pk)
     _require_report_scope(request.user, arrangement.contact_request.item_report)
+    if arrangement.contact_request.status == ContactRequest.Status.COMPLETED:
+        raise PermissionDenied(_("A completed return is read-only."))
     ReturnWorkflowService.confirm(arrangement=arrangement, user=request.user, role=role)
     messages.success(request, _("Your return confirmation was recorded."))
     return redirect("return_arrangement", pk=pk)

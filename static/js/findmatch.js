@@ -68,18 +68,45 @@ document.querySelectorAll("[data-password-toggle]").forEach((button) => {
 
 const reportForm = document.querySelector("[data-report-form]");
 if (reportForm) {
-  const types = {
-    electronics: ["mobile_phone","laptop","tablet","smartwatch","earbuds","headphones","charger","cable","power_bank","camera","calculator","usb_drive","other","not_sure"], bags: ["backpack","handbag","laptop_bag","school_bag","sports_bag","suitcase","shopping_bag","other","not_sure"],
-    clothing: ["jacket","coat","shirt","t_shirt","trousers","dress","shoes","hat","scarf","gloves","other","not_sure"], documents: ["student_id","bank_card","transport_card","driver_licence","national_id","passport","certificate","notebook","other","not_sure"],
-    keys: ["house_keys","car_keys","office_keys","locker_key","keychain","electronic_key","other","not_sure"], wallets: ["wallet","purse","card_holder","coin_purse","other","not_sure"], jewellery: ["ring","necklace","bracelet","earrings","watch","other","not_sure"],
-    books: ["textbook","notebook","folder","pencil_case","pen","calculator","other","not_sure"], sports_equipment: ["sports_bag","ball","racket","sports_clothing","water_bottle","other","not_sure"], personal_accessories: ["glasses","sunglasses","umbrella","water_bottle","watch","head_covering","other","not_sure"], other: ["other","not_sure"], not_sure: ["not_sure","other"]
-  };
   const category = reportForm.querySelector("[name=category]"); const itemType = reportForm.querySelector("[name=item_type]"); const title = reportForm.querySelector("[name=title]");
+  const brand = reportForm.querySelector("[name=brand]");
+  const parseMap = (control, attribute) => { try { return JSON.parse(control?.dataset[attribute] || "{}"); } catch (_error) { return {}; } };
+  const itemTypeMap = parseMap(itemType, "choiceMap");
+  const brandMap = parseMap(brand, "choiceMap");
+  const appearanceMap = parseMap(category, "appearanceMap");
   let titleWasEdited = Boolean(title && title.value.trim()); if (title) title.addEventListener("input", () => { titleWasEdited = true; });
   const selectedText = (name) => { const control = reportForm.querySelector(`[name=${name}]`); return control && control.selectedOptions && control.value && !["not_sure","no_visible_brand"].includes(control.value) ? control.selectedOptions[0].text : ""; };
   const updateTitle = () => { if (!title || titleWasEdited) return; const city = reportForm.querySelector("[name=city]")?.value.trim(); const parts = [reportForm.dataset.reportType === "found" ? reportForm.dataset.foundLabel : reportForm.dataset.lostLabel, selectedText("primary_colour"), selectedText("brand"), selectedText("item_type")]; title.value = `${parts.filter(Boolean).join(" ")}${city ? ` ${reportForm.dataset.inLabel} ${city}` : ""}`; };
-  const updateTypes = () => { if (!category || !itemType) return; const allowed = new Set(types[category.value] || []); [...itemType.options].forEach((option) => { option.hidden = Boolean(option.value) && !allowed.has(option.value); }); if (itemType.value && !allowed.has(itemType.value)) itemType.value = ""; updateTitle(); };
-  const updateConditionals = () => reportForm.querySelectorAll("[data-show-when]").forEach((wrapper) => { const [name, value] = wrapper.dataset.showWhen.split(":"); const control = reportForm.querySelector(`[name=${name}]`); wrapper.hidden = !control || control.value !== value; });
+  const replaceChoices = (control, choices, preserveUnknown = false) => {
+    if (!control) return;
+    const selected = control.value;
+    const selectedLabel = control.selectedOptions[0]?.textContent || selected;
+    const available = [...choices];
+    if (preserveUnknown && selected && !available.some((choice) => choice.value === selected)) available.push({value: selected, label: selectedLabel});
+    control.replaceChildren(new Option(control.dataset.placeholderLabel || "", ""), ...available.map((choice) => new Option(choice.label, choice.value)));
+    control.value = available.some((choice) => choice.value === selected) ? selected : "";
+  };
+  const updateBrand = (preserveUnknown = false) => {
+    const choices = brandMap[category?.value] || {};
+    replaceChoices(brand, choices[itemType?.value] || choices.default || [], preserveUnknown);
+  };
+  const updateAppearance = () => {
+    const rules = appearanceMap[category?.value] || {};
+    const visible = new Set(rules[itemType?.value] || rules.default || []);
+    reportForm.querySelectorAll("[data-structured-field]").forEach((wrapper) => {
+      const show = visible.has(wrapper.dataset.structuredField);
+      wrapper.hidden = !show;
+      wrapper.querySelectorAll("input, select, textarea").forEach((control) => { control.disabled = !show; });
+    });
+  };
+  const updateTypes = (preserveUnknown = false) => {
+    if (!category || !itemType) return;
+    replaceChoices(itemType, itemTypeMap[category.value] || [], preserveUnknown);
+    updateBrand(preserveUnknown);
+    updateAppearance();
+    updateTitle();
+  };
+  const updateConditionals = () => reportForm.querySelectorAll("[data-show-when]").forEach((wrapper) => { const [name, value] = wrapper.dataset.showWhen.split(":"); const control = reportForm.querySelector(`[name=${name}]`); wrapper.hidden = !control || control.disabled || control.value !== value; });
   const universityLocation = reportForm.querySelector("[name=university_location]");
   const publicLocationPreview = reportForm.querySelector("[data-public-location-preview]");
   const updatePublicLocationPreview = () => {
@@ -89,7 +116,11 @@ if (reportForm) {
       ? selected.textContent.trim()
       : reportForm.dataset.publicLocationEmpty;
   };
-  reportForm.addEventListener("change", (event) => { if (event.target === category) updateTypes(); updateConditionals(); updateTitle(); });
+  reportForm.addEventListener("change", (event) => {
+    if (event.target === category) updateTypes();
+    else if (event.target === itemType) { updateBrand(); updateAppearance(); }
+    updateConditionals(); updateTitle();
+  });
   universityLocation?.addEventListener("change", updatePublicLocationPreview);
   const details = reportForm.querySelector("[name=additional_details]"); const counter = reportForm.querySelector("[data-character-count]"); const updateCounter = () => { if (counter && details) counter.textContent = details.value.length; }; if (details) details.addEventListener("input", updateCounter);
   const date = reportForm.querySelector("[name=item_date]"); if (date) date.max = new Date().toISOString().slice(0, 10);
@@ -133,7 +164,7 @@ if (reportForm) {
     };
     additionalInput.addEventListener("change", renderAdditionalPreviews);
   }
-  updateTypes(); updateConditionals(); updateCounter(); updatePublicLocationPreview();
+  updateTypes(true); updateConditionals(); updateCounter(); updatePublicLocationPreview();
 
   const formElement = reportForm.querySelector("[data-report-form-fields]");
   const wizardActions = reportForm.querySelector("[data-wizard-actions]");

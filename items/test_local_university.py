@@ -1,7 +1,7 @@
 from datetime import date
 
 from django.conf import settings
-from django.contrib.auth.models import User
+from django.contrib.auth.models import Permission, User
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.urls import reverse
@@ -96,6 +96,8 @@ class LocalReportMatchingAndCustodyTests(MediaTestCase):
         self.client.force_login(self.owner)
         self.assertEqual(self.client.get(reverse("management_custody")).status_code, 403)
         self.client.force_login(staff)
+        self.assertEqual(self.client.get(reverse("management_custody")).status_code, 403)
+        staff.user_permissions.add(Permission.objects.get(codename="manage_custody"))
         self.assertEqual(self.client.get(reverse("management_custody")).status_code, 200)
         response = self.client.post(
             reverse("management_custody_incident", args=(record.pk,)),

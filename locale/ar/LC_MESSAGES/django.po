@@ -1405,9 +1405,6 @@ msgstr "إعادة إرسال رابط التحقق"
 msgid "Strong possible match"
 msgstr "تطابق محتمل قوي"
 
-msgid "Possible match"
-msgstr "تطابق محتمل"
-
 msgid "Approximate location"
 msgstr "الموقع التقريبي"
 
@@ -1891,3 +1888,1857 @@ msgstr "المظهر الداكن مفعّل"
 
 msgid "Choose a campus and building to preview the public location."
 msgstr "اختر الحرم الجامعي والمبنى لمعاينة الموقع العام."
+
+msgid "Not specified"
+msgstr "غير محدد"
+
+msgid "Select a primary colour"
+msgstr "اختر لونًا أساسيًا"
+
+msgid "Select a secondary colour"
+msgstr "اختر لونًا ثانويًا"
+
+msgid "Black"
+msgstr "أسود"
+
+msgid "White"
+msgstr "أبيض"
+
+msgid "Grey"
+msgstr "رمادي"
+
+msgid "Red"
+msgstr "أحمر"
+
+msgid "Blue"
+msgstr "أزرق"
+
+msgid "Green"
+msgstr "أخضر"
+
+msgid "Yellow"
+msgstr "أصفر"
+
+msgid "Mark selected email addresses as verified"
+msgstr "وضع علامة تم التحقق على عناوين البريد الإلكتروني المحددة"
+
+msgid "Mark selected email addresses as unverified"
+msgstr "وضع علامة غير متحقق على عناوين البريد الإلكتروني المحددة"
+
+msgid "%(count)s account(s) marked as email verified."
+msgstr "تم وضع علامة التحقق من البريد الإلكتروني على %(count)s حساب."
+
+msgid "%(count)s account(s) marked as email unverified."
+msgstr "تم وضع علامة عدم التحقق من البريد الإلكتروني على %(count)s حساب."
+
+msgid "Email verification is required before submitting an ownership claim. For this local demonstration, a superuser can verify the account in Django administration."
+msgstr "يلزم التحقق من البريد الإلكتروني قبل إرسال مطالبة ملكية. في هذا العرض المحلي، يمكن للمستخدم المتميز التحقق من الحساب في إدارة Django."
+
+msgid "Verify your email address before submitting an ownership claim."
+msgstr "تحقق من عنوان بريدك الإلكتروني قبل إرسال مطالبة ملكية."
+
+msgid "%(count)s active filter"
+msgid_plural "%(count)s active filters"
+msgstr[0] "لا توجد مرشحات نشطة"
+msgstr[1] "مرشح نشط واحد"
+msgstr[2] "مرشحان نشطان"
+msgstr[3] "%(count)s مرشحات نشطة"
+msgstr[4] "%(count)s مرشحًا نشطًا"
+msgstr[5] "%(count)s مرشح نشط"
+
+msgid "%(count)s stored item(s) are approaching the configured retention review date."
+msgstr "يقترب %(count)s غرض مخزن من تاريخ مراجعة الاحتفاظ المحدد."
+
+msgid "A completed return is read-only."
+msgstr "سجل الإرجاع المكتمل للقراءة فقط."
+
+msgid "A different second staff member must confirm this high-value release."
+msgstr "ويجب على موظف ثان آخر أن يؤكد هذا الإفراج العالي القيمة."
+
+msgid "A different supervisor or administrator must review this incident."
+msgstr "ويجب على مشرف أو مدير آخر أن يستعرض هذه الحادثة."
+
+msgid "A missing-in-storage item cannot be moved, released, or disposed normally."
+msgstr "لا يمكن نقل أو إطلاق أو التخلص من صنف مفقود في المخزن بشكل طبيعي."
+
+msgid "A participant confirmed the University handover step."
+msgstr "وأكد أحد المشاركين خطوة تسليم الجامعة."
+
+msgid "A photograph or matching score never proves ownership. Private verification is required."
+msgstr "لا تثبت الصورة أو درجة المطابقة الملكية أبدًا. يلزم التحقق الخاص."
+
+msgid "A private ownership claim requires your review."
+msgstr "المطالبة بالملكية الخاصة تتطلب مراجعتك"
+
+msgid "A reason is required for this account action."
+msgstr "ويلزم تقديم سبب لاتخاذ إجراء بشأن هذا الحساب."
+
+msgid "A rejected ownership claim was appealed for administrator review."
+msgstr "وطعن في مطالبة ملكية رُفضت من أجل إعادة النظر فيها من جانب المدير."
+
+msgid "A report with an unresolved custody incident cannot be marked Returned."
+msgstr "ولا يمكن وضع علامات على تقرير عن حادثة احتجاز لم تحل بعد."
+
+msgid "A return can be arranged only after a claim is approved."
+msgstr "ولا يمكن ترتيب العودة إلا بعد الموافقة على المطالبة."
+
+msgid "A suspicious ownership claim was reported."
+msgstr "وأبلغ عن مطالبة ملكية مشبوهة."
+
+msgid "Accepted into custody"
+msgstr "قُبلت رهن الاحتجاز"
+
+msgid "Active filters"
+msgstr "مرشحات نشطة"
+
+msgid "Active reports"
+msgstr "التقارير النشطة"
+
+msgid "Add location"
+msgstr "أضف الموقع"
+
+msgid "Additional answer"
+msgstr "إجابة إضافية"
+
+msgid "Additional answer submitted"
+msgstr "رد إضافي مقدم"
+
+msgid "Additional ownership information was submitted."
+msgstr "وقدمت معلومات إضافية عن الملكية."
+
+msgid "Address sharing requires the owner's explicit consent."
+msgstr "ويتطلب تقاسم العناوين موافقة صريحة من المالك."
+
+msgid "Administration Building"
+msgstr "مبنى الإدارة"
+
+msgid "Airport"
+msgstr "المطار"
+
+msgid "Alert name"
+msgstr "تنبيه الاسم"
+
+msgid "Algeria"
+msgstr "الجزائر"
+
+msgid "All brands"
+msgstr "كل العلامات التجارية"
+
+msgid "All colours"
+msgstr "كل الألوان"
+
+msgid "All countries"
+msgstr "جميع البلدان"
+
+msgid "All item types"
+msgstr "كل أنواع الأصناف"
+
+msgid "All materials"
+msgstr "جميع المواد"
+
+msgid "All modes"
+msgstr "كل الأنماط"
+
+msgid "All place types"
+msgstr "كل أنواع الأماكن"
+
+msgid "All public reports"
+msgstr "جميع التقارير العلنية"
+
+msgid "All sizes"
+msgstr "كل الأحجام"
+
+msgid "An administrator changed a user account status after recording a private reason."
+msgstr "غير مدير حساب المستخدم بعد تسجيل سبب خاص."
+
+msgid "An administrator deactivated a conversation after recording a private reason."
+msgstr "ألغى مسؤول تنشيط محادثة بعد تسجيل سبب خاص."
+
+msgid "An administrator reopened a conversation after recording a private reason."
+msgstr "مدير أعاد فتح محادثة بعد تسجيل سبب خاص"
+
+msgid "An appeal already exists for this claim."
+msgstr "ويوجد بالفعل استئناف لهذا الادعاء."
+
+msgid "An ownership claim was approved."
+msgstr "وتمت الموافقة على مطالبة بالملكية."
+
+msgid "An ownership claim was disputed."
+msgstr "وطعن في مطالبة بالملكية."
+
+msgid "An ownership claim was rejected."
+msgstr "ورفضت مطالبة بالملكية."
+
+msgid "An ownership claim was submitted."
+msgstr "وقدمت مطالبة بالملكية."
+
+msgid "Appeals"
+msgstr "الطعون"
+
+msgid "Append-only movement history"
+msgstr "إلحاق تاريخ الحركة فقط"
+
+msgid "Approve an ownership claim before releasing this item."
+msgstr "الموافقة على مطالبة ملكية قبل الإفراج عن هذا البند."
+
+msgid "Approve this ownership claim?"
+msgstr "الموافقة على هذه المطالبة الملكية؟"
+
+msgid "Approved claim"
+msgstr "المطالبة المعتمدة"
+
+msgid "Approved recycling/data handling"
+msgstr "إعادة التدوير/مناولة البيانات المعتمدة"
+
+msgid "Approximate date"
+msgstr "التاريخ التقريبي"
+
+msgid "Approximately when did you lose it?"
+msgstr "تقريباً متى فقدته؟"
+
+msgid "Argentina"
+msgstr "الأرجنتين"
+
+msgid "Arranging Return"
+msgstr "ترتيب العودة"
+
+msgid "Australia"
+msgstr "أستراليا"
+
+msgid "Authority transfer"
+msgstr "نقل السلطة"
+
+msgid "Authorized University handover recorded."
+msgstr "تم تسجيل تسليم الجامعة المأذون به"
+
+msgid "Authorized administrators: restricted records only for genuine moderation, dispute, or safety work."
+msgstr "المديرون المأذون لهم: السجلات المقيدة فقط من أجل الاعتدال الحقيقي، أو النزاع، أو العمل الآمن."
+
+msgid "Authorized public authority"
+msgstr "السلطة العامة المأذون بها"
+
+msgid "Authorized staff recorded the official item return."
+msgstr "وقد سجل الموظفون المأذون لهم عودة الصنف الرسمي."
+
+msgid "Awaiting Receipt Confirmation"
+msgstr "في انتظار إقرار الإيصال"
+
+msgid "Back to reports"
+msgstr "العودة إلى التقارير"
+
+msgid "Backpack"
+msgstr "حزمة خلفية"
+
+msgid "Ball"
+msgstr "الكرة"
+
+msgid "Bangladesh"
+msgstr "بنغلاديش"
+
+msgid "Bank Card"
+msgstr "بطاقة مصرفية"
+
+msgid "Beige"
+msgstr "بيج"
+
+msgid "Belgium"
+msgstr "بلجيكا"
+
+msgid "Both participants confirmed the handover and receipt. This record is now read-only."
+msgstr "وأكد كلا المشاركين التسليم والاستلام، وهذا السجل الآن مقتصر على القراءة فقط."
+
+msgid "Both participants confirmed the item handover."
+msgstr "وأكد كلا المشاركين تسليم هذه المادة."
+
+msgid "Both participants must confirm the safe handover. Until then, the case remains open."
+msgstr "ويجب على كلا المشاركين أن يؤكدا التسليم الآمن، وحتى ذلك الحين تظل القضية مفتوحة."
+
+msgid "Bracelet"
+msgstr "المُسَلِّق"
+
+msgid "Brand and model"
+msgstr "العلامة التجارية والنموذج"
+
+msgid "Brazil"
+msgstr "البرازيل"
+
+msgid "Brown"
+msgstr "براون"
+
+msgid "Building"
+msgstr "المبنى"
+
+msgid "Cable"
+msgstr "الكابل"
+
+msgid "Calculator"
+msgstr "آلة حاسبة"
+
+msgid "Camera"
+msgstr "آلة تصوير"
+
+msgid "Campus"
+msgstr "الحرم الجامعي"
+
+msgid "Campus and date"
+msgstr "المجمع وتاريخه"
+
+msgid "Campus or building"
+msgstr "الحرم الجامعي أو المبنى"
+
+msgid "Canada"
+msgstr "كندا"
+
+msgid "Cancel claim"
+msgstr "إلغاء المطالبة"
+
+msgid "Car Keys"
+msgstr "مفاتيح السيارة"
+
+msgid "Card Holder"
+msgstr "حامل البطاقة"
+
+msgid "Category and type"
+msgstr "الفئة والنوع"
+
+msgid "Certificate"
+msgstr "الشهادة"
+
+msgid "Charger"
+msgstr "شاحن"
+
+msgid "Check your email"
+msgstr "تحقق من بريدك الإلكتروني"
+
+msgid "Checked"
+msgstr "تم التحقق"
+
+msgid "China"
+msgstr "الصين"
+
+msgid "Choose a new password"
+msgstr "اختر كلمة سر جديدة"
+
+msgid "Choose a return method"
+msgstr "اختر طريقة العودة"
+
+msgid "Choose a return method appropriate for this report scope."
+msgstr "اختر طريقة إعادة مناسبة لنطاق هذا التقرير."
+
+msgid "Choose a unique name for this saved search."
+msgstr "اختر اسما فريدا لهذا البحث المحفوظ."
+
+msgid "Choose an administrator-approved organization."
+msgstr "اختر منظمة معتمدة من المدير."
+
+msgid "Choose an authorized disposition."
+msgstr "اختر تصرفاً مرخصاً به"
+
+msgid "Choose disposition"
+msgstr "اختر التصرف"
+
+msgid "Claim Updated"
+msgstr "المطالبة المستكملة"
+
+msgid "Claim disputed"
+msgstr "المطالبة موضع النزاع"
+
+msgid "Claim in Progress"
+msgstr "المطالبة قيد التنفيذ"
+
+msgid "Claimant"
+msgstr "صاحب المطالبة"
+
+msgid "Claims Received"
+msgstr "المطالبات الواردة"
+
+msgid "Claims Submitted"
+msgstr "المطالبات المقدمة"
+
+msgid "Clarification requested"
+msgstr "التوضيح المطلوب"
+
+msgid "Classroom Building"
+msgstr "مبنى قاعة الدرس"
+
+msgid "Close Selected"
+msgstr "أغلق مختار"
+
+msgid "Close after supervisor review"
+msgstr "إغلاق بعد استعراض المشرف"
+
+msgid "Close filters"
+msgstr "أغلق المرشّحات"
+
+msgid "Close review"
+msgstr "افحص"
+
+msgid "Closest date"
+msgstr "أقرب تاريخ"
+
+msgid "Coat"
+msgstr "المعاطف"
+
+msgid "Coin Purse"
+msgstr "متاع"
+
+msgid "Collected"
+msgstr "تم جمعها"
+
+msgid "Company security department"
+msgstr "إدارة أمن الشركات"
+
+msgid "Complete the official custody handover before marking this report Returned."
+msgstr "أكمل التسليم الرسمي قبل أن يُعلّم هذا التقرير"
+
+msgid "Complete the required release confirmations."
+msgstr "أكمل تأكيدات الإطلاق المطلوبة"
+
+msgid "Conference Hall"
+msgstr "قاعة المؤتمرات"
+
+msgid "Confirm"
+msgstr "تأكيد"
+
+msgid "Confirm claim action"
+msgstr "تأكيد إجراء المطالبة"
+
+msgid "Confirm official physical handover and Returned status?"
+msgstr "تأكيد التسليم المادي الرسمي وحالة العودة؟"
+
+msgid "Confirm that a different authorized reviewer investigated this incident?"
+msgstr "هل تؤكد أن مُراجعاً مُصرحاً له آخر قد حقق في هذا الحادث؟"
+
+msgid "Confirm this account status change?"
+msgstr "هل تؤكد هذا التغيير في حالة الحساب؟"
+
+msgid "Consent-controlled contact details"
+msgstr "تفاصيل الاتصال الخاضعة للرقابة على الموافقة"
+
+msgid "Continue privately"
+msgstr "تابع بشكل خاص"
+
+msgid "Conversation closed. Participants may review the history but cannot send messages."
+msgstr "أُغلقت المحادثة. يمكن للمشاركين أن يستعرضوا التاريخ ولكنهم لا يستطيعون إرسال رسائل."
+
+msgid "Cyprus"
+msgstr "قبرص"
+
+msgid "Damaged"
+msgstr "أضرار"
+
+msgid "Dark Blue"
+msgstr "أزرق غامق"
+
+msgid "Dashboard shortcuts"
+msgstr "اختصارات لوحة الدواش"
+
+msgid "Delete Selected"
+msgstr "احذف مُنتقى"
+
+msgid "Delete this saved alert?"
+msgstr "احذف هذا تنبيه محفوظ؟"
+
+msgid "Deny"
+msgstr "ارفض"
+
+msgid "Deny this appeal?"
+msgstr "رفض هذا الاستئناف؟"
+
+msgid "Describe a hidden mark."
+msgstr "صف علامة مخفية."
+
+msgid "Describe a unique accessory."
+msgstr "صفي شريكاً فريداً"
+
+msgid "Describe an engraving."
+msgstr "صف النقش."
+
+msgid "Description and title"
+msgstr "الوصف واللقب"
+
+msgid "Did you find this item?"
+msgstr "هل وجدت هذا الشيء؟"
+
+msgid "Disable"
+msgstr "عطّل"
+
+msgid "Disposition"
+msgstr "التصرف"
+
+msgid "Disposition Recorded"
+msgstr "مسجل"
+
+msgid "Dispute this decision?"
+msgstr "نعترض على هذا القرار؟"
+
+msgid "Do not include complete passwords, PINs, card numbers, security codes, or identification numbers."
+msgstr "لا تتضمن كلمات السر الكاملة أو بطاقات الهوية الشخصية أو أرقام البطاقات أو الرموز الأمنية أو أرقام الهوية."
+
+msgid "Do not post private contact or exact-location information in public reports."
+msgstr "لا تنشر في التقارير العامة معلومات عن الاتصال الخاص أو الموقع الدقيق."
+
+msgid "Donation"
+msgstr "التبرع"
+
+msgid "Donation under approved policy"
+msgstr "المنحة بموجب السياسة المعتمدة"
+
+msgid "Download private attachment"
+msgstr "نزّل ملحق خاص"
+
+msgid "Download private evidence %(number)s"
+msgstr "نزّل أدلة خاصة %(number)s"
+
+msgid "Draft"
+msgstr "مشروع"
+
+msgid "Dress"
+msgstr "فستان"
+
+msgid "Driver's Licence"
+msgstr "رخصة القيادة"
+
+msgid "Earbuds"
+msgstr "أجهزة الإرسال"
+
+msgid "Earrings"
+msgstr "أقراط"
+
+msgid "Egypt"
+msgstr "مصر"
+
+msgid "Electronic Key"
+msgstr "مفتاح إلكتروني"
+
+msgid "Email verification is required before ownership claims and private messaging."
+msgstr "ويلزم التحقق من البريد الإلكتروني قبل تقديم مطالبات الملكية والرسائل الخاصة."
+
+msgid "Enable"
+msgstr "مكّن"
+
+msgid "Enter a reason for this account action."
+msgstr "أدخل سبباً لهذا الحساب"
+
+msgid "Enter a safe incident summary."
+msgstr "أدخل موجز الحادث الآمن."
+
+msgid "Enter one clarification request."
+msgstr "أدخل طلب توضيح واحد."
+
+msgid "Enter your account email address. Email delivery must be configured by the operator."
+msgstr "أدخل عنوان بريدك الإلكتروني. يجب أن يتم إعداد تسليم البريد الإلكتروني بواسطة المشغل."
+
+msgid "Event venue"
+msgstr "مكان الحدث"
+
+msgid "Evidence files must be 5 MB or smaller."
+msgstr "يجب أن تكون ملفات الأدلة 5 ميغابايت أو أصغر."
+
+msgid "Expired"
+msgstr "انتهت صلاحيته"
+
+msgid "Extra Large"
+msgstr "كبير جداً"
+
+msgid "Extra Small"
+msgstr "صغير جداً"
+
+msgid "Fabric"
+msgstr "نسيج"
+
+msgid "Filters"
+msgstr "المرشحات"
+
+msgid "FindMatch assists communication and recordkeeping. It does not transport an item, purchase shipping, guarantee delivery, or make a legal determination of ownership."
+msgstr "يساعد FindMatch في التواصل وحفظ السجلات. ولا ينقل أي غرض أو يشتري الشحن أو يضمن التسليم أو يصدر حكمًا قانونيًا بشأن الملكية."
+
+msgid "FindMatch can notify you when a new public Found report matches these filters."
+msgstr "ابحث عن ماتش يمكن أن يبلغك عندما يجد تقرير جديد يطابق هذه المرشحات."
+
+msgid "FindMatch helps people communicate and record a return. It does not transport items, buy shipping, guarantee delivery, establish legal ownership, or replace police and official lost-property services."
+msgstr "تساعد شركة FindMatch الناس على التواصل وتسجيل العائد. فهي لا تنقل الأشياء، أو تشتري الشحن، أو تضمن التسليم، أو تثبت الملكية القانونية، أو تحل محل خدمات الشرطة والخدمات الرسمية المتعلقة بالممتلكات المفقودة."
+
+msgid "FindMatch separates public report information from private ownership, exact-location, conversation, evidence, and custody information. Private information is disclosed only through authorized University workflows."
+msgstr "البحث عن معلومات تقرير عام عن الملكية الخاصة، الموقع الدقيق، المحادثة، الأدلة، ومعلومات الحضانة. المعلومات الخاصة لا يتم الكشف عنها إلا من خلال تدفق العمل الجامعي المأذون به."
+
+msgid "FindMatch suggests possible connections but does not make a legal determination of ownership."
+msgstr "البحث عن ماتش يشير إلى صلات محتملة لكنه لا يحدد قانوناً الملكية."
+
+msgid "Finder"
+msgstr "المكتشف"
+
+msgid "Finder: item handed over or sent"
+msgstr "المكتشف: العنصر الذي تم تسليمه أو إرساله"
+
+msgid "Floral"
+msgstr "فلورال"
+
+msgid "Folder"
+msgstr "المجلد"
+
+msgid "For this sensitive action, re-enter the password for your current account."
+msgstr "لهذا الإجراء الحساس، أعيدي إدخال كلمة السر لحسابك الجاري."
+
+msgid "France"
+msgstr "فرنسا"
+
+msgid "General area"
+msgstr "المجال العام"
+
+msgid "General location"
+msgstr "الموقع العام"
+
+msgid "Germany"
+msgstr "ألمانيا"
+
+msgid "Glass"
+msgstr "زجاج"
+
+msgid "Glasses"
+msgstr "نظارات"
+
+msgid "Gloves"
+msgstr "قفازات"
+
+msgid "Gold"
+msgstr "الذهب"
+
+msgid "Good"
+msgstr "جيد"
+
+msgid "Greece"
+msgstr "اليونان"
+
+msgid "Handbag"
+msgstr "حقيبة يد"
+
+msgid "Handed Over"
+msgstr "سلّم"
+
+msgid "Hat"
+msgstr "قبعة"
+
+msgid "Head Covering"
+msgstr "تغطية الرأس"
+
+msgid "Headphones"
+msgstr "سماعات"
+
+msgid "Hide"
+msgstr "إخفاء"
+
+msgid "Hide Images Immediately"
+msgstr "إخفاء الصور فوراً"
+
+msgid "Hide Selected"
+msgstr "إخفاء مُنتقى"
+
+msgid "Hide the target content?"
+msgstr "إخفاء المحتوى المستهدف؟"
+
+msgid "Hide this image from all public pages while preserving it for staff review."
+msgstr "إخفاء صورة من عام صفحة بينما الإيطالية إلى."
+
+msgid "High-value items require locked storage."
+msgstr "المواد عالية القيمة تحتاج إلى تخزين مغلق."
+
+msgid "Hospital or clinic"
+msgstr "المستشفى أو العيادة"
+
+msgid "Hotel"
+msgstr "فندق"
+
+msgid "House Keys"
+msgstr "مفاتيح المنزل"
+
+msgid "I Found This Item"
+msgstr "وجدت هذا الشيء"
+
+msgid "If the address belongs to an account, a password-reset link has been sent."
+msgstr "إذا كان العنوان ينتمي إلى حساب، تم إرسال وصلة إعادة تعيين كلمة السر."
+
+msgid "If verification is still required, a new link has been sent."
+msgstr "وإذا كان التحقق لا يزال مطلوبا، فقد أُرسلت وصلة جديدة."
+
+msgid "In-person meeting in a safe public place"
+msgstr "اجتماع شخصي في مكان عام آمن"
+
+msgid "Incident"
+msgstr "الحادث"
+
+msgid "India"
+msgstr "الهند"
+
+msgid "Initial private claim message"
+msgstr "رسالة المطالبة الخاصة الأولية"
+
+msgid "Intake"
+msgstr "التلقي"
+
+msgid "Inventory review"
+msgstr "استعراض قوائم الجرد"
+
+msgid "Iraq"
+msgstr "العراق"
+
+msgid "Issuer return"
+msgstr "عودة المصدر"
+
+msgid "Italy"
+msgstr "إيطاليا"
+
+msgid "Item report"
+msgstr "البند التقرير"
+
+msgid "JPG, PNG, WebP, or PDF up to 5 MB. Remove unrelated private information."
+msgstr "JPG أو PNG أو WebP أو PDF حتى 5 MB. إزالة معلومات خاصة غير ذات صلة."
+
+msgid "Jacket"
+msgstr "السترة"
+
+msgid "Japan"
+msgstr "اليابان"
+
+msgid "Jordan"
+msgstr "الأردن"
+
+msgid "Kenya"
+msgstr "كينيا"
+
+msgid "Keychain"
+msgstr "سلسلة المفاتيح"
+
+msgid "Kuwait"
+msgstr "الكويت"
+
+msgid "Laptop"
+msgstr "حاسوب محمول"
+
+msgid "Laptop Bag"
+msgstr "حقيبة محمولة"
+
+msgid "Large"
+msgstr "كبير"
+
+msgid "Latitude and longitude must be supplied together."
+msgstr "يجب أن يتم توفير خطوط الطول والخط الطولي معاً"
+
+msgid "Latitude must be between -90 and 90."
+msgstr "خط العرض يجب أن يكون بين -90 و90."
+
+msgid "Leather"
+msgstr "الجلد"
+
+msgid "Lebanon"
+msgstr "لبنان"
+
+msgid "Legal and privacy"
+msgstr "القانون والخصوصية"
+
+msgid "Locked storage"
+msgstr "التخزين المقفل"
+
+msgid "Locker Key"
+msgstr "مفتاح الخزينة"
+
+msgid "Logo"
+msgstr "اللغو"
+
+msgid "Longitude must be between -180 and 180."
+msgstr "خط الطول يجب أن يكون بين 180 و 180"
+
+msgid "Lost and found"
+msgstr "مفقود و موجود"
+
+msgid "Manage campus, building, and general-area choices used by University reports."
+msgstr "إدارة الحرم الجامعي، والمبنى، واختيار المناطق العامة التي تستخدمها تقارير الجامعة."
+
+msgid "Manage saved searches"
+msgstr "إدارة عمليات البحث المحفوظة"
+
+msgid "Mark as Active"
+msgstr "علامة نشط"
+
+msgid "Mark as Resolved"
+msgstr "علّم كما حُلّ"
+
+msgid "Mark as Reviewed"
+msgstr "علامة مُراجعة"
+
+msgid "Mark returned"
+msgstr "عاد مارك"
+
+msgid "Mark this item missing and open an incident?"
+msgstr "هل تذكر هذا الشيء المفقود و تفتح حادثة؟"
+
+msgid "Metal"
+msgstr "معدن"
+
+msgid "Mexico"
+msgstr "المكسيك"
+
+msgid "Missing in Storage"
+msgstr "مفقود في المخزن"
+
+msgid "Mixed Materials"
+msgstr "مواد مختلطة"
+
+msgid "Mobile Phone"
+msgstr "هاتف محمول"
+
+msgid "Mobile navigation"
+msgstr "الملاحة المتنقلة"
+
+msgid "Moderation reports"
+msgstr "تقارير عن الاعتدال"
+
+msgid "More information requested"
+msgstr "طلب المزيد من المعلومات"
+
+msgid "More ownership information was requested."
+msgstr "وطُلب المزيد من المعلومات عن الملكية."
+
+msgid "Morocco"
+msgstr "المغرب"
+
+msgid "Movement or inventory review"
+msgstr "استعراض الحركة أو قوائم الجرد"
+
+msgid "Multicoloured"
+msgstr "متعدد الألوان"
+
+msgid "My Found Reports"
+msgstr "تقاريري المكتشفة"
+
+msgid "My Lost Reports"
+msgstr "تقاريري المفقودة"
+
+msgid "National ID Card"
+msgstr "بطاقة الهوية الوطنية"
+
+msgid "Necklace"
+msgstr "الرقبة"
+
+msgid "Needs attention"
+msgstr "يحتاج إلى الاهتمام"
+
+msgid "Netherlands"
+msgstr "هولندا"
+
+msgid "Never share complete document, card, device, password, or PIN details."
+msgstr "لا تشارك أبداً كامل المستندات، البطاقة، الجهاز، كلمة السر، أو تفاصيل الرقم الشخصي."
+
+msgid "New"
+msgstr "جديد"
+
+msgid "New Claim"
+msgstr "مطالبة جديدة"
+
+msgid "New Zealand"
+msgstr "نيوزيلندا"
+
+msgid "New ownership claim"
+msgstr "مطالبة جديدة تتعلق بالملكية"
+
+msgid "New private storage reference"
+msgstr "مرجع جديد للتخزين الخاص"
+
+msgid "New private storage reference (optional)"
+msgstr "مرجع جديد للتخزين الخاص (اختياري)"
+
+msgid "Newest"
+msgstr "أحدث"
+
+msgid "Nigeria"
+msgstr "نيجيريا"
+
+msgid "No Visible Brand"
+msgstr "لا علامة تجارية مرئية"
+
+msgid "No active Found reports."
+msgstr "لم يتم العثور على تقارير نشطة"
+
+msgid "No active Lost reports."
+msgstr "لا تقارير مفقودة نشطة"
+
+msgid "No appeals."
+msgstr "لا طعون"
+
+msgid "No claims matched."
+msgstr "لا توجد مطالبات متطابقة"
+
+msgid "No compatible opposite report currently scores at least 70%%. Check again after more reports are added."
+msgstr "لا يوجد تقرير متوافق مع ذلك حالياً %يسجل 70 على الأقل. تحقق مرة أخرى بعد إضافة المزيد من التقارير."
+
+msgid "No custody records yet."
+msgstr "لا سجلات حضانة حتى الآن."
+
+msgid "No delivery cost"
+msgstr "لا توجد تكلفة تسليم"
+
+msgid "No moderation reports."
+msgstr "لا تقارير عن الاعتدال"
+
+msgid "No report image"
+msgstr "لا تقرير صورة"
+
+msgid "No requests received."
+msgstr "لم ترد أي طلبات."
+
+msgid "No requests sent."
+msgstr "لم ترسل أي طلبات."
+
+msgid "No return arrangements."
+msgstr "لا ترتيبات للعودة"
+
+msgid "No safe public report image"
+msgstr "لا يوجد تقرير عام آمن"
+
+msgid "No saved searches yet."
+msgstr "لا يوجد أيّة عمليات بحث بعد"
+
+msgid "Notebook"
+msgstr "دفتر الملاحظات"
+
+msgid "Office Keys"
+msgstr "مفاتيح المكاتب"
+
+msgid "Office or workplace"
+msgstr "المكتب أو مكان العمل"
+
+msgid "Official handover"
+msgstr "التسليم الرسمي"
+
+msgid "Oldest"
+msgstr "أقدم"
+
+msgid "One of your active reports will expire soon. Open it to review or renew."
+msgstr "ستنتهي صلاحية أحد بلاغاتك النشطة قريبًا. افتحه لمراجعته أو تجديده."
+
+msgid "Only Found reports may enter University custody."
+msgstr "التقارير التي تم العثور عليها فقط يمكن أن تدخل الحضانة الجامعية."
+
+msgid "Only University Found reports may enter University custody."
+msgstr "التقارير التي وجدت في الجامعة فقط يمكن أن تدخل الحضانة الجامعية."
+
+msgid "Only an authorized administrator may record a final disposition."
+msgstr "ولا يجوز تسجيل التصرف النهائي إلا لمدير مأذون له بذلك."
+
+msgid "Only authorized staff may mark a University item Returned."
+msgstr "ولا يجوز إلا للموظفين المأذون لهم تسجيل عودة أحد أصناف الجامعة."
+
+msgid "Only one clarification request is allowed."
+msgstr "ولا يسمح إلا بطلب توضيح واحد."
+
+msgid "Open"
+msgstr "افتح"
+
+msgid "Open privacy centre"
+msgstr "مركز الخصوصية المفتوح"
+
+msgid "Open the following link to reset your FindMatch password:"
+msgstr "افتح الرابط التالي لإعادة ضبط كلمة مرورك:"
+
+msgid "Open this link to verify your email address: %(url)s"
+msgstr "افتح هذا الرابط للتحقق من عنوان بريدك الإلكتروني: %(url)s"
+
+msgid "Optional JPG, PNG, WebP, or PDF up to 5 MB. Mask unrelated private information."
+msgstr "JPG أو PNG أو WebP أو PDF حتى 5 MB. قناع معلومات خاصة لا صلة لها."
+
+msgid "Optional private attachment"
+msgstr "ملحق خاص اختياري"
+
+msgid "Orange"
+msgstr "برتقالي"
+
+msgid "Organization manager"
+msgstr "مدير المنظمة"
+
+msgid "Organization staff"
+msgstr "موظفو المنظمة"
+
+msgid "Other authorized University decision"
+msgstr "قرار جامعي آخر مأذون به"
+
+msgid "Other authorized decision"
+msgstr "قرار آخر مأذون به"
+
+msgid "Other country"
+msgstr "بلد آخر"
+
+msgid "Other official lost-property organization"
+msgstr "منظمة رسمية أخرى معنية بالممتلكات المفقودة"
+
+msgid "Other private verification question"
+msgstr "مسألة التحقق الخاصة الأخرى"
+
+msgid "Owner: item received"
+msgstr "المالك: الصنف الوارد"
+
+msgid "Ownership claim updated"
+msgstr "تحديث المطالبة بالملكية"
+
+msgid "Ownership claims"
+msgstr "مطالبات الملكية"
+
+msgid "Ownership review"
+msgstr "استعراض الملكية"
+
+msgid "Ownership verification is available only for Found reports."
+msgstr "ولا يمكن التحقق من الملكية إلا فيما يتعلق بالتقارير التي يتم العثور عليها."
+
+msgid "Pakistan"
+msgstr "باكستان"
+
+msgid "Paper"
+msgstr "ورق"
+
+msgid "Park or recreation area"
+msgstr "حديقة أو منطقة ترفيهية"
+
+msgid "Parking Area"
+msgstr "منطقة وقوف السيارات"
+
+msgid "Participants only: claims, answers, evidence, conversations, return and delivery details."
+msgstr "المشاركون فقط: المطالبات، والأجوبة، والأدلة، والمحادثات، وتفاصيل العودة والتسليم."
+
+msgid "Passport"
+msgstr "جواز السفر"
+
+msgid "Password updated"
+msgstr "كلمة السر مستكملة"
+
+msgid "Paused"
+msgstr "توقف"
+
+msgid "Pen"
+msgstr "قلم"
+
+msgid "Pencil Case"
+msgstr "حالة قلم"
+
+msgid "Physical inventory and reconciliation"
+msgstr "الجرد المادي والتسوية"
+
+msgid "Pink"
+msgstr "وردي"
+
+msgid "Plain"
+msgstr "عادي"
+
+msgid "Plastic"
+msgstr "بلاستيكي"
+
+msgid "Please hand this sensitive item to University security."
+msgstr "رجاءً سلم هذا الشيء الحساس لأمن الجامعة"
+
+msgid "Please remove private or sensitive information before submitting this report."
+msgstr "يرجى إزالة المعلومات الخاصة أو الحساسة قبل تقديم هذا التقرير."
+
+msgid "Police or security office"
+msgstr "مكتب الشرطة أو الأمن"
+
+msgid "Power Bank"
+msgstr "بنك الطاقة"
+
+msgid "Prayer Area"
+msgstr "منطقة الصلاة"
+
+msgid "Printed"
+msgstr "طبع"
+
+msgid "Privacy"
+msgstr "الخصوصية"
+
+msgid "Privacy-safe note"
+msgstr "ملاحظة بشأن الخصوصية والسلامة"
+
+msgid "Private and access-controlled"
+msgstr "القطاع الخاص والمنظم للوصول"
+
+msgid "Private cabinet, shelf, room, or bin reference."
+msgstr "خزانة خاصة، رف، غرفة، أو بن مرجع."
+
+msgid "Private claim"
+msgstr "مطالبة خاصة"
+
+msgid "Private question %(number)s"
+msgstr "سؤال خاص %(number)s"
+
+msgid "Private storage"
+msgstr "التخزين الخاص"
+
+msgid "Privately arranged shipping (FindMatch does not provide shipping)"
+msgstr "الشحن المنظم من القطاع الخاص (فيند ماتش لا يوفر الشحن)"
+
+msgid "Provide additional information"
+msgstr "تقديم معلومات إضافية"
+
+msgid "Provide clarification"
+msgstr "تقديم توضيح"
+
+msgid "Provide part of the serial number."
+msgstr "قدم جزء من الرقم التسلسلي"
+
+msgid "Public description"
+msgstr "الوصف العام"
+
+msgid "Public details"
+msgstr "التفاصيل العامة"
+
+msgid "Public location"
+msgstr "الموقع العام"
+
+msgid "Public transport"
+msgstr "النقل العام"
+
+msgid "Public transport lost-property office"
+msgstr "مكتب الممتلكات المفقودة في النقل العام"
+
+msgid "Public: report title, structured item details, approximate location, date, and prepared public image."
+msgstr "الجمهور: عنوان التقرير، تفاصيل البنود المنظمة، الموقع التقريبي، التاريخ، والصورة العامة المعدة."
+
+msgid "Purple"
+msgstr "أرجواني"
+
+msgid "Purse"
+msgstr "حقيبة"
+
+msgid "Qatar"
+msgstr "قطر"
+
+msgid "Racket"
+msgstr "راكيت"
+
+msgid "Re-enter the password for the currently signed-in account."
+msgstr "إعادة إدخال كلمة السر لحساب الموقع حاليا."
+
+msgid "Ready for Pickup"
+msgstr "جاهز للإلتقاط"
+
+msgid "Record disposition"
+msgstr "التصرف في السجلات"
+
+msgid "Record movement"
+msgstr "حركة السجلات"
+
+msgid "Record official handover"
+msgstr "تسليم الوثائق رسميا"
+
+msgid "Record the University policy decision for this unclaimed item?"
+msgstr "تسجيل قرار السياسة العامة للجامعة لهذا البند غير المطالب به؟"
+
+msgid "Record the handover date and time."
+msgstr "سجل تاريخ التسليم والوقت"
+
+msgid "Recycling"
+msgstr "إعادة التدوير"
+
+msgid "Refine results"
+msgstr "صّح النتائج"
+
+msgid "Reject this ownership claim?"
+msgstr "رفض هذه المطالبة الملكية؟"
+
+msgid "Release"
+msgstr "الإفراج"
+
+msgid "Released for collection"
+msgstr "أفرج عنه لجمعه"
+
+msgid "Remove"
+msgstr "أزل"
+
+msgid "Remove filter"
+msgstr "أزل المرشّح"
+
+msgid "Renew"
+msgstr "تجديد"
+
+msgid "Report Expiration Warning"
+msgstr "تحذير انتهاء صلاحية التقرير"
+
+msgid "Report a found item"
+msgstr "تقرير a بند"
+
+msgid "Report a lost item"
+msgstr "أبلغ عن بند مفقود"
+
+msgid "Report a suspicious claim"
+msgstr "الإبلاغ عن ادعاء مشبوه"
+
+msgid "Report expires soon"
+msgstr "ينتهي التقرير قريباً"
+
+msgid "Report location mode"
+msgstr "تقرير موقع نمط"
+
+msgid "Report lost or found items and discover explainable possible matches in one local platform."
+msgstr "أبلغ عن الأشياء المفقودة أو التي وجدت واكتشف تطابقات محتملة يمكن تفسيرها في منصة محلية واحدة."
+
+msgid "Reporter"
+msgstr "مراسل"
+
+msgid "Reports without a public image were skipped."
+msgstr "التقارير بدون صورة عامة تم تخطيها"
+
+msgid "Reports, claims, conversations, returns, and alerts in one place."
+msgstr "التقارير، الادعاءات، المحادثات، العوائد، و الإنذارات في مكان واحد."
+
+msgid "Request account deactivation?"
+msgstr "طلب تعطيل الحساب؟"
+
+msgid "Request one clarification"
+msgstr "طلب توضيح واحد"
+
+msgid "Required. Stored privately; audit descriptions do not copy the reason."
+msgstr "مطلوب. يُخزن بشكل خاص؛ ولا تنسخ أوصاف التدقيق السبب."
+
+msgid "Reserved for approved claimant"
+msgstr "احتياطي لصاحب المطالبة المعتمد"
+
+msgid "Reset password"
+msgstr "أعد تعيين كلمة السر"
+
+msgid "Residential area"
+msgstr "المنطقة السكنية"
+
+msgid "Resolve the storage incident before any release."
+msgstr "حلّْ حادثةَ التخزينَ قبل أيّ إطلاق."
+
+msgid "Restaurant or cafe"
+msgstr "مطعم أو مقهى"
+
+msgid "Restore account"
+msgstr "استعادة الحساب"
+
+msgid "Restroom"
+msgstr "غرفة النوم"
+
+msgid "Retention periods depend on report, dispute, safety, custody, and operational needs. Private evidence should be removed when no longer required unless an authorized dispute or safety hold applies."
+msgstr "وتتوقف فترات الاحتفاظ على الإبلاغ، والنـزاع، والسلامة، والحضانة، والاحتياجات التشغيلية. وينبغي إزالة الأدلة الخاصة عندما لا تعود مطلوبة ما لم يكن هناك نزاع مأذون به أو وجود أمان."
+
+msgid "Return Arranged"
+msgstr "أعد الترتيب"
+
+msgid "Return Updated"
+msgstr "أعد المُحدّث"
+
+msgid "Return and delivery"
+msgstr "العودة والتسليم"
+
+msgid "Return arrangement updated"
+msgstr "تحديث ترتيب العودة"
+
+msgid "Return completed"
+msgstr "اكتملت العودة"
+
+msgid "Return completed."
+msgstr "تمت العودة."
+
+msgid "Return in Progress"
+msgstr "العودة في التقدم"
+
+msgid "Return method"
+msgstr "طريقة العودة"
+
+msgid "Return or delivery"
+msgstr "الإعادة أو التسليم"
+
+msgid "Return this claim to pending review?"
+msgstr "هل تعيد هذه المطالبة إلى المراجعة المنتظرة؟"
+
+msgid "Return to card issuer"
+msgstr "العودة إلى إصدار البطاقات"
+
+msgid "Return updated"
+msgstr "العودة"
+
+msgid "Review"
+msgstr "الاستعراض"
+
+msgid "Review pending and disputed claims without copying private answers into audit descriptions."
+msgstr "استعراض المطالبات المعلقة والمتنازع عليها دون نسخ ردود خاصة في أوصاف مراجعة الحسابات."
+
+msgid "Review privacy and notification settings"
+msgstr "استعراض الخصوصية وإعدادات الإخطار"
+
+msgid "Review this account and its privacy-safe operational records."
+msgstr "استعراض هذا الحساب وسجلاته التشغيلية الآمنة للخصوصية."
+
+msgid "Review user reports about items, images, messages, and accounts."
+msgstr "مراجعة تقارير المستخدمين عن البنود والصور والرسائل والحسابات."
+
+msgid "Ring"
+msgstr "حلقة"
+
+msgid "Rubber"
+msgstr "المطاط"
+
+msgid "Safety review"
+msgstr "استعراض السلامة"
+
+msgid "Saudi Arabia"
+msgstr "المملكة العربية السعودية"
+
+msgid "Save new password"
+msgstr "احفظ كلمة السر الجديدة"
+
+msgid "Saved Alerts"
+msgstr "تنبيهات محفوظة"
+
+msgid "Saved Search Match"
+msgstr "مطابقة البحث الموفّرة"
+
+msgid "Saved alerts"
+msgstr "تنبيهات محفوظة"
+
+msgid "Saved searches may contain only public report filters."
+msgstr "البحث الموفر قد يحتوي فقط على مرشحات تقرير عامة."
+
+msgid "Scarf"
+msgstr "وشاح"
+
+msgid "School Bag"
+msgstr "حقيبة مدرسية"
+
+msgid "Search reports and narrow results by item and location details."
+msgstr "تقارير البحث والنتائج الضيقة حسب العنصر وتفاصيل الموقع."
+
+msgid "Second staff account ID"
+msgstr "الهوية الثانية لحساب الموظفين"
+
+msgid "Second staff confirmation"
+msgstr "إقرار الموظفين الثاني"
+
+msgid "Secure destruction"
+msgstr "التدمير المأمون"
+
+msgid "Secure destruction under approved policy"
+msgstr "التدمير الآمن بموجب السياسة المعتمدة"
+
+msgid "Select a category"
+msgstr "انتقِ a صنف"
+
+msgid "Select a country"
+msgstr "انتقِ a بلد"
+
+msgid "Select a place type"
+msgstr "اختر نوع المكان"
+
+msgid "Select a question"
+msgstr "انتقِ a سؤال"
+
+msgid "Send reset link"
+msgstr "أرسل وصلة إعادة ضبط"
+
+msgid "Send the owner a private message."
+msgstr "أرسلي رسالة خاصة للمالك"
+
+msgid "Shared"
+msgstr "مشترك"
+
+msgid "Shirt"
+msgstr "قميص"
+
+msgid "Shoes"
+msgstr "الأحذية"
+
+msgid "Shop"
+msgstr "محل"
+
+msgid "Shopping Bag"
+msgstr "حقيبة التسوق"
+
+msgid "Shopping centre"
+msgstr "مركز التسوق"
+
+msgid "Shuttle or Bus Stop"
+msgstr "المكوك أو محطة الحافلات"
+
+msgid "Silver"
+msgstr "فضة"
+
+msgid "Size"
+msgstr "الحجم"
+
+msgid "Small"
+msgstr "صغير"
+
+msgid "Smartwatch"
+msgstr "ساعة ذكية"
+
+msgid "South Africa"
+msgstr "جنوب أفريقيا"
+
+msgid "South Korea"
+msgstr "كوريا الجنوبية"
+
+msgid "Spain"
+msgstr "إسبانيا"
+
+msgid "Sports Bag"
+msgstr "حقيبة رياضية"
+
+msgid "Sports Clothing"
+msgstr "ملابس رياضية"
+
+msgid "Sports facility"
+msgstr "المرفق الرياضي"
+
+msgid "Storage incident"
+msgstr "حادث تخزين"
+
+msgid "Storage incident reviewed and closed by an authorized second reviewer."
+msgstr "قام مراجع ثان مأذون له باستعراض حادث التخزين وإغلاقه."
+
+msgid "Storage movement"
+msgstr "حركة التخزين"
+
+msgid "Storage references are private and visible only to authorized staff."
+msgstr "أما المراجع المتعلقة بالخزن فهي خاصة ولا تظهر إلا للموظفين المأذون لهم بذلك."
+
+msgid "Stored"
+msgstr "مخزن"
+
+msgid "Street or public area"
+msgstr "الشارع أو المنطقة العامة"
+
+msgid "Striped"
+msgstr "تعري"
+
+msgid "Strong Possible Match"
+msgstr "مباراة محتملة قوية"
+
+msgid "Structured choices"
+msgstr "الخيارات المنظمة"
+
+msgid "Student ID Card"
+msgstr "بطاقة هوية الطالب"
+
+msgid "Successful returns"
+msgstr "العائدات الناجحة"
+
+msgid "Suitcase"
+msgstr "حقيبة"
+
+msgid "Sunglasses"
+msgstr "نظارات شمسية"
+
+msgid "Suspend account"
+msgstr "تعليق الحساب"
+
+msgid "Suspicious claim reported"
+msgstr "الادعاء المشبوه المبلغ عنه"
+
+msgid "T-Shirt"
+msgstr "T-شيرت"
+
+msgid "Tablet"
+msgstr "لوح"
+
+msgid "Target"
+msgstr "الهدف"
+
+msgid "Textbook"
+msgstr "الكتاب المدرسي"
+
+msgid "The University location availability was updated."
+msgstr "وتم تحديث الموقع المتاح للجامعة."
+
+msgid "The University location was added."
+msgstr "وأضيف موقع الجامعة."
+
+msgid "The append-only custody movement was recorded."
+msgstr "تم تسجيل حركة الحضانة فقط"
+
+msgid "The authorized University disposition was recorded."
+msgstr "وقد سُجل التصرف الجامعي المأذون به."
+
+msgid "The claim appeal was reviewed."
+msgstr "وقد أعيد النظر في الطعن في المطالبة."
+
+msgid "The content was reported for administrator review."
+msgstr "وقد أُبلغ عن المحتوى لاستعراضه من جانب المديرين."
+
+msgid "The custody movement could not be recorded."
+msgstr "ولم يتسن تسجيل حركة الاحتجاز."
+
+msgid "The custody record was created."
+msgstr "تم إنشاء سجل الحضانة."
+
+msgid "The end date must not be before the start date."
+msgstr "ويجب ألا يكون تاريخ النهاية قبل تاريخ البدء."
+
+msgid "The evidence contents, filename extension, and content type do not match."
+msgstr "محتويات الدليل، امتداد اسم الملف، ونوع المحتوى غير متطابقة."
+
+msgid "The finder records handover or shipment, then the owner confirms receipt. The report resolves only after both confirmations."
+msgstr "يسجل من عثر على الغرض التسليم أو الشحن، ثم يؤكد المالك الاستلام. ولا يُغلق البلاغ إلا بعد التأكيدين."
+
+msgid "The first report must be Lost."
+msgstr "التقرير الأول يجب أن يكون مفقوداً"
+
+msgid "The item is marked missing and cannot be released normally."
+msgstr "وعلامة هذا البند مفقودة ولا يمكن الإفراج عنها عادة."
+
+msgid "The moderation report was reviewed."
+msgstr "وقد تم استعراض تقرير الاعتدال."
+
+msgid "The official handover was recorded and the report is Returned."
+msgstr "وتم تسجيل التسليم الرسمي وأعيد التقرير."
+
+msgid "The ownership claim was updated."
+msgstr "وتم تحديث المطالبة المتعلقة بالملكية."
+
+msgid "The possible match was dismissed for your account."
+msgstr "المباراة المحتملة تم رفضها لحسابك"
+
+msgid "The private return arrangement was updated."
+msgstr "وتم تحديث ترتيب العودة الخاصة."
+
+msgid "The public photograph is not enough to prove ownership. Answer details only the owner is likely to know."
+msgstr "الصورة العامة ليست كافية لإثبات الملكية. الإجابة على التفاصيل فقط من المحتمل أن يعرفها المالك."
+
+msgid "The recipient confirmed collection"
+msgstr "المستلم أكد الجمع"
+
+msgid "The report was renewed and is active again."
+msgstr "وقد جدد التقرير وهو نشط مرة أخرى."
+
+msgid "The return arrangement status was updated."
+msgstr "وتم تحديث حالة ترتيبات العودة."
+
+msgid "The return status changed. Open the private return page for details."
+msgstr "تغير وضع العودة. افتح صفحة العودة الخاصة للتفاصيل."
+
+msgid "The search alert was saved."
+msgstr "تم حفظ إنذار البحث."
+
+msgid "The second report must be Found."
+msgstr "ويجب العثور على التقرير الثاني."
+
+msgid "The storage incident was reviewed and closed."
+msgstr "وجرى استعراض حادث التخزين وإغلاقه."
+
+msgid "The suspicious claim was reported and the claimant was blocked."
+msgstr "وأُبلغ عن المطالبة المشبوهة وحُجبت الجهة المطالبة."
+
+msgid "This account cannot submit claims."
+msgstr "ولا يمكن لهذا الحساب أن يقدم مطالبات."
+
+msgid "This action is recorded without copying private answers into the audit log."
+msgstr "ويسجل هذا الإجراء دون نسخ ردود خاصة في سجل مراجعة الحسابات."
+
+msgid "This claim can no longer be changed using that action."
+msgstr "ولم يعد من الممكن تغيير هذا الادعاء باستخدام ذلك الإجراء."
+
+msgid "This conversation is read-only."
+msgstr "هذه المحادثة للقراءة فقط"
+
+msgid "This deterministic score identifies candidates; it never proves ownership or approves a claim."
+msgstr "وتحدد هذه النتيجة الحاسمة المرشحين؛ وهي لا تثبت الملكية أو توافق على المطالبة."
+
+msgid "This email-verification link is invalid or has expired."
+msgstr "وصلة التحقق من البريد الإلكتروني هذه غير صالحة أو انتهت صلاحيتها."
+
+msgid "This item is not available for claims."
+msgstr "ولا يمكن الحصول على هذا البند من المطالبات."
+
+msgid "This local MVP does not claim automatic legal compliance. The University must approve its final privacy, retention, and disposal policies."
+msgstr "ولا يزعم برنامج تقييم المخاطر هذا الامتثال القانوني التلقائي. ويتعين على الجامعة أن توافق على سياساتها النهائية المتعلقة بالخصوصية، والاحتفاظ بها، والتخلص منها."
+
+msgid "This password-reset link is invalid or expired."
+msgstr "وصلة إعادة تعيين كلمة السر هذه غير صالحة أو منتهية الصلاحية."
+
+msgid "This report cannot be renewed in its current state."
+msgstr "ولا يمكن تجديد هذا التقرير بحالته الراهنة."
+
+msgid "This thread is read-only and contact access is disabled."
+msgstr "هذا الخيط هو قراءة فقط و اتصال وصول معطل."
+
+msgid "Too many attempts. Please wait before trying again."
+msgstr "محاولات كثيرة جدًا. يرجى الانتظار قبل المحاولة مرة أخرى."
+
+msgid "Transfer to an appropriate authority"
+msgstr "نقل إلى سلطة مناسبة"
+
+msgid "Transparent"
+msgstr "شفاف"
+
+msgid "Transportation Card"
+msgstr "بطاقة النقل"
+
+msgid "Trousers"
+msgstr "الترلوزر"
+
+msgid "Trusted local authority or organization"
+msgstr "السلطة أو المنظمة المحلية الموثوق بها"
+
+msgid "Tunisia"
+msgstr "تونس"
+
+msgid "Two-person confirmation"
+msgstr "تأكيد لشخصين"
+
+msgid "Two-staff release required"
+msgstr "الإفراج عن موظفين مطلوبين"
+
+msgid "Türkiye"
+msgstr "توركييه"
+
+msgid "USB Drive"
+msgstr "محرك USB"
+
+msgid "Umbrella"
+msgstr "مظلة"
+
+msgid "United Arab Emirates"
+msgstr "الإمارات العربية المتحدة"
+
+msgid "United Kingdom"
+msgstr "المملكة المتحدة"
+
+msgid "United States"
+msgstr "الولايات المتحدة"
+
+msgid "University Garden"
+msgstr "حديقة الجامعة"
+
+msgid "University Lost and Found office"
+msgstr "مكتب الجامعة المفقود والمنشأ"
+
+msgid "University eligibility is separate from ordinary email verification."
+msgstr "وأهلية الجامعة منفصلة عن التحقق العادي من البريد الإلكتروني."
+
+msgid "University or school"
+msgstr "الجامعة أو المدرسة"
+
+msgid "University staff may review this claim only after official custody is recorded."
+msgstr "ولا يجوز لموظفي الجامعة استعراض هذه المطالبة إلا بعد تسجيل الحضانة الرسمية."
+
+msgid "Unread"
+msgstr "غير مقروء"
+
+msgid "Unsupported claim action."
+msgstr "إجراء المطالبة غير المدعم."
+
+msgid "Upheld"
+msgstr "مُثبّتة"
+
+msgid "Uphold"
+msgstr "ارفع"
+
+msgid "Upload a complete, valid PDF file."
+msgstr "ارفع ملف PDF كامل و صالح."
+
+msgid "Upload a genuine JPG, PNG, WebP, or PDF file."
+msgstr "ارفع ملف JPG أو PNG أو WebP أو PDF."
+
+msgid "Use an appropriate trusted local authority or official Lost and Found office where available."
+msgstr "استخدام سلطة محلية مناسبة موثوق بها أو مكتب رسمي مفقود ومكتشف حيثما كان متاحا."
+
+msgid "Used"
+msgstr "مستعمل"
+
+msgid "User"
+msgstr "المستخدم"
+
+msgid "User restored"
+msgstr "المستخدم المسترد"
+
+msgid "User suspended"
+msgstr "المستخدم موقوف"
+
+msgid "Users must provide truthful claims, protect private information, and use safe public or trusted return arrangements."
+msgstr "ويجب على المستخدمين تقديم مطالبات صادقة، وحماية المعلومات الخاصة، واستخدام ترتيبات عامة آمنة أو موثوق بها للعودة."
+
+msgid "Verify your FindMatch email"
+msgstr "تحقق من بريدك الإلكتروني"
+
+msgid "Verify your email address before sending private messages."
+msgstr "تحقق من عنوان بريدك الإلكتروني قبل إرسال رسائل خاصة."
+
+msgid "Verify your email address before using International Mode."
+msgstr "تحقق من عنوان بريدك الإلكتروني قبل استخدام أسلوب العمل الدولي."
+
+msgid "View conversations"
+msgstr "عرض المحادثات"
+
+msgid "View notifications"
+msgstr "اعرض الإخطارات"
+
+msgid "Visibility"
+msgstr "الظهور"
+
+msgid "Account status"
+msgstr "حالة الحساب"
+
+msgid "Account type"
+msgstr "نوع الحساب"
+
+msgid "Arrangement details"
+msgstr "تفاصيل ترتيب الإرجاع"
+
+msgid "Clarification"
+msgstr "توضيح"
+
+msgid "Date from"
+msgstr "التاريخ من"
+
+msgid "Date to"
+msgstr "التاريخ إلى"
+
+msgid "Display name"
+msgstr "اسم العرض"
+
+msgid "Email notifications"
+msgstr "إشعارات البريد الإلكتروني"
+
+msgid "Found report"
+msgstr "بلاغ الغرض المعثور عليه"
+
+msgid "High-value item"
+msgstr "غرض عالي القيمة"
+
+msgid "Intake point"
+msgstr "نقطة الاستلام"
+
+msgid "Intake time"
+msgstr "وقت الاستلام"
+
+msgid "Location type"
+msgstr "نوع الموقع"
+
+msgid "Movement type"
+msgstr "نوع الحركة"
+
+msgid "Notify me about claim updates"
+msgstr "أبلغني بتحديثات مطالبات الملكية"
+
+msgid "Notify me about new messages"
+msgstr "أبلغني بالرسائل الجديدة"
+
+msgid "Notify me about strong possible matches"
+msgstr "أبلغني بالتطابقات المحتملة القوية"
+
+msgid "Preferred language"
+msgstr "اللغة المفضلة"
+
+msgid "Private evidence"
+msgstr "دليل خاص"
+
+msgid "Private notes"
+msgstr "ملاحظات خاصة"
+
+msgid "Private storage reference"
+msgstr "مرجع التخزين الخاص"
+
+msgid "Problem or failure report"
+msgstr "بلاغ المشكلة أو الإخفاق"
+
+msgid "Reference"
+msgstr "المرجع"
+
+msgid "Safe note"
+msgstr "ملاحظة آمنة"
+
+msgid "Select a brand relevant to the selected item type."
+msgstr "اختر علامة تجارية ملائمة لنوع الغرض المحدد."
+
+msgid "Sort"
+msgstr "الترتيب"
+
+msgid "Summary"
+msgstr "ملخص"
+
+msgid "Trusted organization"
+msgstr "جهة موثوقة"
+
+msgid "Attachment"
+msgstr "مرفق"
+
+msgid "Wallet"
+msgstr "المحفظة"
+
+msgid "Watch"
+msgstr "شاهد"
+
+msgid "Water Bottle"
+msgstr "زجاجة ماء"
+
+msgid "Welcome to FindMatch. Open the signed verification link printed in the server terminal to unlock your account."
+msgstr "مرحباً بك في البحث عن مُتَع. افتح وصلة التحقق الموقعة المطبوعة في طرفية الخادم لفتح حسابك."
+
+msgid "What does the lock screen look like?"
+msgstr "كيف تبدو قفل الشاشة؟"
+
+msgid "What was inside the item?"
+msgstr "ماذا كان بداخل هذا الشيء؟"
+
+msgid "Where and approximately when"
+msgstr "أين ومتى تقريباً"
+
+msgid "Where did you lose it?"
+msgstr "أين فقدته؟"
+
+msgid "Where exactly was it lost?"
+msgstr "أين كانت تائهة بالضبط؟"
+
+msgid "Wood"
+msgstr "خشب"
+
+msgid "You already have an active claim for this item."
+msgstr "لديك بالفعل مطالبة نشطة لهذا البند."
+
+msgid "You are all caught up."
+msgstr "لقد تم القبض عليكم جميعاً"
+
+msgid "You cannot claim your own report."
+msgstr "لا يمكنك المطالبة بتقريرك الخاص"
+
+msgid "You have no saved alerts yet."
+msgstr "لم تُنقذوا أي إنذارات بعد"
+
+msgid "You have reached the claim-attempt limit for this item."
+msgstr "لقد وصلتم إلى حد المحاولة المزعومة لهذا البند."
+
+msgid "You must confirm that the claim is truthful."
+msgstr "يجب أن تؤكد أن الادعاء صادق"
+
+msgid "Your account data"
+msgstr "بيانات حسابك"
+
+msgid "Your account-deactivation request was recorded for review."
+msgstr "طلبك لتعطيل الحساب تم تسجيله للمراجعة"
+
+msgid "Your answers and evidence remain private. Never submit passwords, PINs, complete card numbers, or complete identification numbers."
+msgstr "تبقى إجاباتك وأدلتك خاصة. لا ترسل أبدًا كلمات المرور أو أرقام PIN أو أرقام البطاقات الكاملة أو أرقام الهوية الكاملة."
+
+msgid "Your appeal was submitted for administrator review."
+msgstr "تم تقديم طلبك لمراجعة المدير"
+
+msgid "Your email address is verified."
+msgstr "عنوان بريدك الإلكتروني تم التحقق منه."
+
+msgid "Your identity was confirmed."
+msgstr "هويتك تم تأكيدها"
+
+msgid "Your ownership claim status changed. Open FindMatch to review it."
+msgstr "تغيرت حالة مطالبتك بالملكية. افتح FindMatch لمراجعتها."
+
+msgid "Your private draft was saved."
+msgstr "تم حفظ مسودتك الخاصة"
+
+msgid "Your return confirmation was recorded."
+msgstr "تم تسجيل تأكيد عودتك"
+
+msgid "Your session will expire soon. Save long forms before continuing."
+msgstr "ستنتهي جلستك قريبًا. احفظ النماذج الطويلة قبل المتابعة."
+
+msgid "Your staff account is not authorized for this function."
+msgstr "حسابك الخاص بالموظفين غير مصرح له بهذه المهمة"
+
+msgid "Your verified account has International access only."
+msgstr "حسابك المتحقق له صلاحية دخول دولية فقط"

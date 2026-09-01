@@ -3,7 +3,7 @@ from io import BytesIO
 import importlib.util
 from tempfile import TemporaryDirectory
 
-from django.contrib.auth.models import AnonymousUser, User
+from django.contrib.auth.models import AnonymousUser, Permission, User
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -16,7 +16,7 @@ from django.utils.translation import gettext, ngettext
 from PIL import Image
 
 from .forms import ItemReportForm, UserProfileForm
-from .choices import ITEM_TYPE_CHOICES
+from .choices import ITEM_TYPE_CHOICES, brand_choices_for
 from .models import (
     MAX_IMAGE_SIZE,
     ContactAuditLog,
@@ -372,10 +372,15 @@ class StructuredReportAndOwnershipTests(MediaTestCase):
     def test_every_category_item_type_pair_is_valid(self):
         for category, choices in ITEM_TYPE_CHOICES.items():
             for item_type, label in choices:
+                relevant_brands = [
+                    value for value, choice_label in brand_choices_for(category, item_type)
+                    if value not in {"other", "not_sure", "no_visible_brand"}
+                ]
                 form = ItemReportForm(
                     data=self.structured_data(
                         category=category, item_type=item_type,
                         custom_item_type="Custom item" if item_type == "other" else "",
+                        brand=relevant_brands[0] if relevant_brands else "",
                     ), files={"image": test_image(f"{category}-{item_type}.jpg")}, report_type="lost",
                 )
                 self.assertTrue(form.is_valid(), (category, item_type, form.errors))
@@ -497,6 +502,7 @@ class AdministratorDashboardTests(MediaTestCase):
         UserProfile.objects.create(
             user=self.staff, email_verified_at=timezone.now(), university_eligible=True
         )
+        self.staff.user_permissions.add(Permission.objects.get(codename="manage_custody"))
         self.report = self.create_report()
 
     def test_anonymous_user_is_redirected_to_login(self):

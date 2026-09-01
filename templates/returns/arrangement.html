@@ -3,6 +3,10 @@
 {% block content %}<section class="container py-5"><div class="form-shell">
 <p class="eyebrow">{% translate "Approved claim" %}</p><h1>{% translate "Private return arrangement" %}</h1>
 <div class="alert alert-info" role="note">{% translate "FindMatch assists communication and recordkeeping. It does not transport an item, purchase shipping, guarantee delivery, or make a legal determination of ownership." %}</div>
+{% if return_completed %}
+<div class="alert alert-success"><strong>{% translate "Return completed" %}</strong><p class="mb-0">{% translate "Both participants confirmed the handover and receipt. This record is now read-only." %}</p></div>
+<dl><dt>{% translate "Return method" %}</dt><dd>{{ arrangement.get_return_method_display }}</dd><dt>{% translate "Status" %}</dt><dd>{{ arrangement.get_status_display }}</dd>{% if arrangement.safe_public_location %}<dt>{% translate "Safe public location" %}</dt><dd dir="auto">{{ arrangement.safe_public_location }}</dd>{% endif %}</dl>
+{% else %}
 <form method="post" novalidate>{% csrf_token %}{{ form.non_field_errors }}
 {% for field in form %}<div class="mb-3">{% include 'items/includes/form_field.html' with field=field %}</div>{% endfor %}
 <button class="btn btn-primary" type="submit">{% translate "Save return arrangement" %}</button></form>
@@ -10,4 +14,4 @@
 <div class="d-flex flex-wrap gap-2">
 <form method="post" action="{% url 'return_confirmation' claim.pk 'finder' %}">{% csrf_token %}<button class="btn btn-outline-primary" type="submit">{% translate "Finder: item handed over or sent" %}</button></form>
 <form method="post" action="{% url 'return_confirmation' claim.pk 'owner' %}">{% csrf_token %}<button class="btn btn-success" type="submit">{% translate "Owner: item received" %}</button></form>
-</div></div></section>{% endblock %}
+</div>{% endif %}</div></section>{% endblock %}

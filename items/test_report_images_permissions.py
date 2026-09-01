@@ -12,9 +12,10 @@ from django.urls import reverse
 from django.utils.datastructures import MultiValueDict
 from PIL import Image
 
-from .forms import ItemReportForm
+from .forms import ItemReportForm, OwnershipClaimForm
 from .models import (
-    MAX_IMAGE_SIZE, ItemReport, ReportImage, UniversityLocation, private_evidence_storage,
+    MAX_IMAGE_SIZE, ClaimEvidence, ContactRequest, ItemReport, ReportImage,
+    UniversityLocation, private_evidence_storage,
 )
 
 
@@ -259,3 +260,66 @@ class ReportImageAndPermissionTests(TestCase):
         staff_response = self.client.get(url)
         self.assertEqual(staff_response.status_code, 200)
         staff_response.close()
+
+    def test_private_claim_evidence_is_verified_and_permission_checked(self):
+        report = self.create_report(report_type="found")
+        claim = ContactRequest.objects.create(
+            item_report=report,
+            requesting_user=self.other,
+            receiving_user=self.owner,
+            request_type=ContactRequest.RequestType.OWNERSHIP_CLAIM,
+            initial_message="I can identify this item privately.",
+            truthful_confirmation=True,
+        )
+        evidence = ClaimEvidence.objects.create(
+            contact_request=claim,
+            file=image_upload("evidence.jpg"),
+        )
+        with self.assertRaises(ValueError):
+            _ = evidence.file.url
+        url = reverse("claim_evidence_download", args=(evidence.pk,))
+
+        self.client.logout()
+        self.assertRedirects(self.client.get(url), f"{reverse('login')}?next={url}")
+        stranger = User.objects.create_user("evidence_stranger")
+        self.client.force_login(stranger)
+        self.assertEqual(self.client.get(url).status_code, 404)
+
+        self.client.force_login(self.other)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Cache-Control"], "private, no-store")
+        self.assertEqual(response["X-Content-Type-Options"], "nosniff")
+        response.close()
+
+    def test_claim_evidence_rejects_corrupt_and_mismatched_uploads(self):
+        report = self.create_report(report_type="found")
+        data = {
+            "initial_message": "I can identify this item privately.",
+            "loss_location": "Library",
+            "loss_timeframe": "Yesterday",
+            "truthful_confirmation": "on",
+        }
+        invalid_uploads = (
+            SimpleUploadedFile("fake.jpg", b"not an image", content_type="image/jpeg"),
+            SimpleUploadedFile(
+                "wrong.jpg", image_upload("real.png", "PNG", "image/png").read(),
+                content_type="image/jpeg",
+            ),
+            SimpleUploadedFile(
+                "truncated.pdf", b"%PDF-1.7\nmissing trailer", content_type="application/pdf"
+            ),
+        )
+        for upload in invalid_uploads:
+            with self.subTest(filename=upload.name):
+                form = OwnershipClaimForm(
+                    data=data, files={"evidence": upload}, item_report=report
+                )
+                self.assertFalse(form.is_valid())
+                self.assertIn("evidence", form.errors)
+
+        valid = OwnershipClaimForm(
+            data=data, files={"evidence": image_upload("proof.png", "PNG", "image/png")},
+            item_report=report,
+        )
+        self.assertTrue(valid.is_valid(), valid.errors)

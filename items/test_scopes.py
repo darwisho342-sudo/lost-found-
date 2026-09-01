@@ -553,6 +553,21 @@ class InternationalReturnAndAppealTests(TestCase):
         self.assertEqual(self.report.status, ItemReport.Status.RESOLVED)
         self.assertFalse(self.conversation.is_active)
 
+    def test_viewing_return_page_does_not_create_state_but_post_does(self):
+        self.client.force_login(self.owner)
+        url = reverse("return_arrangement", args=(self.claim.pk,))
+        self.assertEqual(self.client.get(url).status_code, 200)
+        self.assertFalse(ReturnArrangement.objects.filter(contact_request=self.claim).exists())
+        response = self.client.post(url, {
+            "return_method": "safe_public_meeting",
+            "status": "arranging",
+            "safe_public_location": "Main station information desk",
+            "custom_arrangement": "Meet during staffed opening hours.",
+            "failure_report": "",
+        })
+        self.assertRedirects(response, url)
+        self.assertTrue(ReturnArrangement.objects.filter(contact_request=self.claim).exists())
+
     def test_rejected_claim_can_be_appealed_once(self):
         self.claim.status = ContactRequest.Status.REJECTED
         self.claim.save(update_fields=("status",))

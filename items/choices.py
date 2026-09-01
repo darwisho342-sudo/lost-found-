@@ -88,6 +88,79 @@ BRAND_CHOICES = (("apple", "Apple"), ("samsung", "Samsung"), ("huawei", "Huawei"
     ("puma", "Puma"), ("no_visible_brand", _("No Visible Brand")),
     ("other", _("Other")), ("not_sure", _("Not Sure")))
 
+# Form-level relevance rules. Values remain the same stable identifiers used by
+# reports and matching; these mappings only control which choices the user sees.
+BRAND_FALLBACK_VALUES = ("no_visible_brand", "other", "not_sure")
+BRAND_CHOICES_BY_CATEGORY = {
+    "electronics": ("apple", "samsung", "huawei", "xiaomi", "lenovo", "hp", "dell", "asus", "sony"),
+    "bags": ("adidas", "nike", "puma"),
+    "clothing": ("adidas", "nike", "puma"),
+    "wallets": ("adidas", "nike", "puma"),
+    "sports_equipment": ("adidas", "nike", "puma"),
+    "personal_accessories": ("adidas", "nike", "puma", "apple", "samsung", "sony"),
+    "documents": (), "keys": (), "jewellery": (), "books": (),
+    "other": tuple(value for value, label in BRAND_CHOICES if value not in BRAND_FALLBACK_VALUES),
+    "not_sure": tuple(value for value, label in BRAND_CHOICES if value not in BRAND_FALLBACK_VALUES),
+}
+BRAND_CHOICES_BY_ITEM_TYPE = {
+    "mobile_phone": ("apple", "samsung", "huawei", "xiaomi", "sony"),
+    "tablet": ("apple", "samsung", "huawei", "xiaomi", "lenovo"),
+    "smartwatch": ("apple", "samsung", "huawei", "xiaomi", "sony"),
+    "laptop": ("apple", "lenovo", "hp", "dell", "asus"),
+    "camera": ("sony",),
+    "earbuds": ("apple", "samsung", "huawei", "xiaomi", "sony"),
+    "headphones": ("apple", "samsung", "sony"),
+    "charger": ("apple", "samsung", "huawei", "xiaomi", "sony"),
+    "cable": ("apple", "samsung", "huawei", "xiaomi", "sony"),
+    "power_bank": ("samsung", "huawei", "xiaomi", "sony"),
+    "calculator": (), "usb_drive": (),
+}
+
+APPEARANCE_FIELD_NAMES = (
+    "primary_colour", "secondary_colour", "material", "approximate_size",
+    "pattern", "item_condition", "brand", "model",
+)
+APPEARANCE_FIELDS_BY_CATEGORY = {
+    "electronics": ("primary_colour", "secondary_colour", "item_condition", "brand", "model"),
+    "bags": ("primary_colour", "secondary_colour", "material", "approximate_size", "pattern", "item_condition", "brand"),
+    "clothing": ("primary_colour", "secondary_colour", "material", "approximate_size", "pattern", "item_condition", "brand"),
+    "documents": ("primary_colour", "item_condition"),
+    "keys": ("primary_colour", "secondary_colour", "material", "item_condition"),
+    "wallets": ("primary_colour", "secondary_colour", "material", "approximate_size", "item_condition", "brand"),
+    "jewellery": ("primary_colour", "secondary_colour", "material", "approximate_size", "item_condition"),
+    "books": ("primary_colour", "approximate_size", "item_condition"),
+    "sports_equipment": ("primary_colour", "secondary_colour", "material", "approximate_size", "item_condition", "brand"),
+    "personal_accessories": ("primary_colour", "secondary_colour", "material", "approximate_size", "pattern", "item_condition", "brand"),
+    "other": APPEARANCE_FIELD_NAMES,
+    "not_sure": APPEARANCE_FIELD_NAMES,
+}
+APPEARANCE_FIELDS_BY_ITEM_TYPE = {
+    "calculator": ("primary_colour", "secondary_colour", "item_condition"),
+    "usb_drive": ("primary_colour", "secondary_colour", "item_condition"),
+    "charger": ("primary_colour", "secondary_colour", "item_condition", "brand"),
+    "cable": ("primary_colour", "secondary_colour", "item_condition", "brand"),
+    "power_bank": ("primary_colour", "secondary_colour", "item_condition", "brand", "model"),
+}
+
+
+def choices_for_values(choices, values):
+    """Return choices in canonical order for the supplied stable values."""
+    allowed = set(values)
+    return tuple(choice for choice in choices if choice[0] in allowed)
+
+
+def brand_choices_for(category, item_type=""):
+    values = BRAND_CHOICES_BY_ITEM_TYPE.get(
+        item_type, BRAND_CHOICES_BY_CATEGORY.get(category, ())
+    )
+    return choices_for_values(BRAND_CHOICES, (*values, *BRAND_FALLBACK_VALUES))
+
+
+def appearance_fields_for(category, item_type=""):
+    return APPEARANCE_FIELDS_BY_ITEM_TYPE.get(
+        item_type, APPEARANCE_FIELDS_BY_CATEGORY.get(category, APPEARANCE_FIELD_NAMES)
+    )
+
 LOCATION_CHOICES = (("main_entrance", _("Main Entrance")), ("library", _("Library")),
     ("cafeteria", _("Cafeteria")), ("classroom", _("Classroom Building")),
     ("laboratory", _("Laboratory")), ("student_affairs", _("Student Affairs")),

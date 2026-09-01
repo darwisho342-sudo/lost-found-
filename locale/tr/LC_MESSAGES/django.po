@@ -1180,8 +1180,8 @@ msgstr "Bu sayfadaki tüm bildirimleri seç"
 
 msgid "%(count)s report"
 msgid_plural "%(count)s reports"
-msgstr[0] "%(count)s bildirim"
-msgstr[1] "%(count)s bildirim"
+msgstr[0] "%(count)s rapor"
+msgstr[1] "%(count)s rapor"
 
 msgid "%(count)s shown"
 msgid_plural "%(count)s shown"
@@ -1190,13 +1190,13 @@ msgstr[1] "%(count)s gösteriliyor"
 
 msgid "%(report_count)s report"
 msgid_plural "%(report_count)s reports"
-msgstr[0] "%(report_count)s bildirim"
-msgstr[1] "%(report_count)s bildirim"
+msgstr[0] "%(report_count)s rapor"
+msgstr[1] "%(report_count)s rapor"
 
 msgid "This action will affect %(count)s selected report."
 msgid_plural "This action will affect %(count)s selected reports."
-msgstr[0] "Bu işlem seçilen %(count)s bildirimi etkileyecek."
-msgstr[1] "Bu işlem seçilen %(count)s bildirimi etkileyecek."
+msgstr[0] "Bu işlem seçilen %(count)s raporu etkileyecek."
+msgstr[1] "Bu işlem seçilen %(count)s raporu etkileyecek."
 msgid "Structured item report"
 msgstr "Yapılandırılmış eşya bildirimi"
 
@@ -1388,9 +1388,6 @@ msgstr "Doğrulama bağlantısını yeniden gönder"
 
 msgid "Strong possible match"
 msgstr "Güçlü olası eşleşme"
-
-msgid "Possible match"
-msgstr "Olası eşleşme"
 
 msgid "Approximate location"
 msgstr "Yaklaşık konum"
@@ -1871,3 +1868,1853 @@ msgstr "Koyu tema etkin"
 
 msgid "Choose a campus and building to preview the public location."
 msgstr "Herkese açık konumu önizlemek için bir kampüs ve bina seçin."
+
+msgid "Not specified"
+msgstr "Belirtilmemiş"
+
+msgid "Select a primary colour"
+msgstr "Bir ana renk seçin"
+
+msgid "Select a secondary colour"
+msgstr "Bir ikincil renk seçin"
+
+msgid "Black"
+msgstr "Siyah"
+
+msgid "White"
+msgstr "Beyaz"
+
+msgid "Grey"
+msgstr "Gri"
+
+msgid "Red"
+msgstr "Kırmızı"
+
+msgid "Blue"
+msgstr "Mavi"
+
+msgid "Green"
+msgstr "Yeşil"
+
+msgid "Yellow"
+msgstr "Sarı"
+
+msgid "Mark selected email addresses as verified"
+msgstr "Seçili e-posta adreslerini doğrulanmış olarak işaretle"
+
+msgid "Mark selected email addresses as unverified"
+msgstr "Seçili e-posta adreslerini doğrulanmamış olarak işaretle"
+
+msgid "%(count)s account(s) marked as email verified."
+msgstr "%(count)s hesap e-posta doğrulanmış olarak işaretlendi."
+
+msgid "%(count)s account(s) marked as email unverified."
+msgstr "%(count)s hesap e-posta doğrulanmamış olarak işaretlendi."
+
+msgid "Email verification is required before submitting an ownership claim. For this local demonstration, a superuser can verify the account in Django administration."
+msgstr "Mülkiyet talebi göndermeden önce e-posta doğrulaması gerekir. Bu yerel gösterim için bir süper kullanıcı hesabı Django yönetiminde doğrulayabilir."
+
+msgid "Verify your email address before submitting an ownership claim."
+msgstr "Mülkiyet talebi göndermeden önce e-posta adresinizi doğrulayın."
+
+msgid "%(count)s active filter"
+msgid_plural "%(count)s active filters"
+msgstr[0] "%(count)s etkin filtre"
+msgstr[1] "%(count)s etkin filtre"
+
+msgid "%(count)s stored item(s) are approaching the configured retention review date."
+msgstr "%(count)s depolanan eşya, yapılandırılmış saklama inceleme tarihine yaklaşıyor."
+
+msgid "A completed return is read-only."
+msgstr "Tamamlanmış bir iade salt okunurdur."
+
+msgid "A different second staff member must confirm this high-value release."
+msgstr "Farklı bir ikinci personel, bu yüksek değerli eşyanın teslimini onaylamalıdır."
+
+msgid "A different supervisor or administrator must review this incident."
+msgstr "Farklı bir yönetici veya yönetici bu olayı gözden geçirmelidir."
+
+msgid "A missing-in-storage item cannot be moved, released, or disposed normally."
+msgstr "Kayıp bir depo eşyası taşınamaz, bırakılamaz veya normal şekilde yok edilemez."
+
+msgid "A participant confirmed the University handover step."
+msgstr "Bir katılımcı üniversitenin devredilmesini onayladı."
+
+msgid "A photograph or matching score never proves ownership. Private verification is required."
+msgstr "Bir fotoğraf veya eşleşme puanı sahipliği asla kanıtlamaz. Özel doğrulama gereklidir."
+
+msgid "A private ownership claim requires your review."
+msgstr "Özel mülkiyet talebi incelemenizi gerektiriyor."
+
+msgid "A reason is required for this account action."
+msgstr "Bu hesap eylemi için bir neden gereklidir."
+
+msgid "A rejected ownership claim was appealed for administrator review."
+msgstr "Reddedilen bir mülkiyet iddiası, yöneticinin yeniden gözden geçirilmesi için temyize gitti."
+
+msgid "A report with an unresolved custody incident cannot be marked Returned."
+msgstr "Çözümlenmemiş bir vesayet olayıyla ilgili rapor iade edilemiyor."
+
+msgid "A return can be arranged only after a claim is approved."
+msgstr "Bir geri dönüş ancak bir iddia onaylandıktan sonra düzenlenebilir."
+
+msgid "A suspicious ownership claim was reported."
+msgstr "Şüpheli bir mülkiyet iddiası rapor edildi."
+
+msgid "Accepted into custody"
+msgstr "Gözaltına alındı"
+
+msgid "Active filters"
+msgstr "Etkin filtreler"
+
+msgid "Active reports"
+msgstr "Etkin raporlar"
+
+msgid "Add location"
+msgstr "Konum ekle"
+
+msgid "Additional answer"
+msgstr "Ek cevap"
+
+msgid "Additional answer submitted"
+msgstr "Ek cevap gönderildi"
+
+msgid "Additional ownership information was submitted."
+msgstr "Ek mülkiyet bilgileri gönderildi."
+
+msgid "Address sharing requires the owner's explicit consent."
+msgstr "Adres paylaşımı sahibinin açık rızasını gerektirir."
+
+msgid "Administration Building"
+msgstr "Yönetim Binası"
+
+msgid "Airport"
+msgstr "Havaalanı"
+
+msgid "Alert name"
+msgstr "Alarm adı"
+
+msgid "Algeria"
+msgstr "Cezayir"
+
+msgid "All brands"
+msgstr "Tüm markalar"
+
+msgid "All colours"
+msgstr "Tüm renkler"
+
+msgid "All countries"
+msgstr "Tüm ülkeler"
+
+msgid "All item types"
+msgstr "Tüm öge türleri"
+
+msgid "All materials"
+msgstr "Tüm malzemeler"
+
+msgid "All modes"
+msgstr "Tüm kipler"
+
+msgid "All place types"
+msgstr "Tüm mekan tipleri"
+
+msgid "All public reports"
+msgstr "Tüm kamu raporları"
+
+msgid "All sizes"
+msgstr "Tüm boyutlar"
+
+msgid "An administrator changed a user account status after recording a private reason."
+msgstr "Bir yönetici, özel bir neden kaydettikten sonra kullanıcı hesap durumunu değiştirdi."
+
+msgid "An administrator deactivated a conversation after recording a private reason."
+msgstr "Bir yönetici özel bir neden kaydettikten sonra bir konuşmayı devre dışı bıraktı."
+
+msgid "An administrator reopened a conversation after recording a private reason."
+msgstr "Bir yönetici özel bir neden kaydettikten sonra bir konuşmayı yeniden açtı."
+
+msgid "An appeal already exists for this claim."
+msgstr "Bu iddia için zaten bir temyiz var."
+
+msgid "An ownership claim was approved."
+msgstr "Bir mülkiyet talebi onaylandı."
+
+msgid "An ownership claim was disputed."
+msgstr "Bir mülkiyet iddiası tartışıldı."
+
+msgid "An ownership claim was rejected."
+msgstr "Bir mülkiyet iddiası reddedildi."
+
+msgid "An ownership claim was submitted."
+msgstr "Bir mülkiyet iddiası sunuldu."
+
+msgid "Appeals"
+msgstr "Temyizler"
+
+msgid "Append-only movement history"
+msgstr "Sadece Ekle- hareket geçmişi"
+
+msgid "Approve an ownership claim before releasing this item."
+msgstr "Bu maddeyi piyasaya sürmeden önce sahiplik hakkını onaylayın."
+
+msgid "Approve this ownership claim?"
+msgstr "Bu mülkiyet iddiasını onaylayacak mısın?"
+
+msgid "Approved claim"
+msgstr "Onaylanan hak"
+
+msgid "Approved recycling/data handling"
+msgstr "Geri dönüşüm/ veri kontrolü onaylandı"
+
+msgid "Approximate date"
+msgstr "En yakın tarih"
+
+msgid "Approximately when did you lose it?"
+msgstr "Ne zaman kaybettin?"
+
+msgid "Argentina"
+msgstr "Arjantin"
+
+msgid "Arranging Return"
+msgstr "Dönüşü Ayarlamak"
+
+msgid "Australia"
+msgstr "Avustralya"
+
+msgid "Authority transfer"
+msgstr "Yetki aktarımı"
+
+msgid "Authorized University handover recorded."
+msgstr "Yetkilendirilmiş Üniversite teslimi kaydedildi."
+
+msgid "Authorized administrators: restricted records only for genuine moderation, dispute, or safety work."
+msgstr "Yetkilendirilmiş yöneticiler: Sadece gerçek ölçülülük, anlaşmazlık veya güvenlik işleri için sınırlı kayıtlar."
+
+msgid "Authorized public authority"
+msgstr "Yetkili kamu otoritesi"
+
+msgid "Authorized staff recorded the official item return."
+msgstr "Yetkili personel resmi eşya iadesini kaydetti."
+
+msgid "Awaiting Receipt Confirmation"
+msgstr "Alıcı Doğrulaması Bekleniyor"
+
+msgid "Back to reports"
+msgstr "Raporlara geri dönelim."
+
+msgid "Backpack"
+msgstr "Sırt Paketi"
+
+msgid "Ball"
+msgstr "Top"
+
+msgid "Bangladesh"
+msgstr "Bangladeş"
+
+msgid "Bank Card"
+msgstr "Banka Kartı"
+
+msgid "Beige"
+msgstr "Bej"
+
+msgid "Belgium"
+msgstr "Belçika"
+
+msgid "Both participants confirmed the handover and receipt. This record is now read-only."
+msgstr "Her iki katılımcı da teslimi ve teslim almayı onayladı. Bu kayıt artık salt okunurdur."
+
+msgid "Both participants confirmed the item handover."
+msgstr "İki katılımcı da maddenin teslim edildiğini doğruladı."
+
+msgid "Both participants must confirm the safe handover. Until then, the case remains open."
+msgstr "Her iki katılımcı da güvenli teslimi onaylamalıdır. O zamana kadar süreç açık kalır."
+
+msgid "Bracelet"
+msgstr "Bilezik"
+
+msgid "Brand and model"
+msgstr "Marka ve model"
+
+msgid "Brazil"
+msgstr "Brezilya"
+
+msgid "Brown"
+msgstr "Kahverengi"
+
+msgid "Building"
+msgstr "Bina"
+
+msgid "Cable"
+msgstr "Kablo"
+
+msgid "Calculator"
+msgstr "Hesap Makinesi"
+
+msgid "Camera"
+msgstr "Kamera"
+
+msgid "Campus"
+msgstr "Kampüs"
+
+msgid "Campus and date"
+msgstr "Kampüs ve tarih"
+
+msgid "Campus or building"
+msgstr "Kampüs veya bina"
+
+msgid "Canada"
+msgstr "Kanada"
+
+msgid "Cancel claim"
+msgstr "İddiayı iptal et"
+
+msgid "Car Keys"
+msgstr "Araba Anahtarları"
+
+msgid "Card Holder"
+msgstr "Kart Tutucu"
+
+msgid "Category and type"
+msgstr "Kategori ve tip"
+
+msgid "Certificate"
+msgstr "Sertifika"
+
+msgid "Charger"
+msgstr "Şarj cihazı"
+
+msgid "Check your email"
+msgstr "E- postanızı kontrol edin"
+
+msgid "Checked"
+msgstr "Kontrol edildi"
+
+msgid "China"
+msgstr "Çin"
+
+msgid "Choose a new password"
+msgstr "Yeni bir parola seç"
+
+msgid "Choose a return method"
+msgstr "Dönüş yöntemini seçin"
+
+msgid "Choose a return method appropriate for this report scope."
+msgstr "Bu rapor kapsamı için uygun bir dönüş yöntemi seçin."
+
+msgid "Choose a unique name for this saved search."
+msgstr "Kaydedilen arama için benzersiz bir isim seçin."
+
+msgid "Choose an administrator-approved organization."
+msgstr "Yönetici onaylı bir organizasyon seçin."
+
+msgid "Choose an authorized disposition."
+msgstr "Yetkili bir mizaç seçin."
+
+msgid "Choose disposition"
+msgstr "Mizaç seç"
+
+msgid "Claim Updated"
+msgstr "İddia Güncellendi"
+
+msgid "Claim disputed"
+msgstr "İddiaya itiraz edildi"
+
+msgid "Claim in Progress"
+msgstr "İlerlemede İddia"
+
+msgid "Claimant"
+msgstr "İddiacı"
+
+msgid "Claims Received"
+msgstr "Alınan İddialar"
+
+msgid "Claims Submitted"
+msgstr "Gönderilen İddialar"
+
+msgid "Clarification requested"
+msgstr "Açıklama istendi"
+
+msgid "Classroom Building"
+msgstr "Sınıf Binası"
+
+msgid "Close Selected"
+msgstr "Seçiliyi Kapat"
+
+msgid "Close after supervisor review"
+msgstr "Denetimci incelemesinden sonra kapat"
+
+msgid "Close filters"
+msgstr "Filtreleri kapat"
+
+msgid "Close review"
+msgstr "Yakın inceleme"
+
+msgid "Closest date"
+msgstr "En yakın tarih"
+
+msgid "Coat"
+msgstr "Ceket"
+
+msgid "Coin Purse"
+msgstr "Bozuk para çantası"
+
+msgid "Collected"
+msgstr "Toplandı"
+
+msgid "Company security department"
+msgstr "Şirket güvenlik departmanı."
+
+msgid "Complete the official custody handover before marking this report Returned."
+msgstr "Bu raporun geri dönüşüne işaret etmeden önce resmi velayeti teslim edin."
+
+msgid "Complete the required release confirmations."
+msgstr "Gerekli tahliye onaylarını tamamlayın."
+
+msgid "Conference Hall"
+msgstr "Konferans Salonu"
+
+msgid "Confirm"
+msgstr "Onayla"
+
+msgid "Confirm claim action"
+msgstr "İddia eylemini onayla"
+
+msgid "Confirm official physical handover and Returned status?"
+msgstr "Resmi fiziksel teslim ve iade durumunu doğrulatın mı?"
+
+msgid "Confirm that a different authorized reviewer investigated this incident?"
+msgstr "Bu olayı başka bir yetkilinin araştırdığını doğrulamak mı?"
+
+msgid "Confirm this account status change?"
+msgstr "Bu hesap durum değişikliği doğrulansın mı?"
+
+msgid "Consent-controlled contact details"
+msgstr "Onaylı kontrollü iletişim ayrıntıları"
+
+msgid "Continue privately"
+msgstr "Özel olarak devam et"
+
+msgid "Conversation closed. Participants may review the history but cannot send messages."
+msgstr "Konuşma kapandı. Katılımcılar geçmişi gözden geçirebilir ama mesaj gönderemez."
+
+msgid "Cyprus"
+msgstr "Kıbrıs"
+
+msgid "Damaged"
+msgstr "Hasarlı"
+
+msgid "Dark Blue"
+msgstr "Koyu Mavi"
+
+msgid "Dashboard shortcuts"
+msgstr "Kısayollar"
+
+msgid "Delete Selected"
+msgstr "Seçiliyi Sil"
+
+msgid "Delete this saved alert?"
+msgstr "Kaydedilen bu uyarı silinsin mi?"
+
+msgid "Deny"
+msgstr "İnkar"
+
+msgid "Deny this appeal?"
+msgstr "Bu temyizi inkar mı edeyim?"
+
+msgid "Describe a hidden mark."
+msgstr "Gizli bir işaret tanımla."
+
+msgid "Describe a unique accessory."
+msgstr "Eşsiz bir aksesuar tarif et."
+
+msgid "Describe an engraving."
+msgstr "Bir kabartma tarif et."
+
+msgid "Description and title"
+msgstr "Açıklama ve başlık"
+
+msgid "Did you find this item?"
+msgstr "Bu şeyi buldun mu?"
+
+msgid "Disable"
+msgstr "Pasifleştir"
+
+msgid "Disposition"
+msgstr "Diskoksiyon"
+
+msgid "Disposition Recorded"
+msgstr "Bozulma Kaydediliyor"
+
+msgid "Dispute this decision?"
+msgstr "Bu kararı tartışmak mı?"
+
+msgid "Do not include complete passwords, PINs, card numbers, security codes, or identification numbers."
+msgstr "Tam şifre, PIN, kart numaraları, güvenlik kodları veya kimlik numaralarını içerme."
+
+msgid "Do not post private contact or exact-location information in public reports."
+msgstr "Kamu raporlarında özel temas veya kesin konum bilgileri gönderme."
+
+msgid "Donation"
+msgstr "Bağış"
+
+msgid "Donation under approved policy"
+msgstr "Onaylanan politika çerçevesinde bağış"
+
+msgid "Download private attachment"
+msgstr "Özel eklenti indir"
+
+msgid "Download private evidence %(number)s"
+msgstr "Özel kanıt indir %(number)s"
+
+msgid "Draft"
+msgstr "Taslak"
+
+msgid "Dress"
+msgstr "Elbise"
+
+msgid "Driver's Licence"
+msgstr "Sürücü Lisansı"
+
+msgid "Earbuds"
+msgstr "Kulaklıklar"
+
+msgid "Earrings"
+msgstr "Küpeler"
+
+msgid "Egypt"
+msgstr "Mısır"
+
+msgid "Electronic Key"
+msgstr "Elektronik Anahtar"
+
+msgid "Email verification is required before ownership claims and private messaging."
+msgstr "Mülkiyet talepleri ve özel mesajlaşmadan önce e-posta doğrulaması gereklidir."
+
+msgid "Enable"
+msgstr "Etkinleştir"
+
+msgid "Enter a reason for this account action."
+msgstr "Bu hesap eyleminin bir nedenini girin."
+
+msgid "Enter a safe incident summary."
+msgstr "Güvenli bir olay özeti girin."
+
+msgid "Enter one clarification request."
+msgstr "Bir açıklama isteği girin."
+
+msgid "Enter your account email address. Email delivery must be configured by the operator."
+msgstr "Hesap e- posta adresinizi girin. E- posta iletimi operatör tarafından yapılandırılmalıdır."
+
+msgid "Event venue"
+msgstr "Olay yeri"
+
+msgid "Evidence files must be 5 MB or smaller."
+msgstr "Kanıt dosyaları 5 MB veya daha küçük olmalıdır."
+
+msgid "Expired"
+msgstr "Süresi dolmuş"
+
+msgid "Extra Large"
+msgstr "Fazla Büyük"
+
+msgid "Extra Small"
+msgstr "Fazladan Küçük"
+
+msgid "Fabric"
+msgstr "Kumaş"
+
+msgid "Filters"
+msgstr "Filtreler"
+
+msgid "FindMatch assists communication and recordkeeping. It does not transport an item, purchase shipping, guarantee delivery, or make a legal determination of ownership."
+msgstr "FINDMatch iletişim ve kayıt işlemlerine yardımcı olur.Bir eşyayı taşımaz, taşımaz, garanti etmez veya mülkiyetin yasal bir kararlılığını sağlamaz."
+
+msgid "FindMatch can notify you when a new public Found report matches these filters."
+msgstr "Yeni bir kamusal bulgu raporu bu filtrelerle uyuştuğunda, BulMatch size haber verebilir."
+
+msgid "FindMatch helps people communicate and record a return. It does not transport items, buy shipping, guarantee delivery, establish legal ownership, or replace police and official lost-property services."
+msgstr "FindMatch, insanların iletişim kurmalarına ve geri dönüş kaydetmelerine yardımcı olur.Bu madde taşıma, taşıma, garanti teslim alma, yasal mülkiyet kurma veya polis ve resmi kayıp-uygulama hizmetlerinin yerini doldurmaz."
+
+msgid "FindMatch separates public report information from private ownership, exact-location, conversation, evidence, and custody information. Private information is disclosed only through authorized University workflows."
+msgstr "FindMatch kamu rapor bilgilerini özel mülkiyet, tam yer, konuşma, kanıt ve ve vesayet bilgilerinden ayırır. Özel bilgiler sadece yetkili üniversite çalışma akışları aracılığıyla açıklanır."
+
+msgid "FindMatch suggests possible connections but does not make a legal determination of ownership."
+msgstr "FindMatch olası bağlantıları önerse de, sahiplik konusunda yasal bir kararlılık göstermiyor."
+
+msgid "Finder"
+msgstr "Bulucu"
+
+msgid "Finder: item handed over or sent"
+msgstr "Bulucu: öge teslim edildi veya gönderildi"
+
+msgid "Floral"
+msgstr "Çiçekli"
+
+msgid "Folder"
+msgstr "Dizin"
+
+msgid "For this sensitive action, re-enter the password for your current account."
+msgstr "Bu hassas eylem için, mevcut hesabınızın parolasını tekrar girin."
+
+msgid "France"
+msgstr "Fransa"
+
+msgid "General area"
+msgstr "Genel alan"
+
+msgid "General location"
+msgstr "Genel konum"
+
+msgid "Germany"
+msgstr "Almanya"
+
+msgid "Glass"
+msgstr "Cam"
+
+msgid "Glasses"
+msgstr "Gözlükler"
+
+msgid "Gloves"
+msgstr "Eldivenler"
+
+msgid "Gold"
+msgstr "Altın"
+
+msgid "Good"
+msgstr "Güzel."
+
+msgid "Greece"
+msgstr "Yunanistan"
+
+msgid "Handbag"
+msgstr "El çantası"
+
+msgid "Handed Over"
+msgstr "Verilen"
+
+msgid "Hat"
+msgstr "Şapka"
+
+msgid "Head Covering"
+msgstr "Baş Kapaklama"
+
+msgid "Headphones"
+msgstr "Kulaklıklar"
+
+msgid "Hide"
+msgstr "Gizle"
+
+msgid "Hide Images Immediately"
+msgstr "Resimleri Hemen Gizle"
+
+msgid "Hide Selected"
+msgstr "Seçileni Gizle"
+
+msgid "Hide the target content?"
+msgstr "Hedef içeriği gizlensin mi?"
+
+msgid "Hide this image from all public pages while preserving it for staff review."
+msgstr "Personel incelemesi için bu resmi tüm kamu sayfalarından gizleyin."
+
+msgid "High-value items require locked storage."
+msgstr "Yüksek değerli öğeler kilitli depolama gerektirir."
+
+msgid "Hospital or clinic"
+msgstr "Hastane veya klinik"
+
+msgid "Hotel"
+msgstr "Otel"
+
+msgid "House Keys"
+msgstr "Ev Anahtarları"
+
+msgid "I Found This Item"
+msgstr "Bu Ögeyi buldum"
+
+msgid "If the address belongs to an account, a password-reset link has been sent."
+msgstr "Adres bir hesaba aitse, parola- yeniden ayar bağlantısı gönderilmiştir."
+
+msgid "If verification is still required, a new link has been sent."
+msgstr "Doğrulama gerekliyse, yeni bir bağlantı gönderildi."
+
+msgid "In-person meeting in a safe public place"
+msgstr "Halka açık bir yerde yüz yüze görüşme."
+
+msgid "Incident"
+msgstr "Olay"
+
+msgid "India"
+msgstr "Hindistan"
+
+msgid "Initial private claim message"
+msgstr "İlk özel hak iletisi"
+
+msgid "Intake"
+msgstr "Giriş"
+
+msgid "Inventory review"
+msgstr "Envanter incelemesi"
+
+msgid "Iraq"
+msgstr "Irak"
+
+msgid "Issuer return"
+msgstr "Dağıtıcı geri döndü"
+
+msgid "Italy"
+msgstr "İtalya"
+
+msgid "Item report"
+msgstr "Öge raporu"
+
+msgid "JPG, PNG, WebP, or PDF up to 5 MB. Remove unrelated private information."
+msgstr "JPG, PNG, WebP veya PDF 5 MB'ye kadar. Konuyla ilgisiz özel bilgileri kaldır."
+
+msgid "Jacket"
+msgstr "Ceket"
+
+msgid "Japan"
+msgstr "Japonya"
+
+msgid "Jordan"
+msgstr "Ürdün"
+
+msgid "Kenya"
+msgstr "Kenya"
+
+msgid "Keychain"
+msgstr "Anahtarlık"
+
+msgid "Kuwait"
+msgstr "Kuveyt"
+
+msgid "Laptop"
+msgstr "Dizüstü"
+
+msgid "Laptop Bag"
+msgstr "Dizüstü Çanta"
+
+msgid "Large"
+msgstr "Büyük"
+
+msgid "Latitude and longitude must be supplied together."
+msgstr "Enlem ve boylam birlikte sağlanmalıdır."
+
+msgid "Latitude must be between -90 and 90."
+msgstr "Enlem -90 ile 90 arasında olmalı."
+
+msgid "Leather"
+msgstr "Deri"
+
+msgid "Lebanon"
+msgstr "Lübnan"
+
+msgid "Legal and privacy"
+msgstr "Yasal ve özel"
+
+msgid "Locked storage"
+msgstr "Kilitli depolama"
+
+msgid "Locker Key"
+msgstr "Dolap Anahtarı"
+
+msgid "Logo"
+msgstr "Logo"
+
+msgid "Longitude must be between -180 and 180."
+msgstr "Boylam -180 ile 180 arasında olmalıdır."
+
+msgid "Lost and found"
+msgstr "Kayıp ve bulundu"
+
+msgid "Manage campus, building, and general-area choices used by University reports."
+msgstr "Üniversite raporları tarafından kullanılan kampüs, bina ve genel bölge seçimlerini yönetin."
+
+msgid "Manage saved searches"
+msgstr "Kaydedilen aramaları yönet"
+
+msgid "Mark as Active"
+msgstr "Etkin Olarak İşaretle"
+
+msgid "Mark as Resolved"
+msgstr "Çözülmüş Olarak İşaretle"
+
+msgid "Mark as Reviewed"
+msgstr "Gözden Geçirilen Olarak İşaretle"
+
+msgid "Mark returned"
+msgstr "Mark döndü."
+
+msgid "Mark this item missing and open an incident?"
+msgstr "Bu eşyayı kayıp olarak işaretleyip bir olay mı açacaksın?"
+
+msgid "Metal"
+msgstr "Metal"
+
+msgid "Mexico"
+msgstr "Meksika"
+
+msgid "Missing in Storage"
+msgstr "Depoda Kayıp"
+
+msgid "Mixed Materials"
+msgstr "Karışık Malzemeler"
+
+msgid "Mobile Phone"
+msgstr "Cep Telefonu"
+
+msgid "Mobile navigation"
+msgstr "Mobil navigasyon"
+
+msgid "Moderation reports"
+msgstr "Ölçüm raporları"
+
+msgid "More information requested"
+msgstr "Daha fazla bilgi istendi"
+
+msgid "More ownership information was requested."
+msgstr "Daha fazla sahiplik bilgisi talep edildi."
+
+msgid "Morocco"
+msgstr "Fas"
+
+msgid "Movement or inventory review"
+msgstr "Hareket veya envanter incelemesi"
+
+msgid "Multicoloured"
+msgstr "Çok Renkli"
+
+msgid "My Found Reports"
+msgstr "Bulunan Raporlarım"
+
+msgid "My Lost Reports"
+msgstr "Kayıp Raporlarım"
+
+msgid "National ID Card"
+msgstr "Ulusal Kimlik Kartı"
+
+msgid "Necklace"
+msgstr "Kolye"
+
+msgid "Needs attention"
+msgstr "Dikkate ihtiyacı var."
+
+msgid "Netherlands"
+msgstr "Hollanda"
+
+msgid "Never share complete document, card, device, password, or PIN details."
+msgstr "Asla tam belge, kart, cihaz, şifre veya PIN detaylarını paylaşma."
+
+msgid "New"
+msgstr "Yeni"
+
+msgid "New Claim"
+msgstr "Yeni İddia"
+
+msgid "New Zealand"
+msgstr "Yeni Zelanda"
+
+msgid "New ownership claim"
+msgstr "Yeni mülkiyet hakkı"
+
+msgid "New private storage reference"
+msgstr "Yeni özel depolama referansı"
+
+msgid "New private storage reference (optional)"
+msgstr "Yeni özel depolama referansı (seçimsel)"
+
+msgid "Newest"
+msgstr "En yeni"
+
+msgid "Nigeria"
+msgstr "Nijerya"
+
+msgid "No Visible Brand"
+msgstr "Görünür Bir Marka Yok"
+
+msgid "No active Found reports."
+msgstr "Aktif bir bulgu yok."
+
+msgid "No active Lost reports."
+msgstr "Kayıp ihbarı yok."
+
+msgid "No appeals."
+msgstr "Temyiz yok."
+
+msgid "No claims matched."
+msgstr "Hiç bir iddia eşleşmiyor."
+
+msgid "No compatible opposite report currently scores at least 70%%. Check again after more reports are added."
+msgstr "Şu anda uyumlu bir karşı rapor yok en az %70 puan alıyor. Daha fazla rapor eklendikten sonra tekrar kontrol edin."
+
+msgid "No custody records yet."
+msgstr "Velayet kaydı yok."
+
+msgid "No delivery cost"
+msgstr "Teslimat maliyeti yok."
+
+msgid "No moderation reports."
+msgstr "Ölçüm raporu yok."
+
+msgid "No report image"
+msgstr "Rapor resmi yok"
+
+msgid "No requests received."
+msgstr "Hiçbir talep kabul edilmedi."
+
+msgid "No requests sent."
+msgstr "İstek gönderilmedi."
+
+msgid "No return arrangements."
+msgstr "Dönüşü olmayan bir anlaşma."
+
+msgid "No safe public report image"
+msgstr "Güvenli bir rapor görüntüsü yok"
+
+msgid "No saved searches yet."
+msgstr "Henüz kaydedilmiş arama yok."
+
+msgid "Notebook"
+msgstr "Not Defteri"
+
+msgid "Office Keys"
+msgstr "Ofis Anahtarları"
+
+msgid "Office or workplace"
+msgstr "Ofis veya işyeri"
+
+msgid "Official handover"
+msgstr "Resmi teslim"
+
+msgid "Oldest"
+msgstr "En Eski"
+
+msgid "One of your active reports will expire soon. Open it to review or renew."
+msgstr "Etkin raporlarınızdan birinin süresi yakında dolacak. İncelemek veya yenilemek için açın."
+
+msgid "Only Found reports may enter University custody."
+msgstr "Sadece bulunan raporlar Üniversitenin gözetimine girebilir."
+
+msgid "Only University Found reports may enter University custody."
+msgstr "Üniversitenin velayetine sadece üniversitenin bulguları girebilir."
+
+msgid "Only an authorized administrator may record a final disposition."
+msgstr "Sadece yetkili bir yönetici son bir mizacı kaydedebilir."
+
+msgid "Only authorized staff may mark a University item Returned."
+msgstr "Sadece yetkili personel, geri dönen bir üniversite eşyasını işaretleyebilir."
+
+msgid "Only one clarification request is allowed."
+msgstr "Sadece bir açıklama isteği kabul edilebilir."
+
+msgid "Open"
+msgstr "Aç"
+
+msgid "Open privacy centre"
+msgstr "Özellik merkezini aç"
+
+msgid "Open the following link to reset your FindMatch password:"
+msgstr "FindMatch parolanızı sıfırlamak için aşağıdaki bağlantıyı açın:"
+
+msgid "Open this link to verify your email address: %(url)s"
+msgstr "Bu bağlantıyı açarak e- posta adresini doğrula: %(url)s"
+
+msgid "Optional JPG, PNG, WebP, or PDF up to 5 MB. Mask unrelated private information."
+msgstr "Seçenek JPG, PNG, WebP veya PDF 5 MB'ye kadar. Mask alakasız özel bilgi."
+
+msgid "Optional private attachment"
+msgstr "İsteğe bağlı özel eklenti"
+
+msgid "Orange"
+msgstr "Portakal"
+
+msgid "Organization manager"
+msgstr "Organizasyon yöneticisi"
+
+msgid "Organization staff"
+msgstr "Örgüt personeli"
+
+msgid "Other authorized University decision"
+msgstr "Diğer yetkili üniversite kararı"
+
+msgid "Other authorized decision"
+msgstr "Diğer yetkili karar"
+
+msgid "Other country"
+msgstr "Diğer ülke"
+
+msgid "Other official lost-property organization"
+msgstr "Diğer resmi kayıp-hükümdarlık örgütü"
+
+msgid "Other private verification question"
+msgstr "Diğer özel doğrulama sorusu"
+
+msgid "Owner: item received"
+msgstr "Sahibi: alındı"
+
+msgid "Ownership claim updated"
+msgstr "Sahiplik iddiası güncellendi"
+
+msgid "Ownership claims"
+msgstr "Sahiplik iddiaları"
+
+msgid "Ownership review"
+msgstr "Sahiplik incelemesi"
+
+msgid "Ownership verification is available only for Found reports."
+msgstr "Sahiplik doğrulaması sadece Bulunan raporlar için mevcuttur."
+
+msgid "Pakistan"
+msgstr "Pakistan"
+
+msgid "Paper"
+msgstr "Kağıt"
+
+msgid "Park or recreation area"
+msgstr "Park veya dinlenme alanı"
+
+msgid "Parking Area"
+msgstr "Park Alanı"
+
+msgid "Participants only: claims, answers, evidence, conversations, return and delivery details."
+msgstr "Sadece katılımcılar: iddialar, cevaplar, kanıtlar, konuşmalar, dönüş ve teslim detayları."
+
+msgid "Passport"
+msgstr "Pasaport"
+
+msgid "Password updated"
+msgstr "Parola güncellendi"
+
+msgid "Paused"
+msgstr "Duraklatıldı"
+
+msgid "Pen"
+msgstr "Kalem"
+
+msgid "Pencil Case"
+msgstr "Kalem"
+
+msgid "Physical inventory and reconciliation"
+msgstr "Fiziksel envanter ve uzlaşma"
+
+msgid "Pink"
+msgstr "Pembe"
+
+msgid "Plain"
+msgstr "Düz"
+
+msgid "Plastic"
+msgstr "Plastik"
+
+msgid "Please hand this sensitive item to University security."
+msgstr "Lütfen bu hassas parçayı üniversite güvenliğine verin."
+
+msgid "Please remove private or sensitive information before submitting this report."
+msgstr "Lütfen bu raporu sunmadan önce özel veya hassas bilgileri kaldırın."
+
+msgid "Police or security office"
+msgstr "Polis veya güvenlik ofisi"
+
+msgid "Power Bank"
+msgstr "Güç Bankası"
+
+msgid "Prayer Area"
+msgstr "Dua Alanı"
+
+msgid "Printed"
+msgstr "Yazdırıldı"
+
+msgid "Privacy"
+msgstr "Gizlilik"
+
+msgid "Privacy-safe note"
+msgstr "Gizlilik-güvenlik notu"
+
+msgid "Private and access-controlled"
+msgstr "Özel ve erişim kontrollü"
+
+msgid "Private cabinet, shelf, room, or bin reference."
+msgstr "Özel dolap, raf, oda veya çöp kutusu referansı."
+
+msgid "Private claim"
+msgstr "Özel hak"
+
+msgid "Private question %(number)s"
+msgstr "Özel soru %(number)s"
+
+msgid "Private storage"
+msgstr "Özel depolama"
+
+msgid "Privately arranged shipping (FindMatch does not provide shipping)"
+msgstr "Özel olarak düzenlenmiş nakliye (FindMatch taşımacılığı sağlamaz)"
+
+msgid "Provide additional information"
+msgstr "Ek bilgi sağla"
+
+msgid "Provide clarification"
+msgstr "Açıklama sağla"
+
+msgid "Provide part of the serial number."
+msgstr "Seri numarasının bir kısmını ver."
+
+msgid "Public description"
+msgstr "Genel açıklama"
+
+msgid "Public details"
+msgstr "Genel ayrıntılar"
+
+msgid "Public location"
+msgstr "Genel konum"
+
+msgid "Public transport"
+msgstr "Toplu taşıma"
+
+msgid "Public transport lost-property office"
+msgstr "Toplu taşıma kayıp-işletme ofisi"
+
+msgid "Public: report title, structured item details, approximate location, date, and prepared public image."
+msgstr "Kamu: rapor başlığı, yapılandırılmış öge ayrıntıları, yaklaşık konum, tarih ve hazırlanmış kamu resmi."
+
+msgid "Purple"
+msgstr "Mor"
+
+msgid "Purse"
+msgstr "Çanta"
+
+msgid "Qatar"
+msgstr "Katar"
+
+msgid "Racket"
+msgstr "Raket"
+
+msgid "Re-enter the password for the currently signed-in account."
+msgstr "Şu anda imzalanmış olan hesabın parolasını tekrar girin."
+
+msgid "Ready for Pickup"
+msgstr "Almaya Hazır"
+
+msgid "Record disposition"
+msgstr "Kayıt mizacı"
+
+msgid "Record movement"
+msgstr "Hareketi kaydet"
+
+msgid "Record official handover"
+msgstr "Resmi teslimi kaydet"
+
+msgid "Record the University policy decision for this unclaimed item?"
+msgstr "Bu sahipsiz eşya için üniversitenin politika kararını kaydetmek mi?"
+
+msgid "Record the handover date and time."
+msgstr "Teslim tarihini ve saatini kaydet."
+
+msgid "Recycling"
+msgstr "Geri Dönüş"
+
+msgid "Refine results"
+msgstr "Sonuçları gözden geçir"
+
+msgid "Reject this ownership claim?"
+msgstr "Bu mülkiyet iddiasını reddetmek mi?"
+
+msgid "Release"
+msgstr "Bırak"
+
+msgid "Released for collection"
+msgstr "Koleksiyon için serbest bırakıldı"
+
+msgid "Remove"
+msgstr "Sil"
+
+msgid "Remove filter"
+msgstr "Filtreyi kaldır"
+
+msgid "Renew"
+msgstr "Yenile"
+
+msgid "Report Expiration Warning"
+msgstr "Son kullanma Uyarısı"
+
+msgid "Report a found item"
+msgstr "Bulunan bir ögeyi rapor et"
+
+msgid "Report a lost item"
+msgstr "Kayıp bir eşyayı bildir"
+
+msgid "Report a suspicious claim"
+msgstr "Şüpheli bir iddiayı rapor et."
+
+msgid "Report expires soon"
+msgstr "Rapor yakında sona eriyor."
+
+msgid "Report location mode"
+msgstr "Konum kipini bildir"
+
+msgid "Report lost or found items and discover explainable possible matches in one local platform."
+msgstr "Kayıp ya da buluntu ögeleri rapor etmek ve bir yerel platformda açıklanabilir eşleşmeler keşfetmek."
+
+msgid "Reporter"
+msgstr "Muhabir"
+
+msgid "Reports without a public image were skipped."
+msgstr "Kamusal bir görüntü olmayan raporlar atlandı."
+
+msgid "Reports, claims, conversations, returns, and alerts in one place."
+msgstr "Raporlar, iddialar, konuşmalar, dönüşler ve alarmlar bir yerde."
+
+msgid "Request account deactivation?"
+msgstr "Hesap kapatılmasını mı istiyorsun?"
+
+msgid "Request one clarification"
+msgstr "Bir açıklama istiyorum."
+
+msgid "Required. Stored privately; audit descriptions do not copy the reason."
+msgstr "Gereklidir. Özel olarak kaydedilmiştir; denetim tanımları nedeni kopyalamaz."
+
+msgid "Reserved for approved claimant"
+msgstr "Onaylanan hak sahibine rezerve edildi"
+
+msgid "Reset password"
+msgstr "Parolayı sıfırla"
+
+msgid "Residential area"
+msgstr "Yerleşim alanı"
+
+msgid "Resolve the storage incident before any release."
+msgstr "Herhangi bir tahliye olmadan önce depo olayını çöz."
+
+msgid "Restaurant or cafe"
+msgstr "Restoran ya da kafe"
+
+msgid "Restore account"
+msgstr "Hesabı geri yükle"
+
+msgid "Restroom"
+msgstr "Tuvalet"
+
+msgid "Retention periods depend on report, dispute, safety, custody, and operational needs. Private evidence should be removed when no longer required unless an authorized dispute or safety hold applies."
+msgstr "Tutum süreleri rapor, anlaşmazlık, güvenlik, vesayet ve operasyonel ihtiyaçlara bağlıdır. Yetkili bir anlaşmazlık veya güvenlik tedbiri uygulanmadıkça özel kanıtın artık gerekmediği durumlarda kaldırılmalıdır."
+
+msgid "Return Arranged"
+msgstr "Dönüş Düzenlendi"
+
+msgid "Return Updated"
+msgstr "Güncellenmiş Dönüş"
+
+msgid "Return and delivery"
+msgstr "Geri dön ve teslim et."
+
+msgid "Return arrangement updated"
+msgstr "Dönüş düzenlemesi güncellendi"
+
+msgid "Return completed"
+msgstr "Dönüş tamamlandı"
+
+msgid "Return completed."
+msgstr "Dönüş tamamlandı."
+
+msgid "Return in Progress"
+msgstr "İlerlemeye Dön"
+
+msgid "Return method"
+msgstr "Dönüş yöntemi"
+
+msgid "Return or delivery"
+msgstr "Geri dön ya da teslim et"
+
+msgid "Return this claim to pending review?"
+msgstr "Bu talebi, bekleyen incelemelere iade etmek mi?"
+
+msgid "Return to card issuer"
+msgstr "Kart sayıcısına geri dön"
+
+msgid "Return updated"
+msgstr "Güncellenmiş olarak geri dön"
+
+msgid "Review"
+msgstr "Gözden Geçir"
+
+msgid "Review pending and disputed claims without copying private answers into audit descriptions."
+msgstr "Özel cevapları denetim tanımlarına kopyalamadan, bekleyen ve tartışılan iddiaları gözden geçirin."
+
+msgid "Review privacy and notification settings"
+msgstr "Özellik ve bildirim ayarlarını gözden geçirin"
+
+msgid "Review this account and its privacy-safe operational records."
+msgstr "Bu hesabı ve gizli operasyon kayıtlarını gözden geçirin."
+
+msgid "Review user reports about items, images, messages, and accounts."
+msgstr "Kullanıcının ögeler, resimler, mesajlar ve hesaplar hakkında raporlarını gözden geçirin."
+
+msgid "Ring"
+msgstr "Yüzük"
+
+msgid "Rubber"
+msgstr "Lastik"
+
+msgid "Safety review"
+msgstr "Güvenlik Denetimi"
+
+msgid "Saudi Arabia"
+msgstr "Suudi Arabistan"
+
+msgid "Save new password"
+msgstr "Yeni parolayı kaydet"
+
+msgid "Saved Alerts"
+msgstr "Kaydedilen Uyarılar"
+
+msgid "Saved Search Match"
+msgstr "Kaydedilen Arama Eşlemesi"
+
+msgid "Saved alerts"
+msgstr "Kaydedilen uyarılar"
+
+msgid "Saved searches may contain only public report filters."
+msgstr "Kaydedilmiş aramalar sadece kamu rapor filtrelerini içerebilir."
+
+msgid "Scarf"
+msgstr "Fular"
+
+msgid "School Bag"
+msgstr "Okul Çantası"
+
+msgid "Search reports and narrow results by item and location details."
+msgstr "Arama raporları ve konum ayrıntılarıyla dar sonuçlar."
+
+msgid "Second staff account ID"
+msgstr "İkinci personel hesap kimliği"
+
+msgid "Second staff confirmation"
+msgstr "İkinci personel doğrulaması"
+
+msgid "Secure destruction"
+msgstr "Güvenli yıkım"
+
+msgid "Secure destruction under approved policy"
+msgstr "Onaylanan politika çerçevesinde güvenlikli yıkım"
+
+msgid "Select a category"
+msgstr "Bir kategori seç"
+
+msgid "Select a country"
+msgstr "Bir ülke seçin"
+
+msgid "Select a place type"
+msgstr "Bir yer tipi seçin"
+
+msgid "Select a question"
+msgstr "Bir soru seçin"
+
+msgid "Send reset link"
+msgstr "Sıfırlama bağı gönder"
+
+msgid "Send the owner a private message."
+msgstr "Sahibine özel bir mesaj gönderin."
+
+msgid "Shared"
+msgstr "Paylaşılan"
+
+msgid "Shirt"
+msgstr "Gömlek"
+
+msgid "Shoes"
+msgstr "Ayakkabılar"
+
+msgid "Shop"
+msgstr "Alışveriş"
+
+msgid "Shopping Bag"
+msgstr "Alışveriş çantası"
+
+msgid "Shopping centre"
+msgstr "Alışveriş merkezi"
+
+msgid "Shuttle or Bus Stop"
+msgstr "Mekik veya Otobüs Durağı"
+
+msgid "Silver"
+msgstr "Gümüş"
+
+msgid "Size"
+msgstr "Boyut"
+
+msgid "Small"
+msgstr "Küçük"
+
+msgid "Smartwatch"
+msgstr "Akıllı Saat"
+
+msgid "South Africa"
+msgstr "Güney Afrika"
+
+msgid "South Korea"
+msgstr "Güney Kore"
+
+msgid "Spain"
+msgstr "İspanya"
+
+msgid "Sports Bag"
+msgstr "Spor Çantası"
+
+msgid "Sports Clothing"
+msgstr "Spor Giysisi"
+
+msgid "Sports facility"
+msgstr "Spor tesisi"
+
+msgid "Storage incident"
+msgstr "Depolama olayı"
+
+msgid "Storage incident reviewed and closed by an authorized second reviewer."
+msgstr "Depolama olayı, yetkili ikinci bir incelemeci tarafından incelenip kapatıldı."
+
+msgid "Storage movement"
+msgstr "Depolama hareketi"
+
+msgid "Storage references are private and visible only to authorized staff."
+msgstr "Depolama referansları sadece yetkili personele özel ve görülebilir."
+
+msgid "Stored"
+msgstr "Kaydedilen"
+
+msgid "Street or public area"
+msgstr "Sokak veya kamusal alan"
+
+msgid "Striped"
+msgstr "Çizgili"
+
+msgid "Strong Possible Match"
+msgstr "Güçlü Olası Eşleşme"
+
+msgid "Structured choices"
+msgstr "Yapısal seçimler"
+
+msgid "Student ID Card"
+msgstr "Öğrenci Kimliği Kartı"
+
+msgid "Successful returns"
+msgstr "Başarılı dönüşler"
+
+msgid "Suitcase"
+msgstr "Bavul"
+
+msgid "Sunglasses"
+msgstr "Güneş gözlüğü"
+
+msgid "Suspend account"
+msgstr "Hesabı askıya al"
+
+msgid "Suspicious claim reported"
+msgstr "Şüpheli iddia rapor edildi"
+
+msgid "T-Shirt"
+msgstr "T- Şort"
+
+msgid "Tablet"
+msgstr "Tablet"
+
+msgid "Target"
+msgstr "Hedef"
+
+msgid "Textbook"
+msgstr "Ders Kitabı"
+
+msgid "The University location availability was updated."
+msgstr "Üniversitenin yeri güncellendi."
+
+msgid "The University location was added."
+msgstr "Üniversitenin yeri eklendi."
+
+msgid "The append-only custody movement was recorded."
+msgstr "Ek velayet hareketi kaydedildi."
+
+msgid "The authorized University disposition was recorded."
+msgstr "Üniversitenin yetki belgesi kaydedildi."
+
+msgid "The claim appeal was reviewed."
+msgstr "İddia temyizi tekrar gözden geçirildi."
+
+msgid "The content was reported for administrator review."
+msgstr "İçerik yönetici incelemesi için rapor edildi."
+
+msgid "The custody movement could not be recorded."
+msgstr "Velayet hareketi kaydedilemedi."
+
+msgid "The custody record was created."
+msgstr "Velayet kaydı oluşturuldu."
+
+msgid "The end date must not be before the start date."
+msgstr "Bitiş tarihi başlangıç tarihinden önce olmamalıdır."
+
+msgid "The evidence contents, filename extension, and content type do not match."
+msgstr "Kanıt içeriği, dosya adı uzantısı ve içerik tipi uyuşmuyor."
+
+msgid "The finder records handover or shipment, then the owner confirms receipt. The report resolves only after both confirmations."
+msgstr "Bulucu teslim veya sevkiyatı kaydeder, sonra sahibi makbuzu onaylar. Rapor ancak iki onaydan sonra çözülür."
+
+msgid "The first report must be Lost."
+msgstr "İlk rapor kayıp olmalı."
+
+msgid "The item is marked missing and cannot be released normally."
+msgstr "Öge kayıp olarak işaretlenmiş ve normal olarak piyasaya sürülemez."
+
+msgid "The moderation report was reviewed."
+msgstr "Ölçüm raporu gözden geçirildi."
+
+msgid "The official handover was recorded and the report is Returned."
+msgstr "Resmi teslim kaydı yapılmış ve rapor iade edilmiştir."
+
+msgid "The ownership claim was updated."
+msgstr "Sahiplik iddiası güncellendi."
+
+msgid "The possible match was dismissed for your account."
+msgstr "Olası maç, hesabınız için iptal edildi."
+
+msgid "The private return arrangement was updated."
+msgstr "Özel dönüş düzenlemesi güncellendi."
+
+msgid "The public photograph is not enough to prove ownership. Answer details only the owner is likely to know."
+msgstr "Kamu fotoğrafı sahiplik kanıtlamaya yetmez. Sadece sahibin bildiği detayları cevaplayın."
+
+msgid "The recipient confirmed collection"
+msgstr "Alıcı koleksiyon doğrulandı"
+
+msgid "The report was renewed and is active again."
+msgstr "Rapor yenilendi ve tekrar aktif hale geldi."
+
+msgid "The return arrangement status was updated."
+msgstr "Dönüş düzenleme durumu güncellendi."
+
+msgid "The return status changed. Open the private return page for details."
+msgstr "Dönüş durumu değişti. Ayrıntılar için özel dönüş sayfasını açın."
+
+msgid "The search alert was saved."
+msgstr "Arama alarmı kurtarıldı."
+
+msgid "The second report must be Found."
+msgstr "İkinci rapor bulunmalı."
+
+msgid "The storage incident was reviewed and closed."
+msgstr "Depolama olayı gözden geçirildi ve kapatıldı."
+
+msgid "The suspicious claim was reported and the claimant was blocked."
+msgstr "Şüpheli iddia rapor edildi ve iddia sahibi engellendi."
+
+msgid "This account cannot submit claims."
+msgstr "Bu hesap iddiaları sunamaz."
+
+msgid "This action is recorded without copying private answers into the audit log."
+msgstr "Bu eylem, denetim kütüğüne özel yanıtların kopyalanması yapılmadan kaydedilir."
+
+msgid "This claim can no longer be changed using that action."
+msgstr "Bu iddia artık bu eylem kullanılarak değiştirilemez."
+
+msgid "This conversation is read-only."
+msgstr "Bu konuşma sadece okunabilir."
+
+msgid "This deterministic score identifies candidates; it never proves ownership or approves a claim."
+msgstr "Bu deterministik puan adayları belirler; hiçbir zaman sahiplik iddiasını kanıtlamaz veya onaylamaz."
+
+msgid "This email-verification link is invalid or has expired."
+msgstr "Bu e- posta doğrulama bağlantısı geçersiz ya da süresi dolmuş."
+
+msgid "This item is not available for claims."
+msgstr "Bu öge iddialar için mevcut değildir."
+
+msgid "This local MVP does not claim automatic legal compliance. The University must approve its final privacy, retention, and disposal policies."
+msgstr "Bu yerel MVP otomatik yasal uyum iddia etmez.Üniversite son gizliliğini, gözaltısını ve imha politikalarını onaylamalıdır."
+
+msgid "This password-reset link is invalid or expired."
+msgstr "Bu parola ayarı bağlantısı geçersiz ya da süresi geçmiş."
+
+msgid "This report cannot be renewed in its current state."
+msgstr "Bu rapor şu anki durumunda yenilenemez."
+
+msgid "This thread is read-only and contact access is disabled."
+msgstr "Bu iplik sadece okunur ve iletişim erişimi pasifleştirilir."
+
+msgid "Too many attempts. Please wait before trying again."
+msgstr "Çok fazla deneme yapıldı. Yeniden denemeden önce lütfen bekleyin."
+
+msgid "Transfer to an appropriate authority"
+msgstr "Uygun bir yetkiliye aktar"
+
+msgid "Transparent"
+msgstr "Şeffaf"
+
+msgid "Transportation Card"
+msgstr "Taşıma Kartı"
+
+msgid "Trousers"
+msgstr "Pantolonlar"
+
+msgid "Trusted local authority or organization"
+msgstr "Yerel otoriteye veya teşkilata güven"
+
+msgid "Tunisia"
+msgstr "Tunus"
+
+msgid "Two-person confirmation"
+msgstr "İki kişilik onay"
+
+msgid "Two-staff release required"
+msgstr "İki personelli tahliye gerekiyor"
+
+msgid "Türkiye"
+msgstr "Türkiye"
+
+msgid "USB Drive"
+msgstr "USB Sürücü"
+
+msgid "Umbrella"
+msgstr "Şemsiye"
+
+msgid "United Arab Emirates"
+msgstr "Birleşik Arap Emirlikleri"
+
+msgid "United Kingdom"
+msgstr "Birleşik Krallık"
+
+msgid "United States"
+msgstr "Amerika Birleşik Devletleri"
+
+msgid "University Garden"
+msgstr "Üniversite Bahçesi"
+
+msgid "University Lost and Found office"
+msgstr "Kayıp Üniversite ve Bulunanlar Bürosu"
+
+msgid "University eligibility is separate from ordinary email verification."
+msgstr "Üniversite uygunluğu sıradan e-posta doğrulamalarından ayrıdır."
+
+msgid "University or school"
+msgstr "Üniversite veya okul"
+
+msgid "University staff may review this claim only after official custody is recorded."
+msgstr "Üniversite personeli bu iddiayı ancak resmi velayet kaydedildikten sonra gözden geçirebilir."
+
+msgid "Unread"
+msgstr "Okunmamış"
+
+msgid "Unsupported claim action."
+msgstr "Desteklenmeyen talep eylemi."
+
+msgid "Upheld"
+msgstr "Destekleniyor"
+
+msgid "Uphold"
+msgstr "Yukarı"
+
+msgid "Upload a complete, valid PDF file."
+msgstr "Tam, geçerli bir PDF dosyası yükle."
+
+msgid "Upload a genuine JPG, PNG, WebP, or PDF file."
+msgstr "Gerçek bir JPG, PNG, WebP veya PDF dosyası yükle."
+
+msgid "Use an appropriate trusted local authority or official Lost and Found office where available."
+msgstr "Uygun güvenilir yerel bir yetkiliyi veya mevcut olan Kayıp ve Bulunmuş Bürosunu kullanın."
+
+msgid "Used"
+msgstr "Kullanılan"
+
+msgid "User"
+msgstr "Kullanıcı"
+
+msgid "User restored"
+msgstr "Kullanıcı yeniden kuruldu"
+
+msgid "User suspended"
+msgstr "Kullanıcı askıya alındı"
+
+msgid "Users must provide truthful claims, protect private information, and use safe public or trusted return arrangements."
+msgstr "Kullanıcılar doğru iddialar sunmalı, özel bilgileri korumalı ve güvenli bir kamu veya güvenilir dönüş düzenlemelerini kullanmalıdır."
+
+msgid "Verify your FindMatch email"
+msgstr "BulMatch e- postanızı doğrula"
+
+msgid "Verify your email address before sending private messages."
+msgstr "Özel ileti göndermeden önce e- posta adresinizi doğrulayın."
+
+msgid "Verify your email address before using International Mode."
+msgstr "Uluslararası Kipi kullanmadan önce e- posta adresinizi doğrulayın."
+
+msgid "View conversations"
+msgstr "Sohbetleri göster"
+
+msgid "View notifications"
+msgstr "Bildirimleri göster"
+
+msgid "Visibility"
+msgstr "Görünürlük"
+
+msgid "Account status"
+msgstr "Hesap durumu"
+
+msgid "Account type"
+msgstr "Hesap türü"
+
+msgid "Arrangement details"
+msgstr "Teslim düzenlemesi ayrıntıları"
+
+msgid "Clarification"
+msgstr "Açıklama"
+
+msgid "Date from"
+msgstr "Başlangıç tarihi"
+
+msgid "Date to"
+msgstr "Bitiş tarihi"
+
+msgid "Display name"
+msgstr "Görünen ad"
+
+msgid "Email notifications"
+msgstr "E-posta bildirimleri"
+
+msgid "Found report"
+msgstr "Bulunan eşya raporu"
+
+msgid "High-value item"
+msgstr "Yüksek değerli eşya"
+
+msgid "Intake point"
+msgstr "Teslim alma noktası"
+
+msgid "Intake time"
+msgstr "Teslim alma zamanı"
+
+msgid "Location type"
+msgstr "Konum türü"
+
+msgid "Movement type"
+msgstr "Hareket türü"
+
+msgid "Notify me about claim updates"
+msgstr "Mülkiyet talebi güncellemelerini bana bildir"
+
+msgid "Notify me about new messages"
+msgstr "Yeni mesajları bana bildir"
+
+msgid "Notify me about strong possible matches"
+msgstr "Güçlü olası eşleşmeleri bana bildir"
+
+msgid "Preferred language"
+msgstr "Tercih edilen dil"
+
+msgid "Private evidence"
+msgstr "Özel kanıt"
+
+msgid "Private notes"
+msgstr "Özel notlar"
+
+msgid "Private storage reference"
+msgstr "Özel depolama referansı"
+
+msgid "Problem or failure report"
+msgstr "Sorun veya başarısızlık raporu"
+
+msgid "Reference"
+msgstr "Referans"
+
+msgid "Safe note"
+msgstr "Güvenli not"
+
+msgid "Select a brand relevant to the selected item type."
+msgstr "Seçilen eşya türüyle ilgili bir marka seçin."
+
+msgid "Sort"
+msgstr "Sıralama"
+
+msgid "Summary"
+msgstr "Özet"
+
+msgid "Trusted organization"
+msgstr "Güvenilir kuruluş"
+
+msgid "Attachment"
+msgstr "Ek dosya"
+
+msgid "Wallet"
+msgstr "Cüzdan"
+
+msgid "Watch"
+msgstr "İzle"
+
+msgid "Water Bottle"
+msgstr "Su Şişesi"
+
+msgid "Welcome to FindMatch. Open the signed verification link printed in the server terminal to unlock your account."
+msgstr "FindMatch' e hoşgeldiniz. Hesabınızı açmak için sunucu terminalinde imzalanmış doğrulama linkini açın."
+
+msgid "What does the lock screen look like?"
+msgstr "Kilit ekranı neye benziyor?"
+
+msgid "What was inside the item?"
+msgstr "- İçinde ne vardı?"
+
+msgid "Where and approximately when"
+msgstr "Nerede ve ne zaman?"
+
+msgid "Where did you lose it?"
+msgstr "Nerede kaybettin?"
+
+msgid "Where exactly was it lost?"
+msgstr "Tam olarak nerede kayboldu?"
+
+msgid "Wood"
+msgstr "Ahşap"
+
+msgid "You already have an active claim for this item."
+msgstr "Bu eşya için zaten aktif bir iddian var."
+
+msgid "You are all caught up."
+msgstr "Hepiniz yetişmişsiniz."
+
+msgid "You cannot claim your own report."
+msgstr "Kendi raporunu talep edemezsin."
+
+msgid "You have no saved alerts yet."
+msgstr "Henüz bir uyarınız yok."
+
+msgid "You have reached the claim-attempt limit for this item."
+msgstr "Bu madde için talep-i tedavül limitine ulaştınız."
+
+msgid "You must confirm that the claim is truthful."
+msgstr "İddianın doğru olduğunu doğrulamalısınız."
+
+msgid "Your account data"
+msgstr "Hesap verileriniz"
+
+msgid "Your account-deactivation request was recorded for review."
+msgstr "Hesap açma isteğin gözden geçirilmek üzere kaydedildi."
+
+msgid "Your answers and evidence remain private. Never submit passwords, PINs, complete card numbers, or complete identification numbers."
+msgstr "Yanıtlarınız ve kanıtlarınız gizli kalır. Parola, PIN, tam kart numarası veya tam kimlik numarası asla göndermeyin."
+
+msgid "Your appeal was submitted for administrator review."
+msgstr "Temyiz başvurunuz yönetici incelemesi için geldi."
+
+msgid "Your email address is verified."
+msgstr "E- posta adresiniz doğrulandı."
+
+msgid "Your identity was confirmed."
+msgstr "Kimliğin doğrulandı."
+
+msgid "Your ownership claim status changed. Open FindMatch to review it."
+msgstr "Mülkiyet talebinizin durumu değişti. İncelemek için FindMatch'i açın."
+
+msgid "Your private draft was saved."
+msgstr "Özel askerlik belgen kurtarıldı."
+
+msgid "Your return confirmation was recorded."
+msgstr "Dönüş doğrulamanız kaydedildi."
+
+msgid "Your session will expire soon. Save long forms before continuing."
+msgstr "Oturumunuz yakında sona erecek. Devam etmeden önce uzun formlar alın."
+
+msgid "Your staff account is not authorized for this function."
+msgstr "Personel hesabınız bu fonksiyon için yetkili değildir."
+
+msgid "Your verified account has International access only."
+msgstr "Doğrulanmış hesabınızın sadece uluslararası erişimi var."

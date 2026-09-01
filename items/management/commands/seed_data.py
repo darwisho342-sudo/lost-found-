@@ -1,7 +1,7 @@
 from datetime import timedelta
 from io import BytesIO
 
-from django.contrib.auth.models import User
+from django.contrib.auth.models import Permission, User
 from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
 from django.utils import timezone
@@ -9,10 +9,14 @@ from PIL import Image, ImageDraw
 
 from items.alerts import AlertService
 from items.models import (
-    ClaimAppeal, ContactRequest, Conversation, CustodyMovement, CustodyRecord, ItemReport,
-    Notification, StorageIncident, UserProfile,
+    ClaimAnswer, ClaimAppeal, ContactRequest, CustodyMovement, CustodyRecord, ItemReport,
+    Notification, PrivateVerificationQuestion, ReturnArrangement, StorageIncident, UserProfile,
     UniversityLocation,
 )
+from items.forms import ReturnArrangementForm
+from items.ownership import OwnershipVerificationService
+from items.return_service import ReturnWorkflowService
+from items.services import MatchingService
 from items.university import UniversityAccessService
 
 
@@ -79,6 +83,11 @@ class Command(BaseCommand):
                 "university_eligibility_lost_at", "updated_at",
             ))
             user_objects[username] = user
+
+        custody_permission = Permission.objects.get(
+            content_type__app_label="items", codename="manage_custody"
+        )
+        user_objects["security_staff"].user_permissions.add(custody_permission)
 
         today = timezone.localdate()
         campus_locations = {}
@@ -162,31 +171,37 @@ class Command(BaseCommand):
             owner=user_objects["international_finder"], title="Black Samsung phone",
             defaults=international_found_defaults,
         )
-        international_claim, _ = ContactRequest.objects.get_or_create(
-            item_report=international_found, requesting_user=user_objects["international_owner"],
-            receiving_user=user_objects["international_finder"],
-            defaults={"request_type": ContactRequest.RequestType.OWNERSHIP_CLAIM,
-                      "initial_message": "I can verify this phone privately.",
-                      "loss_location": "Kadikoy", "loss_timeframe": "Yesterday",
-                      "truthful_confirmation": True, "status": ContactRequest.Status.PENDING},
-        )
         AlertService.notify_strong_matches(international_lost)
 
-        lost_phone = ItemReport.objects.get(owner=user_objects["demo_student"], title="Black wireless headphones")
-        found_phone = ItemReport.objects.get(owner=user_objects["demo_helper"], title="Black headphones in case")
+        lost_headphones = ItemReport.objects.get(
+            owner=user_objects["demo_student"], title="Black wireless headphones"
+        )
+        found_headphones = ItemReport.objects.get(
+            owner=user_objects["demo_helper"], title="Black headphones in case"
+        )
+        verification_question, _ = PrivateVerificationQuestion.objects.update_or_create(
+            item_report=found_headphones, position=1,
+            defaults={
+                "question_type": "hidden_mark",
+                "question_text": "Describe the fictional mark inside the demo case.",
+                "expected_answer": "A small silver star sticker.",
+            },
+        )
         claim, _ = ContactRequest.objects.get_or_create(
-            item_report=found_phone, requesting_user=user_objects["demo_student"],
+            item_report=found_headphones, requesting_user=user_objects["demo_student"],
             receiving_user=user_objects["demo_helper"],
             defaults={"request_type": ContactRequest.RequestType.OWNERSHIP_CLAIM,
                       "initial_message": "I believe this is my item and can verify it privately.",
+                      "loss_location": "Main Campus Library",
+                      "loss_timeframe": "Yesterday afternoon",
                       "truthful_confirmation": True, "status": ContactRequest.Status.PENDING},
         )
-        Conversation.objects.get_or_create(
-            item_report=lost_phone, first_participant=user_objects["demo_student"],
-            second_participant=user_objects["demo_helper"], approved_contact_request=claim,
+        ClaimAnswer.objects.update_or_create(
+            contact_request=claim, question=verification_question,
+            defaults={"answer": "There is a silver star sticker inside the case."},
         )
         custody, custody_created = CustodyRecord.objects.get_or_create(
-            found_report=found_phone,
+            found_report=found_headphones,
             defaults={"reference": "FM-DEMO-001", "received_by": user_objects["security_staff"],
                       "intake_point": "University Lost and Found Office",
                       "storage_reference": "Demo cabinet A / shelf 1",
@@ -197,19 +212,99 @@ class Command(BaseCommand):
                 custody_record=custody, event_type="intake", recorded_by=user_objects["security_staff"],
                 safe_note="Demo item received into University custody.",
             )
-        AlertService.notify_strong_matches(lost_phone)
+        AlertService.notify_strong_matches(lost_headphones)
         Notification.objects.get_or_create(
             recipient=user_objects["demo_student"], deduplication_key="demo:claim-ready",
             defaults={"notification_type": Notification.NotificationType.NEW_CLAIM,
                       "title": "Demo ownership workflow",
                       "safe_message": "A fictional local claim is ready for demonstration.",
-                      "item_report": found_phone},
+                      "item_report": found_headphones},
         )
+
+        returned_report, _ = ItemReport.objects.update_or_create(
+            owner=user_objects["international_finder"],
+            title="Returned red carry-on suitcase",
+            defaults={
+                "report_type": ItemReport.ReportType.FOUND,
+                "scope": ItemReport.Scope.INTERNATIONAL,
+                "description": "Red hard-shell carry-on suitcase with black wheels.",
+                "additional_details": "Red hard-shell carry-on suitcase with black wheels.",
+                "category": "bags", "item_type": "suitcase", "colour": "Red",
+                "primary_colour": "red", "secondary_colour": "black",
+                "brand": "no_visible_brand", "country": "TR", "region": "Marmara",
+                "city": "Istanbul", "district": "Besiktas", "place_type": "hotel",
+                "place_name": "Fictional Bosphorus Hotel",
+                "public_location": "Hotel reception area",
+                "item_date": today - timedelta(days=8),
+            },
+        )
+        completed_claim, _ = ContactRequest.objects.get_or_create(
+            item_report=returned_report,
+            requesting_user=user_objects["international_owner"],
+            receiving_user=user_objects["international_finder"],
+            defaults={
+                "request_type": ContactRequest.RequestType.OWNERSHIP_CLAIM,
+                "initial_message": "I can identify the fictional suitcase lining and wheel mark.",
+                "loss_location": "Fictional Bosphorus Hotel reception",
+                "loss_timeframe": "Eight days ago",
+                "truthful_confirmation": True,
+                "status": ContactRequest.Status.PENDING,
+            },
+        )
+        if completed_claim.status == ContactRequest.Status.PENDING:
+            completed_claim, _ = OwnershipVerificationService.change_status(
+                claim=completed_claim,
+                actor=user_objects["international_finder"],
+                action="approve",
+            )
+        if completed_claim.status in (
+            ContactRequest.Status.APPROVED, ContactRequest.Status.RETURN_IN_PROGRESS
+        ):
+            arrangement, _ = ReturnArrangement.objects.get_or_create(
+                contact_request=completed_claim
+            )
+            if completed_claim.status == ContactRequest.Status.APPROVED:
+                form = ReturnArrangementForm(
+                    data={
+                        "return_method": "safe_public_meeting",
+                        "status": "ready_pickup",
+                        "safe_public_location": "Fictional hotel reception desk",
+                        "custom_arrangement": "Daylight collection beside the staffed reception desk.",
+                        "failure_report": "",
+                    },
+                    instance=arrangement,
+                    user=user_objects["international_owner"],
+                )
+                if not form.is_valid():
+                    raise RuntimeError(f"Invalid completed-return demo data: {form.errors.as_text()}")
+                arrangement = ReturnWorkflowService.update(
+                    arrangement=arrangement,
+                    user=user_objects["international_owner"],
+                    form=form,
+                )
+                completed_claim.refresh_from_db()
+            if not arrangement.finder_confirmed_at:
+                ReturnWorkflowService.confirm(
+                    arrangement=arrangement,
+                    user=user_objects["international_finder"],
+                    role="finder",
+                )
+                arrangement.refresh_from_db()
+            if not arrangement.owner_confirmed_at:
+                ReturnWorkflowService.confirm(
+                    arrangement=arrangement,
+                    user=user_objects["international_owner"],
+                    role="owner",
+                )
+
+        university_score = MatchingService.compare(lost_headphones, found_headphones).total_score
+        international_score = MatchingService.compare(international_lost, international_found).total_score
 
         self.stdout.write(
             self.style.SUCCESS(
-                f"Demo data ready: {len(user_objects)} users and {len(self.reports)} reports "
-                f"({created_count} new)."
+                f"Demo data ready: {len(user_objects)} users; "
+                f"University match {university_score}%; International match {international_score}%; "
+                f"{created_count} new University report(s)."
             )
         )
 

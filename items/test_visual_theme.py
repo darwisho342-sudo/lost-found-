@@ -9,6 +9,14 @@ from django.utils.translation import gettext
 
 
 class VisualThemeTests(TestCase):
+    def setUp(self):
+        super().setUp()
+        translation.activate("en")
+
+    def tearDown(self):
+        translation.activate("en")
+        super().tearDown()
+
     def test_public_layout_has_one_accessible_theme_toggle(self):
         for page_name in ("home", "item_list", "login"):
             with self.subTest(page=page_name):

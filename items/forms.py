@@ -1,4 +1,5 @@
 from io import BytesIO
+import json
 from pathlib import Path
 from uuid import uuid4
 
@@ -9,12 +10,15 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.core.files.uploadedfile import InMemoryUploadedFile, UploadedFile
+from django.core.validators import FileExtensionValidator
 from PIL import Image, UnidentifiedImageError
 
 from .choices import (
-    ALL_ITEM_TYPE_CHOICES, BRAND_CHOICES, COLOUR_CHOICES, CONDITION_CHOICES,
+    ALL_ITEM_TYPE_CHOICES, APPEARANCE_FIELD_NAMES, APPEARANCE_FIELDS_BY_CATEGORY,
+    BRAND_CHOICES, COLOUR_CHOICES, CONDITION_CHOICES,
     COUNTRY_CHOICES, ITEM_TYPE_CHOICES, MATERIAL_CHOICES, PATTERN_CHOICES, SIZE_CHOICES,
     VERIFICATION_QUESTION_TYPES, PLACE_TYPE_CHOICES, RETURN_METHOD_CHOICES, RETURN_STATUS_CHOICES,
+    appearance_fields_for, brand_choices_for,
 )
 from .models import (
     ClaimAppeal,
@@ -31,9 +35,9 @@ from .models import (
     UserProfile,
     UniversityLocation,
     normalize_phone_number,
+    detect_evidence_format,
     validate_image_size,
     validate_evidence_size,
-    validate_evidence_content,
     validate_phone_number,
 )
 from .moderation import SensitiveContentModerationService
@@ -41,10 +45,11 @@ from .university import UniversityAccessService
 
 
 class RegistrationForm(UserCreationForm):
-    email = forms.EmailField(required=True)
+    email = forms.EmailField(required=True, label=_("Email"))
     phone_number = forms.CharField(
         required=False,
         max_length=30,
+        label=_("Phone number"),
         help_text=_("Optional. You may include an international country code."),
     )
     consent_to_share_phone = forms.BooleanField(
@@ -102,6 +107,7 @@ class UserProfileForm(forms.ModelForm):
     phone_number = forms.CharField(
         required=False,
         max_length=30,
+        label=_("Phone number"),
         help_text=_("Optional. You may include an international country code."),
     )
 
@@ -114,8 +120,15 @@ class UserProfileForm(forms.ModelForm):
             "notify_strong_matches", "notify_claim_updates", "notify_messages", "email_notifications",
         )
         labels = {
+            "display_name": _("Display name"),
+            "preferred_language": _("Preferred language"),
+            "preferred_scope": _("Preferred mode"),
             "consent_to_share_phone": _("Allow active conversation contacts to see my phone number"),
             "mask_phone_number": _("Mask my phone number"),
+            "notify_strong_matches": _("Notify me about strong possible matches"),
+            "notify_claim_updates": _("Notify me about claim updates"),
+            "notify_messages": _("Notify me about new messages"),
+            "email_notifications": _("Email notifications"),
         }
         help_texts = {
             "phone_number": _("Optional. You may include an international country code."),
@@ -169,7 +182,7 @@ class MessageForm(forms.ModelForm):
     class Meta:
         model = Message
         fields = ("body", "attachment")
-        labels = {"body": _("Message")}
+        labels = {"body": _("Message"), "attachment": _("Attachment")}
         widgets = {
             "body": forms.Textarea(
                 attrs={"rows": 3, "maxlength": 2000, "placeholder": _("Write a message…")}
@@ -194,6 +207,7 @@ class MessageForm(forms.ModelForm):
 class ConversationDeactivateForm(forms.Form):
     reason = forms.CharField(
         max_length=1000,
+        label=_("Reason"),
         widget=forms.Textarea(attrs={"rows": 4, "maxlength": 1000}),
         help_text=_("Required for administrator accountability. Message content is not copied here."),
     )
@@ -208,6 +222,7 @@ class ConversationDeactivateForm(forms.Form):
 class ConversationReopenForm(forms.Form):
     reason = forms.CharField(
         max_length=1000,
+        label=_("Reason"),
         widget=forms.Textarea(attrs={"rows": 4, "maxlength": 1000}),
         help_text=_("Required for administrator accountability. It is not included in notifications."),
     )
@@ -398,11 +413,76 @@ class ItemReportForm(forms.ModelForm):
             self.instance.status = ItemReport.Status.DRAFT
         self.fields["category"].choices = (("", _("Select a category")), *ItemReport.Category.choices)
         self.fields["title"].required = False
-        self.fields["item_type"].choices = (("", _("Select an item type")), *ALL_ITEM_TYPE_CHOICES)
+        selected_category = (
+            self.data.get("category", "") if self.is_bound
+            else self.initial.get("category") or getattr(self.instance, "category", "")
+        )
+        selected_item_type = (
+            self.data.get("item_type", "") if self.is_bound
+            else self.initial.get("item_type") or getattr(self.instance, "item_type", "")
+        )
+        selected_brand = (
+            self.data.get("brand", "") if self.is_bound
+            else self.initial.get("brand") or getattr(self.instance, "brand", "")
+        )
+        available_item_types = ITEM_TYPE_CHOICES.get(selected_category, ALL_ITEM_TYPE_CHOICES)
+        self.fields["item_type"].choices = (("", _("Select an item type")), *available_item_types)
         self.fields["primary_colour"].required = not bool(self.data.get("colour"))
         self.fields["primary_colour"].choices = (("", _("Select a primary colour")), *COLOUR_CHOICES)
-        for field_name in ("secondary_colour", "material", "approximate_size", "pattern", "item_condition", "brand"):
+        for field_name in ("secondary_colour", "material", "approximate_size", "pattern", "item_condition"):
             self.fields[field_name].choices = (("", _("Not specified")), *self.fields[field_name].choices)
+        available_brands = list(brand_choices_for(selected_category, selected_item_type))
+        if (
+            selected_brand
+            and selected_brand not in {value for value, label in available_brands}
+            and self.instance.pk
+            and selected_category == self.instance.category
+            and selected_item_type == self.instance.item_type
+        ):
+            legacy_choice = next(
+                (choice for choice in BRAND_CHOICES if choice[0] == selected_brand),
+                (selected_brand, selected_brand),
+            )
+            available_brands.append(legacy_choice)
+        self.fields["brand"].choices = (("", _("Not specified")), *available_brands)
+
+        def serialized(choices):
+            return [{"value": value, "label": str(label)} for value, label in choices]
+
+        item_type_map = {
+            category: serialized(choices) for category, choices in ITEM_TYPE_CHOICES.items()
+        }
+        brand_map = {
+            category: {
+                "default": serialized(brand_choices_for(category)),
+                **{
+                    item_type: serialized(brand_choices_for(category, item_type))
+                    for item_type, label in item_types
+                },
+            }
+            for category, item_types in ITEM_TYPE_CHOICES.items()
+        }
+        appearance_map = {
+            category: {
+                "default": list(APPEARANCE_FIELDS_BY_CATEGORY.get(category, APPEARANCE_FIELD_NAMES)),
+                **{
+                    item_type: list(appearance_fields_for(category, item_type))
+                    for item_type, label in item_types
+                },
+            }
+            for category, item_types in ITEM_TYPE_CHOICES.items()
+        }
+        self.fields["item_type"].widget.attrs.update({
+            "data-choice-map": json.dumps(item_type_map, ensure_ascii=False),
+            "data-placeholder-label": str(_("Select an item type")),
+        })
+        self.fields["brand"].widget.attrs.update({
+            "data-choice-map": json.dumps(brand_map, ensure_ascii=False),
+            "data-placeholder-label": str(_("Not specified")),
+        })
+        self.fields["category"].widget.attrs["data-appearance-map"] = json.dumps(
+            appearance_map, ensure_ascii=False
+        )
         current_location = self.instance.university_location if self.instance.pk else None
         available_locations = list(UniversityLocation.objects.filter(is_active=True))
         if current_location and all(location.pk != current_location.pk for location in available_locations):
@@ -492,7 +572,21 @@ class ItemReportForm(forms.ModelForm):
             self.add_error("item_type", _("Select an item type."))
         if item_type == "other" and not cleaned.get("custom_item_type") and not self.draft_mode:
             self.add_error("custom_item_type", _("Specify the item type when Other is selected."))
-        if cleaned.get("brand") == "other" and not cleaned.get("custom_brand") and not self.draft_mode:
+        applicable_fields = set(appearance_fields_for(category, item_type))
+        for field_name in APPEARANCE_FIELD_NAMES:
+            if field_name not in applicable_fields:
+                cleaned[field_name] = ""
+        allowed_brands = {value for value, label in brand_choices_for(category, item_type)}
+        brand = cleaned.get("brand")
+        legacy_brand_is_unchanged = bool(
+            self.instance.pk
+            and category == self.instance.category
+            and item_type == self.instance.item_type
+            and brand == self.instance.brand
+        )
+        if brand and brand not in allowed_brands and not legacy_brand_is_unchanged:
+            self.add_error("brand", _("Select a brand relevant to the selected item type."))
+        if brand == "other" and not cleaned.get("custom_brand") and not self.draft_mode:
             self.add_error("custom_brand", _("Specify the brand when Other is selected."))
         if self.scope == ItemReport.Scope.UNIVERSITY:
             location = cleaned.get("university_location")
@@ -611,6 +705,14 @@ class ReturnArrangementForm(forms.ModelForm):
             "return_method", "status", "safe_public_location", "trusted_organization",
             "custom_arrangement", "failure_report",
         )
+        labels = {
+            "return_method": _("Return method"),
+            "status": _("Status"),
+            "safe_public_location": _("Safe public location"),
+            "trusted_organization": _("Trusted organization"),
+            "custom_arrangement": _("Arrangement details"),
+            "failure_report": _("Problem or failure report"),
+        }
         widgets = {
             "custom_arrangement": forms.Textarea(attrs={"rows": 3, "dir": "auto"}),
             "failure_report": forms.Textarea(attrs={"rows": 3, "dir": "auto"}),
@@ -647,10 +749,11 @@ class SavedSearchForm(forms.ModelForm):
     class Meta:
         model = SavedSearch
         fields = ("name",)
+        labels = {"name": _("Alert name")}
 
 
 class OwnershipClaimForm(forms.ModelForm):
-    evidence = forms.FileField(required=False, help_text=_("Optional JPG, PNG, WebP, or PDF up to 5 MB. Mask unrelated private information."))
+    evidence = forms.FileField(required=False, label=_("Private evidence"), help_text=_("Optional JPG, PNG, WebP, or PDF up to 5 MB. Mask unrelated private information."))
 
     class Meta:
         model = ContactRequest
@@ -673,8 +776,22 @@ class OwnershipClaimForm(forms.ModelForm):
         upload = self.cleaned_data.get("evidence")
         if upload:
             validate_evidence_size(upload)
-            validate_evidence_content(upload)
             FileExtensionValidator(("jpg", "jpeg", "png", "webp", "pdf"))(upload)
+            detected_format = detect_evidence_format(upload)
+            extension = Path(upload.name).suffix.casefold()
+            submitted_content_type = (getattr(upload, "content_type", "") or "").casefold()
+            expected_formats = {
+                ".jpg": ("JPEG", "image/jpeg"),
+                ".jpeg": ("JPEG", "image/jpeg"),
+                ".png": ("PNG", "image/png"),
+                ".webp": ("WEBP", "image/webp"),
+                ".pdf": ("PDF", "application/pdf"),
+            }
+            expected_format, expected_mime = expected_formats[extension]
+            if detected_format != expected_format or submitted_content_type != expected_mime:
+                raise forms.ValidationError(
+                    _("The evidence contents, filename extension, and content type do not match.")
+                )
         return upload
 
     def clean(self):
@@ -691,20 +808,21 @@ class OwnershipClaimForm(forms.ModelForm):
 
 
 class ClarificationForm(forms.Form):
-    clarification = forms.CharField(max_length=1000, widget=forms.Textarea(attrs={"rows": 4, "dir": "auto"}))
+    clarification = forms.CharField(label=_("Clarification"), max_length=1000, widget=forms.Textarea(attrs={"rows": 4, "dir": "auto"}))
 
     def clean_clarification(self):
         return SensitiveContentModerationService.reject_forbidden_secret(self.cleaned_data["clarification"])
 
 
 class SuspiciousClaimForm(forms.Form):
-    reason = forms.CharField(max_length=1000, widget=forms.Textarea(attrs={"rows": 4, "dir": "auto"}))
+    reason = forms.CharField(label=_("Reason"), max_length=1000, widget=forms.Textarea(attrs={"rows": 4, "dir": "auto"}))
 
 
 class ClaimAppealForm(forms.ModelForm):
     class Meta:
         model = ClaimAppeal
         fields = ("reason",)
+        labels = {"reason": _("Reason")}
         widgets = {"reason": forms.Textarea(attrs={"rows": 5, "maxlength": 1000, "dir": "auto"})}
 
     def clean_reason(self):
@@ -715,6 +833,7 @@ class ContentReportForm(forms.ModelForm):
     class Meta:
         model = ContentReport
         fields = ("reason",)
+        labels = {"reason": _("Reason")}
         widgets = {"reason": forms.Textarea(attrs={"rows": 4, "maxlength": 1000, "dir": "auto"})}
 
     def clean_reason(self):
@@ -725,36 +844,38 @@ class ReportFilterForm(forms.Form):
     scope = forms.ChoiceField(choices=ItemReport.Scope.choices, label=_("Mode"))
     query = forms.CharField(required=False, label=_("Keyword"))
     report_type = forms.ChoiceField(
-        required=False, choices=[("", _("All types")), *ItemReport.ReportType.choices]
+        required=False, label=_("Report type"), choices=[("", _("All types")), *ItemReport.ReportType.choices]
     )
     category = forms.ChoiceField(
-        required=False, choices=[("", _("All categories")), *ItemReport.Category.choices]
+        required=False, label=_("Category"), choices=[("", _("All categories")), *ItemReport.Category.choices]
     )
-    item_type = forms.ChoiceField(required=False, choices=(("", _("All item types")), *ALL_ITEM_TYPE_CHOICES))
-    primary_colour = forms.ChoiceField(required=False, choices=(("", _("All colours")), *COLOUR_CHOICES))
-    brand = forms.ChoiceField(required=False, choices=(("", _("All brands")), *BRAND_CHOICES))
-    material = forms.ChoiceField(required=False, choices=(("", _("All materials")), *MATERIAL_CHOICES))
+    item_type = forms.ChoiceField(required=False, label=_("Item type"), choices=(("", _("All item types")), *ALL_ITEM_TYPE_CHOICES))
+    primary_colour = forms.ChoiceField(required=False, label=_("Primary colour"), choices=(("", _("All colours")), *COLOUR_CHOICES))
+    brand = forms.ChoiceField(required=False, label=_("Brand"), choices=(("", _("All brands")), *BRAND_CHOICES))
+    material = forms.ChoiceField(required=False, label=_("Material"), choices=(("", _("All materials")), *MATERIAL_CHOICES))
     approximate_size = forms.ChoiceField(required=False, choices=(("", _("All sizes")), *SIZE_CHOICES), label=_("Size"))
     campus_location = forms.ChoiceField(
         required=False,
+        label=_("Location"),
         choices=[("", _("All locations")), *ItemReport.CampusLocation.choices],
     )
     university_location = forms.ModelChoiceField(
         required=False, queryset=None, label=_("Campus or building")
     )
-    country = forms.ChoiceField(required=False, choices=(("", _("All countries")), *COUNTRY_CHOICES))
+    country = forms.ChoiceField(required=False, label=_("Country"), choices=(("", _("All countries")), *COUNTRY_CHOICES))
     region = forms.CharField(required=False, label=_("Region / State / Governorate"))
     city = forms.CharField(required=False, label=_("City"))
     district = forms.CharField(required=False, label=_("District or area"))
-    place_type = forms.ChoiceField(required=False, choices=(("", _("All place types")), *PLACE_TYPE_CHOICES))
+    place_type = forms.ChoiceField(required=False, label=_("Place type"), choices=(("", _("All place types")), *PLACE_TYPE_CHOICES))
     place_name = forms.CharField(required=False, label=_("Place name"))
     status = forms.ChoiceField(
-        required=False, choices=(("", _("All public reports")), (ItemReport.Status.ACTIVE, _("Active")))
+        required=False, label=_("Status"), choices=(("", _("All public reports")), (ItemReport.Status.ACTIVE, _("Active")))
     )
-    date_from = forms.DateField(required=False, widget=forms.DateInput(attrs={"type": "date"}))
-    date_to = forms.DateField(required=False, widget=forms.DateInput(attrs={"type": "date"}))
+    date_from = forms.DateField(required=False, label=_("Date from"), widget=forms.DateInput(attrs={"type": "date"}))
+    date_to = forms.DateField(required=False, label=_("Date to"), widget=forms.DateInput(attrs={"type": "date"}))
     sort = forms.ChoiceField(
         required=False,
+        label=_("Sort"),
         choices=(("newest", _("Newest")), ("oldest", _("Oldest")), ("closest_date", _("Closest date"))),
     )
 
@@ -783,6 +904,7 @@ class ReportFilterForm(forms.Form):
 class AdminReportFilterForm(ReportFilterForm):
     visibility = forms.ChoiceField(
         required=False,
+        label=_("Visibility"),
         choices=[("", _("All visibility")), ("visible", _("Visible")), ("hidden", _("Hidden"))],
     )
 
@@ -796,17 +918,19 @@ class AdminUserFilterForm(forms.Form):
     query = forms.CharField(required=False, label=_("Username or email"))
     account_type = forms.ChoiceField(
         required=False,
+        label=_("Account type"),
         choices=[("", _("All account types")), ("staff", _("Staff")), ("regular", _("Regular users"))],
     )
     account_status = forms.ChoiceField(
         required=False,
+        label=_("Account status"),
         choices=[("", _("All account statuses")), ("active", _("Active")), ("inactive", _("Inactive"))],
     )
 
 
 class AdminUserStatusForm(forms.Form):
     reason = forms.CharField(
-        max_length=500, widget=forms.Textarea(attrs={"rows": 3, "dir": "auto"}),
+        max_length=500, label=_("Reason"), widget=forms.Textarea(attrs={"rows": 3, "dir": "auto"}),
         help_text=_("Required. Stored privately; audit descriptions do not copy the reason."),
     )
 
@@ -821,6 +945,11 @@ class UniversityLocationForm(forms.ModelForm):
     class Meta:
         model = UniversityLocation
         fields = ("campus", "building", "general_area", "location_type", "is_active")
+        labels = {
+            "campus": _("Campus"), "building": _("Building"),
+            "general_area": _("General area"), "location_type": _("Location type"),
+            "is_active": _("Active"),
+        }
 
 
 class CustodyRecordForm(forms.ModelForm):
@@ -830,6 +959,14 @@ class CustodyRecordForm(forms.ModelForm):
             "found_report", "reference", "intake_at", "intake_point", "storage_reference",
             "status", "is_high_value", "is_locked_storage", "requires_two_staff_release", "notes",
         )
+        labels = {
+            "found_report": _("Found report"), "reference": _("Reference"),
+            "intake_at": _("Intake time"), "intake_point": _("Intake point"),
+            "storage_reference": _("Private storage reference"), "status": _("Status"),
+            "is_high_value": _("High-value item"), "is_locked_storage": _("Locked storage"),
+            "requires_two_staff_release": _("Two-staff release required"),
+            "notes": _("Private notes"),
+        }
         widgets = {"intake_at": forms.DateTimeInput(attrs={"type": "datetime-local"}),
                    "notes": forms.Textarea(attrs={"rows": 3, "dir": "auto"})}
 
@@ -848,16 +985,16 @@ class CustodyRecordForm(forms.ModelForm):
 
 
 class StorageIncidentForm(forms.Form):
-    summary = forms.CharField(max_length=255, widget=forms.Textarea(attrs={"rows": 3, "dir": "auto"}))
+    summary = forms.CharField(label=_("Summary"), max_length=255, widget=forms.Textarea(attrs={"rows": 3, "dir": "auto"}))
 
     def clean_summary(self):
         return SensitiveContentModerationService.clean(self.cleaned_data["summary"])
 
 
 class CustodyMovementForm(forms.Form):
-    event_type = forms.ChoiceField(choices=(("move", _("Storage movement")), ("review", _("Inventory review"))))
+    event_type = forms.ChoiceField(label=_("Movement type"), choices=(("move", _("Storage movement")), ("review", _("Inventory review"))))
     new_storage_reference = forms.CharField(required=False, max_length=120, label=_("New private storage reference"))
-    safe_note = forms.CharField(required=False, max_length=255, widget=forms.Textarea(attrs={"rows": 2, "dir": "auto"}))
+    safe_note = forms.CharField(required=False, label=_("Safe note"), max_length=255, widget=forms.Textarea(attrs={"rows": 2, "dir": "auto"}))
 
     def clean_safe_note(self):
         return SensitiveContentModerationService.clean(self.cleaned_data.get("safe_note", ""))
@@ -878,7 +1015,7 @@ class CustodyReleaseForm(forms.Form):
 
 
 class CustodyDispositionForm(forms.Form):
-    disposition = forms.ChoiceField(choices=(
+    disposition = forms.ChoiceField(label=_("Disposition"), choices=(
         ("authority_transfer", _("Transfer to an appropriate authority")),
         ("issuer_return", _("Return to card issuer")),
         ("secure_destruction", _("Secure destruction under approved policy")),
@@ -886,4 +1023,4 @@ class CustodyDispositionForm(forms.Form):
         ("recycling", _("Approved recycling/data handling")),
         ("other_authorized", _("Other authorized University decision")),
     ))
-    safe_note = forms.CharField(required=False, max_length=255, widget=forms.Textarea(attrs={"rows": 2, "dir": "auto"}))
+    safe_note = forms.CharField(required=False, label=_("Safe note"), max_length=255, widget=forms.Textarea(attrs={"rows": 2, "dir": "auto"}))

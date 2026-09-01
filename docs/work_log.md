@@ -168,4 +168,22 @@ The first test run found an argument collision inside a matching test helper. Th
 - Added exact approved-domain registration and verification checks, a shared server-side University access service, short configurable sessions, and eligibility-loss handling.
 - Simplified report creation to a general campus location, retained backward-compatible international database fields without presenting them as current MVP requirements, and changed matching to the requested 15/15/15/10/5/10/5/10/10/5 formula.
 - Added private sensitive-document image storage, public-image removal, official-handover enforcement, staff custody inventory, append-only movements, retention review dates, high-value controls, and missing-storage incidents.
-- Extended repeatable demo data with security staff, a pending claim, conversation, strong match notifications, and a custody record; updated tests and local documentation to match the current scope.
+- Extended repeatable demo data with security staff, a pending claim, strong match notifications, and a custody record; updated tests and local documentation to match the current scope.
+
+## Demonstration preparation and security verification
+
+- Kept the demonstration setup in the repeatable development-only `seed_data` command with clearly fictional local accounts and generated item data.
+- Assigned the existing custody permission only to the security demo account; normal University and personal-email demo accounts remain non-staff even while temporary open University access is enabled.
+- Prepared an Active 92% University headphones match and an Active 98% International phone match, including explainable score components and deduplicated privacy-safe notifications.
+- Prepared a genuinely pending University ownership claim with a private fictional verification answer and no premature conversation.
+- Prepared a separate completed International suitcase return through the existing claim-approval, conversation, return-arrangement, and two-participant confirmation services.
+- Made completed return records safely reviewable in a read-only page while rejecting further confirmation or modification attempts.
+- Documented account roles, demo reset commands, exact rehearsal order, screenshot targets, multilingual/RTL/theme/mobile captures, permission checks, and recovery steps in `docs/demo_guide.md`.
+- Added automated demonstration checks for account roles, both mode permissions, match thresholds and suggestions, notification creation, claim privacy, completed return state, custody authorization, normal-user denial, and administrator access.
+# Day 8 — translations, local verification, and claim regression
+
+- Audited 1,281 literal user-interface messages and completed both Turkish and Arabic catalogs, including structured choices, security/workflow messages, and the previously visible English `Not specified` and `Select a primary colour` values.
+- Added superuser-only Django admin actions that set or clear the existing `UserProfile.email_verified_at` timestamp; ordinary staff cannot see or invoke them.
+- Added a local-debug 403 explanation that tells demonstrators exactly where verification is controlled without exposing that operational detail in production.
+- Added focused tests for the admin permission boundary, unverified-by-default accounts, verify/unverify claim access, and Turkish/Arabic structured choices.
+- Kept automatic email-link verification and the existing claim approval/conversation boundary intact.

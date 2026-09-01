@@ -5,6 +5,6 @@
   <a href="{% url 'management_claims' %}"{% if request.resolver_match.url_name == 'management_claims' %} aria-current="page"{% endif %}>{% translate "Claims" %}</a>
   <a href="{% url 'management_moderation' %}"{% if request.resolver_match.url_name == 'management_moderation' %} aria-current="page"{% endif %}>{% translate "Moderation" %}</a>
   <a href="{% url 'management_locations' %}"{% if request.resolver_match.url_name == 'management_locations' %} aria-current="page"{% endif %}>{% translate "Locations" %}</a>
-  <a href="{% url 'management_custody' %}"{% if request.resolver_match.url_name == 'management_custody' %} aria-current="page"{% endif %}>{% translate "Custody inventory" %}</a>
+  {% if perms.items.manage_custody %}<a href="{% url 'management_custody' %}"{% if request.resolver_match.url_name == 'management_custody' %} aria-current="page"{% endif %}>{% translate "Custody inventory" %}</a>{% endif %}
   <a href="{% url 'admin:index' %}">{% translate "Django admin" %}</a>
 </div>

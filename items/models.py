@@ -11,6 +11,7 @@ from django.db.models import Q
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from PIL import Image, UnidentifiedImageError
 
 from .choices import (
     ALL_ITEM_TYPE_CHOICES, BRAND_CHOICES, CATEGORY_CHOICES, COLOUR_CHOICES, COUNTRY_CHOICES,
@@ -96,14 +97,35 @@ def validate_evidence_size(upload):
         raise ValidationError(_("Evidence files must be 5 MB or smaller."))
 
 
-def validate_evidence_content(upload):
+def detect_evidence_format(upload):
+    """Return a verified evidence format without trusting its name or MIME type."""
     position = upload.tell() if hasattr(upload, "tell") else 0
-    header = upload.read(16)
-    if hasattr(upload, "seek"):
-        upload.seek(position)
-    image_signatures = (b"\xff\xd8\xff", b"\x89PNG\r\n\x1a\n", b"RIFF")
-    if not (header.startswith(b"%PDF-") or any(header.startswith(signature) for signature in image_signatures)):
+    try:
+        upload.seek(0)
+        header = upload.read(16)
+        upload.seek(0)
+        if header.startswith(b"%PDF-"):
+            content = upload.read()
+            if b"%%EOF" not in content[-1024:]:
+                raise ValidationError(_("Upload a complete, valid PDF file."))
+            return "PDF"
+        with Image.open(upload) as image:
+            detected_format = (image.format or "").upper()
+            image.verify()
+        if detected_format not in {"JPEG", "PNG", "WEBP"}:
+            raise ValidationError(_("Upload a genuine JPG, PNG, WebP, or PDF file."))
+        return detected_format
+    except ValidationError:
+        raise
+    except (UnidentifiedImageError, OSError, ValueError, Image.DecompressionBombError):
         raise ValidationError(_("Upload a genuine JPG, PNG, WebP, or PDF file."))
+    finally:
+        if hasattr(upload, "seek"):
+            upload.seek(position)
+
+
+def validate_evidence_content(upload):
+    detect_evidence_format(upload)
 
 
 class UniversityLocation(models.Model):

@@ -1,4 +1,4 @@
-<div class="{{ field_class|default:'col-12' }}">
+<div class="{{ field_class|default:'col-12' }}"{% if structured_name %} data-structured-field="{{ structured_name }}"{% endif %}>
   <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
   {{ field }}
   {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}

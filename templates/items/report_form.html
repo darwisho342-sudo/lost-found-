@@ -12,10 +12,10 @@
 {% include 'items/includes/form_field.html' with field=form.title %}
 </div></section>
 <section class="form-section"><div class="form-section-heading"><i class="bi bi-palette"></i><div><h2>{% translate "Appearance" %}</h2><small>{% translate "Size is approximate. Optional fields may be left blank." %}</small></div></div><div class="row g-3">
-{% include 'items/includes/form_field.html' with field=form.primary_colour field_class='col-md-6' %}{% include 'items/includes/form_field.html' with field=form.secondary_colour field_class='col-md-6' %}
-{% include 'items/includes/form_field.html' with field=form.material field_class='col-md-6' %}{% include 'items/includes/form_field.html' with field=form.approximate_size field_class='col-md-6' %}
-{% include 'items/includes/form_field.html' with field=form.pattern field_class='col-md-6' %}{% include 'items/includes/form_field.html' with field=form.item_condition field_class='col-md-6' %}
-{% include 'items/includes/form_field.html' with field=form.brand field_class='col-md-6' %}{% include 'items/includes/form_field.html' with field=form.model field_class='col-md-6' %}
+{% include 'items/includes/form_field.html' with field=form.primary_colour field_class='col-md-6' structured_name='primary_colour' %}{% include 'items/includes/form_field.html' with field=form.secondary_colour field_class='col-md-6' structured_name='secondary_colour' %}
+{% include 'items/includes/form_field.html' with field=form.material field_class='col-md-6' structured_name='material' %}{% include 'items/includes/form_field.html' with field=form.approximate_size field_class='col-md-6' structured_name='approximate_size' %}
+{% include 'items/includes/form_field.html' with field=form.pattern field_class='col-md-6' structured_name='pattern' %}{% include 'items/includes/form_field.html' with field=form.item_condition field_class='col-md-6' structured_name='item_condition' %}
+{% include 'items/includes/form_field.html' with field=form.brand field_class='col-md-6' structured_name='brand' %}{% include 'items/includes/form_field.html' with field=form.model field_class='col-md-6' structured_name='model' %}
 <div class="col-12 conditional-field" data-show-when="brand:other">{% include 'items/includes/form_field.html' with field=form.custom_brand field_class='col-12' %}</div>
 </div></section>
 <section class="form-section"><div class="form-section-heading"><i class="bi bi-geo-alt"></i><div><h2>{% if active_scope == 'university' %}{% translate "Campus location and date" %}{% else %}{% translate "International location and date" %}{% endif %}</h2><small>{% translate "Use only a safe general public location. Keep exact details private." %}</small></div></div><div class="row g-3">
